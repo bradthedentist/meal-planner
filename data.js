@@ -80,7 +80,26 @@ const RECIPES = {
   ],
   thu: [],
   fri: [],
-  sat: [],
+  sat: [
+    R("cpk1", "Slow Cooker Chicken and Dumplings", "Creamy chicken and veggie stew with Bisquick dumplings. Some amounts aren't given in the source (chicken, butter, seasonings, dumpling mix).", "4–8 hr", [
+      "2|lb|carrots|pr", "1|bunch|celery|pr", "1||white onion~white onions|st", "0|-|garlic|st", "0|-|seasoning salt|sp", "0|-|chicken|me",
+      "0|-|paprika|sp", "4|cup|chicken broth|pa", "0|-|butter|st", "3|tbsp|cornstarch|pa", "1|cup|heavy whipping cream|da",
+      "0|-|Bisquick mix|pa", "0|-|milk|da",
+    ], [
+      "Peel and chop the carrots.",
+      "Chop the celery and the white onion.",
+      "Season the veggies with garlic and seasoning salt.",
+      "Add chicken seasoned with the same seasonings and paprika on top of the veggies. (The source doesn't say which cut or how much chicken.)",
+      "Pour in the chicken broth and add a few tablespoons of butter.",
+      "Cook on low for 6 to 8 hours or high for 3 to 4 hours.",
+      "In the last hour of cooking, shred the chicken.",
+      "Mix the cornstarch with enough water to dissolve it, then add it to the crock pot.",
+      "Add the heavy whipping cream and the shredded chicken back into the pot.",
+      "Make the dumplings with Bisquick mix and milk to a thick texture. (No amounts in the source.)",
+      "Drop the dumplings into the pot and cover.",
+      "Halfway through the dumplings' cooking time, flip them so they cook evenly. (The source doesn't give the dumpling cooking time.)",
+    ], { by: "@karissastevens", src: "https://recime.app/p/39e1d9cd-7159-4d39-a636-bbe06a191820", serves: 6 }),
+  ],
   sun: []
 };
 const BY_ID = {};
