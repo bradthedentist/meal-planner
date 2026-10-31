@@ -102,7 +102,8 @@
     d.setDate(d.getDate() + (dow === 1 ? 0 : (8 - dow) % 7));
     return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
   }
-  function servingsFor(d) { return S.servings[d] || 4; }
+  function recipeFor(d) { var id = S.picks[d]; return id && id !== "skip" ? BY_ID[id] : null; }
+  function servingsFor(d) { var r = recipeFor(d); return S.servings[d] || (r ? r.serves : 4); }
   function pickedCount() { return DAYS.filter(function (d) { return S.picks[d] && S.picks[d] !== "skip"; }).length; }
   function toast(msg) {
     $toast.textContent = msg; $toast.classList.add("show");
@@ -113,7 +114,7 @@
     DAYS.forEach(function (d) {
       var id = S.picks[d]; if (!id || id === "skip") return;
       var r = BY_ID[id]; if (!r) return;
-      var f = servingsFor(d) / 4;
+      var f = servingsFor(d) / r.serves;
       r.ing.forEach(function (i) {
         if (i.c === "lf") return;
         var fam = famOf(i.u), key = i.sing.toLowerCase() + "|" + fam;
@@ -122,6 +123,15 @@
         map[key].amt += base;
         if (map[key].days.indexOf(d) < 0) map[key].days.push(d);
       });
+    });
+    var withQty = {};
+    Object.keys(map).forEach(function (k) { if (map[k].amt > 0) withQty[map[k].sing.toLowerCase()] = true; });
+    var seenZero = {};
+    Object.keys(map).forEach(function (k) {
+      var g = map[k], n = g.sing.toLowerCase();
+      if (g.amt > 0) return;
+      if (withQty[n] || seenZero[n]) { seenZero[n] = true; delete map[k]; return; }
+      seenZero[n] = true;
     });
     var groups = [];
     CAT_ORDER.forEach(function (c) {
@@ -178,6 +188,10 @@
       return "<li><span>" + esc(ingText(i, f)) + "</span>" + (i.c === "lf" ? '<span class="tag">leftover</span>' : "") + "</li>";
     }).join("") + "</ul>";
   }
+  function credit(r) {
+    if (!r.src && !r.by) return "";
+    return '<p class="src">' + (r.by ? "Recipe by " + esc(r.by) : "") + (r.src ? (r.by ? " · " : "") + '<a href="' + esc(r.src) + '" target="_blank" rel="noopener">Source</a>' : "") + "</p>";
+  }
   function steps(r) {
     return '<ol class="steps">' + r.steps.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ol>";
   }
@@ -191,7 +205,7 @@
         '<div class="desc">' + esc(r.desc) + '</div><div class="meta">' + esc(r.time) + "</div></div></div>" +
         '<div class="stepper"><span class="cap" style="margin:0">Servings</span><button data-act="serv" data-n="-1" aria-label="Fewer">−</button><b>' +
         servingsFor(d) + '</b><button data-act="serv" data-n="1" aria-label="More">+</button></div>' +
-        "<h3>Ingredients</h3>" + ingList(r, servingsFor(d) / 4) + "<h3>Steps</h3>" + steps(r) + "</div>";
+        "<h3>Ingredients</h3>" + ingList(r, servingsFor(d) / r.serves) + "<h3>Steps</h3>" + steps(r) + credit(r) + "</div>";
     } else {
       h += '<p class="cap">' + (id === "skip" ? "Night off. No cooking planned." : "No recipe picked for this day.") + "</p>" +
         '<div class="row"><button class="btn" data-act="pickfor" data-d="' + d + '">Pick for ' + DAY_SHORT[d] + "</button></div>";
@@ -208,9 +222,9 @@
       var on = cur === r.id, open = V.open === r.id;
       return '<div class="card' + (on ? " on" : "") + '"><div class="opt"><div class="info" data-act="toggle" data-id="' + r.id + '">' +
         '<div class="name">' + esc(r.name) + '</div><div class="desc">' + esc(r.desc) + "</div>" +
-        '<div class="meta">' + esc(r.time) + ' · serves 4 · <button class="link" data-act="toggle" data-id="' + r.id + '">' + (open ? "Hide" : "See recipe") + "</button></div></div>" +
+        '<div class="meta">' + esc(r.time) + ' · serves ' + r.serves + ' · <button class="link" data-act="toggle" data-id="' + r.id + '">' + (open ? "Hide" : "See recipe") + "</button></div></div>" +
         '<button class="btn pick' + (on ? " primary" : "") + '" data-act="pick" data-id="' + r.id + '">' + (on ? "Picked" : "Pick") + "</button></div>" +
-        (open ? "<h3>Ingredients</h3>" + ingList(r, 1) + "<h3>Steps</h3>" + steps(r) : "") + "</div>";
+        (open ? "<h3>Ingredients</h3>" + ingList(r, 1) + "<h3>Steps</h3>" + steps(r) + credit(r) : "") + "</div>";
     }).join("");
     h += '<div class="row"><button class="btn" data-act="pick" data-id="skip">' + (cur === "skip" ? "Skipped (undo)" : "Skip this day") + "</button>" +
       '<button class="btn" data-act="clear">Clear all picks</button></div>';

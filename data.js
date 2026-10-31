@@ -38,8 +38,9 @@ function parseIng(s) {
   const [sing, plur] = n.split("~");
   return { q: parseFloat(q) || 0, u, sing, plur: plur ?? sing, c };
 }
-function R(id, name, desc, time, ings, steps) {
-  return { id, name, desc, time, ing: ings.map(parseIng), steps };
+function R(id, name, desc, time, ings, steps, meta) {
+  const m = meta || {};
+  return { id, name, desc, time, ing: ings.map(parseIng), steps, by: m.by || "", src: m.src || "", serves: m.serves || 4 };
 }
 const SP = "0||salt|st";
 const PP = "0||black pepper|st";
@@ -158,18 +159,17 @@ const RECIPES = {
     ])
   ],
   tue: [
-    R("sp1", "Sheet-Pan Chicken Fajitas", "Peppers, onions and spiced chicken roasted on one pan.", "35 min", [
-      "1.5|lb|boneless chicken breasts|me", "2||red bell pepper~red bell peppers|pr", "1||green bell pepper~green bell peppers|pr",
-      "1||yellow onion~yellow onions|st", "2|tbsp|olive oil|st", "2|tsp|chili powder|sp", "1|tsp|ground cumin|sp",
-      "1|tsp|smoked paprika|sp", "0.5|tsp|garlic powder|sp", "8||flour tortilla (8-inch)~flour tortillas (8-inch)|ba",
-      "1||lime~limes|pr", "0.5|cup|sour cream|da", "1||avocado~avocados|pr", SP,
+    R("sp1", "Sheetpan Chicken Fajitas", "Chicken, peppers and onions baked on one pan. The source gives no amounts, so use what looks right for 4.", "30 min", [
+      "0|-|boneless chicken breasts|me", "0|-|bell peppers|pr", "0|-|yellow onions|st", "0|-|vinegar|co", "0|-|fajita spices|sp",
+      "0|-|limes (for juice)|pr", "0|-|cilantro|pr", "0|-|flour or corn tortillas|ba", "0|-|white rice (to serve)|st", "0|-|beans (to serve)|pa",
     ], [
-      "Heat the oven to 425°F and line a large sheet pan with foil or parchment.",
-      "Slice chicken, peppers and onion into thin strips.",
-      "Toss everything with oil, chili powder, cumin, smoked paprika, garlic powder and 1 tsp salt. Spread in one layer.",
-      "Roast 20–25 minutes, tossing once, until chicken is cooked and veggies are charred at the edges.",
-      "Squeeze lime over the pan. Serve in warm tortillas with sour cream and avocado.",
-    ]),
+      "Slice your chicken breasts into long strips.",
+      "Toss it together with some bell peppers, onions, a little vinegar, and all the spices.",
+      "Transfer it to a large sheet pan and spread it out in an even layer.",
+      "Bake it for 20 minutes. (The source doesn't give an oven temperature.)",
+      "Top it with some lime juice and cilantro.",
+      "Serve it in warm flour or corn tortillas for tacos or with some rice and beans.",
+    ], { by: "@isabeleatsrecipes", src: "https://recime.app/p/251484e4-e41a-41e3-b7b4-7398f28dd839", serves: 4 }),
     R("sp2", "Kielbasa, Potatoes & Green Beans", "Smoky sausage and crispy potatoes, one pan.", "40 min", [
       "14|oz|smoked kielbasa|me", "1.5|lb|baby gold potatoes|pr", "1|lb|green beans|pr", "3|tbsp|olive oil|st",
       "1|tsp|Italian seasoning|sp", "0.5|tsp|garlic powder|sp", "0.25|cup|grated Parmesan|da", SP, PP,
@@ -217,6 +217,74 @@ const RECIPES = {
       "Toss potatoes and corn with half the butter. Roast 20 minutes.",
       "Add sausage and shrimp, drizzle with remaining butter, and roast 8–10 minutes until shrimp are pink.",
       "Squeeze lemon over and scatter chopped parsley.",
+    ]),
+    R("sp7", "Vegetarian Sheet Pan Gnocchi", "Crispy gnocchi, chickpeas, peppers and burst tomatoes. Vegan.", "35 min", [
+      "16|oz|potato gnocchi (shelf-stable)|pa", "1||yellow bell pepper~yellow bell peppers|pr", "2|cup|cherry tomatoes|pr",
+      "1||red onion~red onions|pr", "1|can|chickpeas|pa", "2|tbsp|olive oil|st", "2|tbsp|nutritional yeast|pa",
+      "1|tsp|garlic powder|sp", "0.5|tsp|dried oregano|sp", "1|bunch|basil|pr", "0|-|balsamic glaze|co", "0|-|vegan parmesan (optional)|da", SP,
+    ], [
+      "Preheat the oven to 400°F.",
+      "Add the gnocchi, chopped bell pepper, cherry tomatoes (1 pint), chopped red onion and drained chickpeas to the sheet pan. Drizzle with olive oil and coat with nutritional yeast, garlic powder, ½ tsp salt and oregano. Toss until evenly mixed.",
+      "Bake for 25 minutes, until the tomatoes are burst and the gnocchi has a slight crisp. In the last few minutes, you can broil to brown the gnocchi and tomatoes a bit, if desired.",
+      "Serve immediately with fresh basil, balsamic glaze and vegan parmesan.",
+    ], { by: "@PlantYou", src: "https://recime.app/p/abf42996-aaa0-42db-a749-27bd2c50f5f7", serves: 4 }),
+    R("sp8", "Sheet Pan Crunchwrap", "One giant crunchwrap with spiced black beans, baked and cut into squares. Vegan.", "40 min", [
+      "8||large tortilla~large tortillas|ba", "2|clove|garlic|st", "1|can|black beans (large, 19 oz / 540 ml)|pa", "1|packet|taco seasoning|sp",
+      "2||Roma tomato~Roma tomatoes|pr", "1||red onion~red onions|pr", "1.5|cup|tortilla chips (crushed)|pa", "1|head|romaine lettuce (optional)|pr",
+      "1|handful|vegan shredded cheese|da", "1|cup|vegan sour cream or coconut yogurt|da", "1|cup|vegan queso (optional)|da",
+      "0|-|guacamole|pr", "0|-|pickled jalapeños|co", "0|-|salsa|co",
+    ], [
+      "Preheat your oven to 400°F (200°C) and line a large sheet pan with parchment paper.",
+      "In a pan over medium heat, sauté the minced garlic for 1 to 2 minutes until fragrant.",
+      "Add the drained black beans (or Beyond Meat) and taco seasoning along with ½ cup of water. Cook for 5 to 7 minutes, stirring frequently, until soft and flavorful. Lightly mash with the back of a spoon for a chunky texture.",
+      "Lay 6 of the tortillas slightly overlapping across the sheet pan so they cover the base and hang over the sides. Place 1 tortilla in the center to fully cover the bottom, reserving the last one to close the top.",
+      "Spoon the bean mixture evenly over the tortillas. Top with vegan cheese or queso and crushed tortilla chips. Add diced tomato, onion and lettuce now, or save them for topping at the end.",
+      "Fold the overhanging edges toward the center and set the last tortilla in the middle to seal it. Place another sheet pan on top to keep it flat.",
+      "Bake for 15 to 20 minutes, removing the top sheet pan halfway through if you'd like it extra crisp.",
+      "Let cool slightly before slicing into squares. Serve with sour cream, salsa, guacamole or jalapeños.",
+    ], { by: "@PlantYou", src: "https://recime.app/p/5e8baeef-ac72-4bcc-817c-b6f0baa950c4", serves: 8 }),
+    R("sp9", "Cabbage Burgers / Cabbage Steaks", "Cabbage slices topped with seasoned ground meat and cheese. The saved recipe is missing its first steps; see the source.", "35 min", [
+      "1|head|green cabbage|pr", "12|oz|ground beef, chicken or turkey (300–400 g)|me", "1||yellow onion~yellow onions|st", "2|clove|garlic|st",
+      "0||paprika (optional)|sp", "0||dried herbs (optional)|sp", "0|-|grated cheese (optional)|da", SP, PP,
+    ], [
+      "Only the last step was saved in the source recipe. Open the source link for the full method.",
+      "Oil. Bake at 375–390°F (190–200°C) for 25–30 minutes until golden and cooked through. In the last 5 minutes, sprinkle grated cheese on top and bake until melted.",
+    ], { by: "unknown creator (via ReciMe)", src: "https://recime.app/p/2d913c7f-c181-4eae-8046-dc0c3d85e9de", serves: 4 }),
+    R("sp10", "Scarpaccia", "Crispy Tuscan zucchini and onion flatbread.", "1 hr 10 min", [
+      "1.65|lb|zucchini (750 g / 26.5 oz)|pr", "1|cup|all-purpose flour|st", "0.33|cup|cornstarch|pa", "1||red onion~red onions|pr",
+      "0||extra-virgin olive oil|st", "0|-|plain breadcrumbs (optional)|pa", SP,
+    ], [
+      "Thinly slice the zucchini and red onion (using a mandoline if you have one).",
+      "Place the vegetables in a colander over a bowl to collect the liquid. Add 1 tsp salt and mix well.",
+      "Place a plate on top of the vegetables and add a weight. Leave to drain for 20–30 minutes.",
+      "Measure the collected liquid (about ¾ cup / 200 ml). If you have less, add a little water to reach ¾ cup.",
+      "Whisk the flour (130 g, Italian Type 1 or all-purpose) and cornstarch (40 g) into the liquid until smooth. Add a drizzle of olive oil.",
+      "Add the zucchini and onion to the batter and mix well.",
+      "Generously oil a non-stick baking tray of about 12 × 12 inches (30 × 30 cm). Spread the mixture evenly.",
+      "Drizzle with more olive oil and sprinkle with breadcrumbs if you like extra crispiness.",
+      "Bake in a preheated oven at 425°F (220°C) for 30–35 minutes, until golden and crispy.",
+    ], { by: "@thatoneitalianchef", src: "https://recime.app/p/9ef79f67-525e-4a51-8e41-7339d838423c", serves: 4 }),
+    R("sp11", "Fluffige Protein-Ofenpfannkuchen mit Apfel", "Fluffy high-protein oven pancake with apple and cinnamon (translated from German).", "25 min", [
+      "1.25|cup|spelt flour (Dinkelmehl, 150 g)|pa", "1.25|cup|milk or coconut milk drink (300 ml)|da", "4||egg~eggs|da",
+      "7|oz|skyr (200 g)|da", "2||apple~apples|pr", "0||ground cinnamon|sp", "0||erythritol sweetener (e.g. No More Sugar)|pa",
+      "0|-|extra sweetener (optional)|pa",
+    ], [
+      "Stir the spelt flour, liquid (e.g. ⅔ cup coconut milk drink + ⅔ cup low-fat milk), eggs and skyr into a smooth batter.",
+      "Spread the batter evenly on a sheet pan lined with parchment paper.",
+      "Thinly slice the apples and spread them over the batter.",
+      "Sprinkle with cinnamon and a little sweetener.",
+      "Bake at 350°F (180°C) for about 15 minutes until golden.",
+      "Let cool briefly, then top with more cinnamon and sweetener if you like.",
+    ], { by: "@jasmin_alessia", src: "https://recime.app/p/7afbcc5e-7dad-44eb-9e53-11e14b415e50", serves: 4 }),
+    R("sp12", "Sheet Pan Veggies", "Simple roasted vegetables: a side or a light dinner.", "35 min", [
+      "1|lb|broccoli crowns|pr", "4||carrot~carrots|pr", "1||red bell pepper~red bell peppers|pr", "1||zucchini~zucchini|pr",
+      "1||red onion~red onions|pr", "3|tbsp|olive oil|st", "1|tsp|garlic powder|sp", "1|tsp|Italian seasoning|sp", "1||lemon~lemons|pr", SP, PP,
+    ], [
+      "Heat the oven to 425°F and line a large sheet pan.",
+      "Cut broccoli into florets, carrots into ½-inch coins, and the pepper, zucchini and onion into 1-inch pieces.",
+      "Toss with olive oil, garlic powder, Italian seasoning, 1 tsp salt and pepper. Spread in one layer (use two pans if crowded).",
+      "Roast 25–30 minutes, tossing halfway, until tender and browned at the edges.",
+      "Squeeze lemon over before serving.",
     ]),
   ],
   wed: [
@@ -709,6 +777,8 @@ const VOL = { tsp: 1, tbsp: 3, cup: 48 };
 const WT = { oz: 1, lb: 16 };
 const PLURAL = {
   clove: "cloves",
+  packet: "packets",
+  handful: "handfuls",
   loaf: "loaves",
   can: "cans",
   jar: "jars",
@@ -741,6 +811,7 @@ function unitLabel(u, q) {
   return u;
 }
 function ingText(i, f) {
+  if (i.u === "-") return i.sing;
   if (i.q <= 0) return `${i.sing}, to taste`;
   const q = i.q * f;
   const name = !i.u && q > 1 ? i.plur : i.sing;
