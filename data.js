@@ -243,13 +243,18 @@ const RECIPES = {
       "Bake for 15 to 20 minutes, removing the top sheet pan halfway through if you'd like it extra crisp.",
       "Let cool slightly before slicing into squares. Serve with sour cream, salsa, guacamole or jalapeños.",
     ], { by: "@PlantYou", src: "https://recime.app/p/5e8baeef-ac72-4bcc-817c-b6f0baa950c4", serves: 8 }),
-    R("sp9", "Cabbage Burgers / Cabbage Steaks", "Cabbage slices topped with seasoned ground meat and cheese. The saved recipe is missing its first steps; see the source.", "35 min", [
-      "1|head|green cabbage|pr", "12|oz|ground beef, chicken or turkey (300–400 g)|me", "1||yellow onion~yellow onions|st", "2|clove|garlic|st",
-      "0||paprika (optional)|sp", "0||dried herbs (optional)|sp", "0|-|grated cheese (optional)|da", SP, PP,
+    R("sp9", "Cabbage Burgers / Cabbage Steaks", "Thick cabbage slices topped with seasoned ground-meat patties, tomato and cheese.", "40 min", [
+      "1|head|small green cabbage|pr", "12|oz|ground beef, chicken or turkey (300–400 g)|me", "1||yellow onion~yellow onions|st", "2|clove|garlic|st",
+      "2||tomato (as seen in the video)~tomatoes (as seen in the video)|pr", "0||paprika (optional)|sp", "0||dried herbs (optional)|sp",
+      "0|-|grated cheese (optional)|da", "0||oil|st", SP, PP,
     ], [
-      "Only the last step was saved in the source recipe. Open the source link for the full method.",
-      "Oil. Bake at 375–390°F (190–200°C) for 25–30 minutes until golden and cooked through. In the last 5 minutes, sprinkle grated cheese on top and bake until melted.",
-    ], { by: "unknown creator (via ReciMe)", src: "https://recime.app/p/2d913c7f-c181-4eae-8046-dc0c3d85e9de", serves: 4 }),
+      "Heat the oven to 375–390°F (190–200°C) and line a sheet pan with parchment.",
+      "Slice the cabbage into thick rounds, lay them on the pan, and brush with oil.",
+      "Mix the ground meat with finely chopped onion, 1–2 minced garlic cloves, salt, pepper, and paprika or dried herbs if using.",
+      "Press the meat into patties on top of the cabbage slices and add a tomato slice to each.",
+      "Bake 25–30 minutes until golden and cooked through.",
+      "In the last 5 minutes, sprinkle grated cheese on top and bake until melted.",
+    ], { by: "@EIENACOOK-s", src: "https://recime.app/p/2d913c7f-c181-4eae-8046-dc0c3d85e9de", serves: 4 }),
     R("sp10", "Scarpaccia", "Crispy Tuscan zucchini and onion flatbread.", "1 hr 10 min", [
       "1.65|lb|zucchini (750 g / 26.5 oz)|pr", "1|cup|all-purpose flour|st", "0.33|cup|cornstarch|pa", "1||red onion~red onions|pr",
       "0||extra-virgin olive oil|st", "0|-|plain breadcrumbs (optional)|pa", SP,
