@@ -47,7 +47,24 @@ const PP = "0||black pepper|st";
 // Recipes are added as Romy tests them. Older recipes live in git history.
 const RECIPES = {
   mon: [],
-  tue: [],
+  tue: [
+    R("spc1", "Sheet Pan Crunchwrap", "One giant crunchwrap with spiced black beans, baked and cut into squares. Vegan. Serves 6–8 depending on how you cut it.", "40 min", [
+      "8||large tortilla~large tortillas|ba", "2|clove|garlic|st", "1|can|black beans (large, 540 ml / 19 oz)|pa", "1|packet|taco seasoning|sp",
+      "2||Roma tomato~Roma tomatoes|pr", "1||red onion~red onions|pr", "1.5|cup|tortilla chips|pa", "1|head|romaine lettuce (optional)|pr",
+      "1|handful|vegan shredded cheese|da", "1|cup|vegan sour cream or coconut yogurt|da", "1|cup|vegan queso (optional)|da",
+      "0|-|guacamole (for serving)|pr", "0|-|jalapeños (for serving)|pr", "0|-|salsa (for serving)|co",
+    ], [
+      "Preheat your oven to 400°F (200°C) and line a large sheet pan with parchment paper.",
+      "In a pan over medium heat, sauté the minced garlic for 1 to 2 minutes until fragrant.",
+      "Add the drained and rinsed black beans (or a Beyond Meat packet) and the taco seasoning along with ½ cup of water. Cook 5 to 7 minutes, stirring often, until soft and flavorful. Lightly mash with the back of a spoon for a chunky texture.",
+      "Lay 6 of the tortillas slightly overlapping across the sheet pan so they cover the base and hang over the sides. Place 1 tortilla in the center to fully cover the bottom, reserving the last one to close the top.",
+      "Spoon the bean mixture evenly over the tortillas. Top with vegan cheese or vegan queso and the crushed tortilla chips. Add the diced tomatoes, onion and lettuce now, or save them for topping at the end.",
+      "Fold the overhanging edges toward the center to seal, with the last tortilla in the middle. Place another sheet pan on top to keep it flat and compact.",
+      "Bake 15 to 20 minutes, removing the top sheet pan halfway through if you'd like it extra crisp.",
+      "Let cool slightly, then slice into squares. Serve with your fresh toppings, extra sour cream, salsa or guacamole.",
+      "Tip from the recipe notes: swap the beans for chickpeas, lentils, shredded tofu or vegan ground crumbles. In a rush, use a can of refried beans and skip cooking the beans.",
+    ], { by: "PlantYou", src: "https://plantyou.com/sheet-pan-crunchwrap/", serves: 8 }),
+  ],
   wed: [],
   thu: [],
   fri: [],
