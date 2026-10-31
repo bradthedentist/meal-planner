@@ -38,8 +38,8 @@
       if (!s.picks[d]) { s.picks[d] = moved[d].id; if (moved[d].sv) s.servings[d] = moved[d].sv; }
     });
     s.checked = p.checked && typeof p.checked === "object" ? p.checked : {};
-    s.active = !!p.active;
-    s.weekOf = p.weekOf || "";
+    s.active = !!p.active && DAYS.some(function (d) { return s.picks[d] && s.picks[d] !== "skip"; });
+    s.weekOf = s.active ? p.weekOf || "" : "";
     return s;
   }
 
@@ -218,6 +218,9 @@
     var decided = DAYS.filter(function (x) { return !!S.picks[x]; }).length;
     var h = dayStrip(d, true);
     h += "<h2>" + esc(DAY_FULL[d]) + " · " + esc(S.themes[d]) + "</h2><p class=\"cap\">" + decided + " of 7 days decided</p>";
+    if (!RECIPES[d].length) {
+      h += '<div class="empty"><div class="empty-t">No recipes yet</div><div class="cap" style="margin:4px 0 0">Send recipes to Meal Planner to add them.</div></div>';
+    }
     h += RECIPES[d].map(function (r) {
       var on = cur === r.id, open = V.open === r.id;
       return '<div class="card' + (on ? " on" : "") + '"><div class="opt"><div class="info" data-act="toggle" data-id="' + r.id + '">' +
@@ -226,8 +229,10 @@
         '<button class="btn pick' + (on ? " primary" : "") + '" data-act="pick" data-id="' + r.id + '">' + (on ? "Picked" : "Pick") + "</button></div>" +
         (open ? "<h3>Ingredients</h3>" + ingList(r, 1) + "<h3>Steps</h3>" + steps(r) + credit(r) : "") + "</div>";
     }).join("");
-    h += '<div class="row"><button class="btn" data-act="pick" data-id="skip">' + (cur === "skip" ? "Skipped (undo)" : "Skip this day") + "</button>" +
-      '<button class="btn" data-act="clear">Clear all picks</button></div>';
+    var btns = "";
+    if (RECIPES[d].length || cur === "skip") btns += '<button class="btn" data-act="pick" data-id="skip">' + (cur === "skip" ? "Skipped (undo)" : "Skip this day") + "</button>";
+    if (decided) btns += '<button class="btn" data-act="clear">Clear all picks</button>';
+    if (btns) h += '<div class="row">' + btns + "</div>";
     return h;
   }
   function renderList() {
@@ -281,7 +286,8 @@
     $sub.textContent = S.active && S.weekOf ? "Week of " + S.weekOf + " · " + pickedCount() + " dinners" : "Pick a dinner for each night";
     $app.innerHTML = V.tab === "week" ? renderWeek() : V.tab === "plan" ? renderPlan() : V.tab === "list" ? renderList() : renderThemes();
     var n = pickedCount();
-    if (V.tab === "plan") {
+    var anyRecipes = DAYS.some(function (x) { return RECIPES[x].length > 0; });
+    if (V.tab === "plan" && (anyRecipes || n)) {
       $bar.className = "show";
       $bar.innerHTML = '<button class="btn primary" data-act="start"' + (n ? "" : " disabled") + ">" +
         (n ? (S.active ? "Save week (" + n + ")" : "Start week (" + n + ")") : "Pick a recipe to start") + "</button>";

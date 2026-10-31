@@ -82,3 +82,5 @@ textarea { min-height: 120px; font: 13px/1.4 ui-monospace, Menlo, monospace; wor
 #toast.show { opacity: 1; }
 .src { color: var(--muted); font-size: 13px; margin: 14px 0 0; }
 .src a { color: var(--accent); font-weight: 600; }
+.empty { background: var(--card); border: 1px dashed var(--line2); border-radius: var(--radius); padding: 22px 16px; margin: 10px 0; text-align: center; }
+.empty-t { font-weight: 650; font-size: 17px; }
