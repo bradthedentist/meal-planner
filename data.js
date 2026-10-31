@@ -45,10 +45,11 @@ function R(id, name, desc, time, ings, steps, meta) {
 const SP = "0||salt|st";
 const PP = "0||black pepper|st";
 // Recipes are added as Romy tests them. Older recipes live in git history.
+// serves = the SOURCE yield (used only for scaling). The app always defaults to 4 servings (HOUSEHOLD in app.js).
 const RECIPES = {
   mon: [],
   tue: [
-    R("spc1", "Sheet Pan Crunchwrap", "One giant crunchwrap with spiced black beans, baked and cut into squares. Vegan. Serves 6–8 depending on how you cut it.", "40 min", [
+    R("spc1", "Sheet Pan Crunchwrap", "One giant crunchwrap with spiced black beans, baked and cut into squares. Vegan. Source makes 8 (6–8 depending on how you cut it); shown for 4.", "40 min", [
       "8||large tortilla~large tortillas|ba", "2|clove|garlic|st", "1|can|black beans (large, 540 ml / 19 oz)|pa", "1|packet|taco seasoning|sp",
       "2||Roma tomato~Roma tomatoes|pr", "1||red onion~red onions|pr", "1.5|cup|tortilla chips|pa", "1|head|romaine lettuce (optional)|pr",
       "1|handful|vegan shredded cheese|da", "1|cup|vegan sour cream or coconut yogurt|da", "1|cup|vegan queso (optional)|da",

@@ -103,7 +103,17 @@
     return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
   }
   function recipeFor(d) { var id = S.picks[d]; return id && id !== "skip" ? BY_ID[id] : null; }
-  function servingsFor(d) { var r = recipeFor(d); return S.servings[d] || (r ? r.serves : 4); }
+  var HOUSEHOLD = 4; // every recipe defaults to 4 servings, scaled from the source yield
+  function servingsFor(d) { return S.servings[d] || HOUSEHOLD; }
+  // Grocery list: round packaged/count items up to whole units you can buy, noting the amount used.
+  function shopLine(g) {
+    var frac = g.amt > 0 && Math.abs(g.amt - Math.round(g.amt)) > 0.01;
+    if (!frac || g.fam === "vol" || g.fam === "wt" || g.unit === "handful") return gLine(g);
+    var whole = Math.ceil(g.amt - 0.01);
+    var buy = Object.assign({}, g, { amt: whole });
+    return gLine(buy) + " (use " + fmtNum(g.amt) + ")";
+  }
+  function srcNote(r) { return r.serves !== HOUSEHOLD ? "Source makes " + r.serves + ", scaled to your servings" : ""; }
   function pickedCount() { return DAYS.filter(function (d) { return S.picks[d] && S.picks[d] !== "skip"; }).length; }
   function toast(msg) {
     $toast.textContent = msg; $toast.classList.add("show");
@@ -148,7 +158,7 @@
       var items = g.items.filter(function (i) { return !S.checked[i.key]; });
       if (!items.length) return;
       lines.push("", CAT_LABEL[g.cat].toUpperCase());
-      items.forEach(function (i) { lines.push("- " + gLine(i)); });
+      items.forEach(function (i) { lines.push("- " + shopLine(i)); });
     });
     return lines.join("\n");
   }
@@ -205,6 +215,7 @@
         '<div class="desc">' + esc(r.desc) + '</div><div class="meta">' + esc(r.time) + "</div></div></div>" +
         '<div class="stepper"><span class="cap" style="margin:0">Servings</span><button data-act="serv" data-n="-1" aria-label="Fewer">−</button><b>' +
         servingsFor(d) + '</b><button data-act="serv" data-n="1" aria-label="More">+</button></div>' +
+        (srcNote(r) ? '<p class="cap" style="margin:-4px 0 8px">' + esc(srcNote(r)) + "</p>" : "") +
         "<h3>Ingredients</h3>" + ingList(r, servingsFor(d) / r.serves) + "<h3>Steps</h3>" + steps(r) + credit(r) + "</div>";
     } else {
       h += '<p class="cap">' + (id === "skip" ? "Night off. No cooking planned." : "No recipe picked for this day.") + "</p>" +
@@ -225,9 +236,9 @@
       var on = cur === r.id, open = V.open === r.id;
       return '<div class="card' + (on ? " on" : "") + '"><div class="opt"><div class="info" data-act="toggle" data-id="' + r.id + '">' +
         '<div class="name">' + esc(r.name) + '</div><div class="desc">' + esc(r.desc) + "</div>" +
-        '<div class="meta">' + esc(r.time) + ' · serves ' + r.serves + ' · <button class="link" data-act="toggle" data-id="' + r.id + '">' + (open ? "Hide" : "See recipe") + "</button></div></div>" +
+        '<div class="meta">' + esc(r.time) + ' · serves ' + HOUSEHOLD + (r.serves !== HOUSEHOLD ? " (source makes " + r.serves + ")" : "") + ' · <button class="link" data-act="toggle" data-id="' + r.id + '">' + (open ? "Hide" : "See recipe") + "</button></div></div>" +
         '<button class="btn pick' + (on ? " primary" : "") + '" data-act="pick" data-id="' + r.id + '">' + (on ? "Picked" : "Pick") + "</button></div>" +
-        (open ? "<h3>Ingredients</h3>" + ingList(r, 1) + "<h3>Steps</h3>" + steps(r) + credit(r) : "") + "</div>";
+        (open ? "<h3>Ingredients</h3>" + ingList(r, HOUSEHOLD / r.serves) + "<h3>Steps</h3>" + steps(r) + credit(r) : "") + "</div>";
     }).join("");
     var btns = "";
     if (RECIPES[d].length || cur === "skip") btns += '<button class="btn" data-act="pick" data-id="skip">' + (cur === "skip" ? "Skipped (undo)" : "Skip this day") + "</button>";
@@ -252,7 +263,7 @@
       h += items.map(function (i) {
         var on = !!S.checked[i.key];
         return '<div class="check' + (on ? " on" : "") + '" role="checkbox" aria-checked="' + on + '" data-act="check" data-key="' + esc(i.key) + '">' +
-          '<span class="box">' + (on ? "✓" : "") + '</span><span class="lbl">' + esc(gLine(i)) + '</span><span class="m">' +
+          '<span class="box">' + (on ? "✓" : "") + '</span><span class="lbl">' + esc(shopLine(i)) + '</span><span class="m">' +
           i.days.map(function (d) { return DAY_SHORT[d]; }).join(" · ") + "</span></div>";
       }).join("");
     });
@@ -311,6 +322,7 @@
       var id = el.getAttribute("data-id"), pd = V.planDay;
       var picks = Object.assign({}, S.picks);
       if (picks[pd] === id) delete picks[pd]; else picks[pd] = id;
+      if (S.picks[pd] !== picks[pd] && S.servings[pd]) { S.servings = Object.assign({}, S.servings); delete S.servings[pd]; }
       S.picks = picks; save();
       if (picks[pd]) {
         var idx = DAYS.indexOf(pd);
