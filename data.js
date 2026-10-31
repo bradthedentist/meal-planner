@@ -10,22 +10,23 @@ const DAY_FULL = {
   sun: "Sunday"
 };
 const DEFAULT_THEMES = {
-  mon: "Leftover Day",
-  tue: "Taco Tuesday",
-  wed: "One Pot Wednesday",
-  thu: "Stir-Fry Thursday",
-  fri: "Pizza Friday",
-  sat: "Grill Saturday",
-  sun: "Comfort Sunday"
+  mon: "Leftovers",
+  tue: "Sheet Pan",
+  wed: "One Pot",
+  thu: "Stir-Fry",
+  fri: "Brotzeit",
+  sat: "Crockpot",
+  sun: "Pizza Sunday"
 };
+const OLD_DEFAULT_THEMES = ["Leftover Day", "Taco Tuesday", "One Pot Wednesday", "Stir-Fry Thursday", "Pizza Friday", "Grill Saturday", "Comfort Sunday"];
 const CAT_ORDER = ["st", "sp", "pr", "me", "da", "ba", "fr", "pa", "co", "ot"];
 const CAT_LABEL = {
   st: "Staples",
   sp: "Spices",
   pr: "Produce",
-  me: "Meat & Seafood",
+  me: "Meat, Deli & Seafood",
   da: "Dairy & Eggs",
-  ba: "Bakery & Tortillas",
+  ba: "Bakery & Bread",
   fr: "Frozen",
   pa: "Pantry & Canned",
   co: "Condiments & Sauces",
@@ -157,133 +158,66 @@ const RECIPES = {
     ])
   ],
   tue: [
-    R("t1", "Ground Beef Tacos", "The classic weeknight taco.", "25 min", [
-      "1.5|lb|ground beef|me",
-      "1||yellow onion~yellow onions|st",
-      "2|clove|garlic|st",
-      "1|tbsp|chili powder|sp",
-      "1|tsp|ground cumin|sp",
-      "1|tsp|paprika|sp",
-      "0.5|tsp|dried oregano|sp",
-      "1|can|tomato sauce (8 oz)|pa",
-      "12||corn tortilla~corn tortillas|ba",
-      "1|head|iceberg lettuce|pr",
-      "2||Roma tomato~Roma tomatoes|pr",
-      "1|cup|shredded cheddar|da",
-      "0.5|cup|sour cream|da",
-      SP
+    R("sp1", "Sheet-Pan Chicken Fajitas", "Peppers, onions and spiced chicken roasted on one pan.", "35 min", [
+      "1.5|lb|boneless chicken breasts|me", "2||red bell pepper~red bell peppers|pr", "1||green bell pepper~green bell peppers|pr",
+      "1||yellow onion~yellow onions|st", "2|tbsp|olive oil|st", "2|tsp|chili powder|sp", "1|tsp|ground cumin|sp",
+      "1|tsp|smoked paprika|sp", "0.5|tsp|garlic powder|sp", "8||flour tortilla (8-inch)~flour tortillas (8-inch)|ba",
+      "1||lime~limes|pr", "0.5|cup|sour cream|da", "1||avocado~avocados|pr", SP,
     ], [
-      "Brown the beef with diced onion in a skillet over medium-high, 6\u20138 minutes. Drain fat.",
-      "Stir in minced garlic, chili powder, cumin, paprika, oregano and 1 tsp salt; cook 1 minute.",
-      "Add tomato sauce and \xBC cup water. Simmer 5 minutes until thick.",
-      "Warm tortillas in a dry skillet. Shred the lettuce and dice the tomatoes.",
-      "Fill tortillas with beef, lettuce, tomato, cheese and sour cream."
+      "Heat the oven to 425°F and line a large sheet pan with foil or parchment.",
+      "Slice chicken, peppers and onion into thin strips.",
+      "Toss everything with oil, chili powder, cumin, smoked paprika, garlic powder and 1 tsp salt. Spread in one layer.",
+      "Roast 20–25 minutes, tossing once, until chicken is cooked and veggies are charred at the edges.",
+      "Squeeze lime over the pan. Serve in warm tortillas with sour cream and avocado.",
     ]),
-    R("t2", "Chicken Tinga Tacos", "Smoky chipotle-tomato shredded chicken.", "35 min", [
-      "1.5|lb|boneless chicken thighs|me",
-      "1||yellow onion~yellow onions|st",
-      "3|clove|garlic|st",
-      "1|can|fire-roasted diced tomatoes (14.5 oz)|pa",
-      "1|can|chipotles in adobo (7 oz)|pa",
-      "1|tsp|dried oregano|sp",
-      "1|tsp|ground cumin|sp",
-      "1|tbsp|vegetable oil|st",
-      "12||corn tortilla~corn tortillas|ba",
-      "2||avocado~avocados|pr",
-      "0.5|cup|crumbled cotija|da",
-      "1||lime~limes|pr",
-      "1|bunch|cilantro|pr",
-      SP
+    R("sp2", "Kielbasa, Potatoes & Green Beans", "Smoky sausage and crispy potatoes, one pan.", "40 min", [
+      "14|oz|smoked kielbasa|me", "1.5|lb|baby gold potatoes|pr", "1|lb|green beans|pr", "3|tbsp|olive oil|st",
+      "1|tsp|Italian seasoning|sp", "0.5|tsp|garlic powder|sp", "0.25|cup|grated Parmesan|da", SP, PP,
     ], [
-      "Simmer the chicken in salted water 15\u201318 minutes until cooked. Shred with two forks.",
-      "Meanwhile, cook sliced onion in oil over medium 5 minutes; add garlic for 1 minute.",
-      "Blend the tomatoes, 2 chipotles plus 1 tbsp adobo, oregano and cumin. Pour into the pan and simmer 5 minutes.",
-      "Stir in the chicken and simmer 5 more minutes. Season with salt.",
-      "Serve in warm tortillas with avocado, cotija, cilantro and lime."
+      "Heat the oven to 425°F. Halve the potatoes and trim the green beans. Slice kielbasa into coins.",
+      "Toss potatoes with 2 tbsp oil, Italian seasoning, garlic powder, salt and pepper. Roast 15 minutes.",
+      "Add green beans and kielbasa tossed with the remaining oil. Roast 15–18 minutes more.",
+      "Sprinkle with Parmesan and serve.",
     ]),
-    R("t3", "Baja Fish Tacos", "Spiced white fish with a creamy lime slaw.", "30 min", [
-      "1.5|lb|cod or tilapia fillets|me",
-      "1|tsp|chili powder|sp",
-      "1|tsp|ground cumin|sp",
-      "0.5|tsp|garlic powder|sp",
-      "2|tbsp|vegetable oil|st",
-      "1|bag|coleslaw mix (14 oz)|pr",
-      "0.33|cup|mayonnaise|co",
-      "2||lime~limes|pr",
-      "1|tsp|sriracha|co",
-      "12||corn tortilla~corn tortillas|ba",
-      "1||avocado~avocados|pr",
-      "1|bunch|cilantro|pr",
-      SP
+    R("sp3", "Lemon-Garlic Salmon & Broccoli", "Light, fast and only one pan to wash.", "25 min", [
+      "1.5|lb|salmon fillets|me", "1.5|lb|broccoli crowns|pr", "3|tbsp|olive oil|st", "1||lemon~lemons|pr", "3|clove|garlic|st",
+      "1|tsp|dried dill|sp", "2|tbsp|butter|st", SP, PP,
     ], [
-      "Stir the mayo, juice of 1 lime and sriracha. Toss half with the coleslaw mix.",
-      "Pat the fish dry and season with chili powder, cumin, garlic powder and salt.",
-      "Heat oil in a skillet over medium-high. Cook fish 3\u20134 minutes per side until flaky.",
-      "Warm tortillas. Flake the fish into them.",
-      "Top with slaw, avocado, cilantro, the rest of the sauce, and lime wedges."
+      "Heat the oven to 425°F. Cut broccoli into florets and toss with 2 tbsp oil, salt and pepper. Roast 8 minutes.",
+      "Melt butter with minced garlic, the lemon zest and dill.",
+      "Push broccoli to the sides; add salmon, season, and spoon the garlic butter over it.",
+      "Roast 10–12 minutes until salmon flakes. Squeeze lemon over everything.",
     ]),
-    R("t4", "Sweet Potato & Black Bean Tacos", "Roasted, smoky and meat-free.", "35 min", [
-      "2||sweet potato~sweet potatoes|pr",
-      "1|can|black beans|pa",
-      "2|tbsp|olive oil|st",
-      "2|tsp|chili powder|sp",
-      "1|tsp|ground cumin|sp",
-      "0.5|tsp|smoked paprika|sp",
-      "12||corn tortilla~corn tortillas|ba",
-      "1||avocado~avocados|pr",
-      "0.5|cup|crumbled cotija|da",
-      "1||lime~limes|pr",
-      "1||red onion~red onions|pr",
-      SP
+    R("sp4", "Honey-Garlic Chicken Thighs & Veg", "Sticky, crispy thighs with potatoes and carrots.", "50 min", [
+      "2|lb|bone-in chicken thighs|me", "6||carrot~carrots|pr", "1|lb|baby gold potatoes|pr", "3|tbsp|honey|co", "2|tbsp|soy sauce|co",
+      "3|clove|garlic|st", "2|tbsp|olive oil|st", "1|tsp|dried thyme|sp", SP, PP,
     ], [
-      "Heat the oven to 425\xB0F. Dice the sweet potatoes into \xBD-inch cubes.",
-      "Toss with oil, chili powder, cumin, smoked paprika and salt. Roast 20\u201325 minutes, tossing once.",
-      "Warm the rinsed black beans with a pinch of salt.",
-      "Thinly slice the red onion and squeeze some lime over it.",
-      "Fill tortillas with sweet potato, beans, avocado, onion and cotija."
+      "Heat the oven to 425°F. Cut carrots into sticks and halve the potatoes; toss with oil, thyme, salt and pepper.",
+      "Nestle chicken skin-side up among the veg. Season with salt and pepper.",
+      "Roast 25 minutes. Meanwhile whisk honey, soy sauce and minced garlic.",
+      "Brush the glaze over the chicken and roast 10–15 minutes more, until 175°F and sticky.",
     ]),
-    R("t5", "Garlic-Lime Shrimp Tacos", "Fast, bright and weeknight easy.", "20 min", [
-      "1.5|lb|large shrimp, peeled|me",
-      "2|tbsp|olive oil|st",
-      "2|clove|garlic|st",
-      "1|tsp|chili powder|sp",
-      "0.5|tsp|ground cumin|sp",
-      "0.5|tsp|smoked paprika|sp",
-      "2||lime~limes|pr",
-      "12||corn tortilla~corn tortillas|ba",
-      "1|bag|coleslaw mix (14 oz)|pr",
-      "0.33|cup|mayonnaise|co",
-      "1|tsp|sriracha|co",
-      "1|bunch|cilantro|pr",
-      SP
+    R("sp5", "Sheet-Pan Gnocchi with Sausage & Peppers", "Crispy gnocchi, no boiling needed.", "35 min", [
+      "1|lb|potato gnocchi (shelf-stable)|pa", "1|lb|Italian sausage|me", "1||red bell pepper~red bell peppers|pr", "1||red onion~red onions|pr",
+      "1|cup|cherry tomatoes|pr", "2|tbsp|olive oil|st", "1|tsp|Italian seasoning|sp", "0.25|cup|grated Parmesan|da",
+      "1|bunch|basil|pr", SP, PP,
     ], [
-      "Toss shrimp with chili powder, cumin, smoked paprika and salt.",
-      "Heat oil in a large skillet over medium-high. Cook shrimp 1\u20132 minutes per side; add minced garlic for the last 30 seconds.",
-      "Squeeze 1 lime over the shrimp.",
-      "Mix mayo, sriracha and a squeeze of lime; toss with the slaw.",
-      "Serve shrimp in warm tortillas with slaw and cilantro."
+      "Heat the oven to 450°F.",
+      "Toss gnocchi, chopped pepper and onion, and tomatoes with oil, Italian seasoning, salt and pepper.",
+      "Pinch sausage into small pieces over the pan.",
+      "Roast 20–25 minutes, stirring once, until gnocchi are golden and sausage is cooked.",
+      "Top with Parmesan and torn basil.",
     ]),
-    R("t6", "Pork Carnitas Tacos", "Slow-cooked, then crisped. Great for leftovers Monday.", "3 hr", [
-      "3|lb|boneless pork shoulder|me",
-      "1||yellow onion~yellow onions|st",
-      "4|clove|garlic|st",
-      "1||orange~oranges|pr",
-      "1||lime~limes|pr",
-      "2|tsp|ground cumin|sp",
-      "1|tsp|dried oregano|sp",
-      "2|tbsp|vegetable oil|st",
-      "12||corn tortilla~corn tortillas|ba",
-      "0.5|cup|salsa verde|co",
-      "1|bunch|cilantro|pr",
-      "1||red onion~red onions|pr",
-      SP
+    R("sp6", "Sheet-Pan Shrimp Boil", "Shrimp, sausage, corn and potatoes in garlic butter.", "40 min", [
+      "1.5|lb|large shrimp, peeled|me", "12|oz|andouille sausage|me", "1.5|lb|baby gold potatoes|pr", "4|ear|corn on the cob|pr",
+      "4|tbsp|butter|st", "3|clove|garlic|st", "1|tbsp|Old Bay seasoning|sp", "1||lemon~lemons|pr", "1|bunch|flat-leaf parsley|pr",
     ], [
-      "Heat the oven to 300\xB0F. Cut pork into 2-inch chunks; season with 2 tsp salt, cumin and oregano.",
-      "Put pork, quartered onion, smashed garlic, the juice of the orange and lime (plus the spent halves) in a Dutch oven. Add water to come halfway up.",
-      "Cover and bake 2\xBD\u20133 hours until fork-tender.",
-      "Shred the pork. Heat oil in a skillet over high and crisp the pork in batches, splashing in a little cooking liquid.",
-      "Serve in tortillas with salsa verde, diced red onion and cilantro."
-    ])
+      "Heat the oven to 425°F. Halve potatoes; cut corn into thirds; slice sausage.",
+      "Melt butter with minced garlic and Old Bay.",
+      "Toss potatoes and corn with half the butter. Roast 20 minutes.",
+      "Add sausage and shrimp, drizzle with remaining butter, and roast 8–10 minutes until shrimp are pink.",
+      "Squeeze lemon over and scatter chopped parsley.",
+    ]),
   ],
   wed: [
     R("w1", "One-Pot Chicken & Rice", "Golden chicken thighs baked over seasoned rice.", "50 min", [
@@ -537,6 +471,138 @@ const RECIPES = {
     ])
   ],
   fri: [
+    R("bz1", "Classic Brotzeit Board", "Rye bread, ham, salami, Leberwurst, cheese, radishes and pickles.", "15 min", [
+      "1|loaf|dark rye bread|ba", "4||soft pretzel~soft pretzels|ba", "8|oz|Black Forest ham|me", "6|oz|sliced salami|me",
+      "8|oz|Leberwurst (liverwurst)|me", "8|oz|Emmentaler|da", "4|tbsp|butter|st", "1|bunch|radishes|pr",
+      "1|jar|gherkins (Gewürzgurken)|co", "0||German mustard|co", "1|bunch|chives|pr",
+    ], [
+      "Take butter, cheese and Leberwurst out 20 minutes ahead so they spread easily.",
+      "Slice the bread; warm the pretzels in a 350°F oven for 5 minutes.",
+      "Trim radishes (slice some thin and salt them). Snip chives.",
+      "Arrange ham, salami, Leberwurst, sliced cheese, radishes and gherkins on a board.",
+      "Serve with butter, mustard and chives so everyone builds their own.",
+    ]),
+    R("bz2", "Obatzda & Pretzels", "Bavarian beer-garden cheese spread with warm pretzels.", "20 min", [
+      "8|oz|ripe Camembert|da", "4|oz|cream cheese|da", "2|tbsp|butter|st", "0.5||red onion~red onions|pr", "1|tsp|sweet paprika|sp",
+      "0.5|tsp|caraway seeds|sp", "2|tbsp|beer (optional)|ot", "4||soft pretzel~soft pretzels|ba", "1|bunch|radishes|pr",
+      "1|bunch|chives|pr", SP, PP,
+    ], [
+      "Let Camembert, cream cheese and butter soften 30 minutes.",
+      "Chop the Camembert (rind and all) and mash with cream cheese and butter until mostly smooth.",
+      "Stir in finely diced red onion, paprika, caraway, beer, salt and pepper.",
+      "Chill 15 minutes. Dust with paprika and top with chives and onion rings.",
+      "Serve with warm pretzels and sliced radishes.",
+    ]),
+    R("bz3", "Wurstsalat", "Tangy sausage salad with cheese, pickles and onion.", "20 min", [
+      "1|lb|Fleischwurst or bologna (thick-sliced)|me", "6|oz|Emmentaler|da", "1||red onion~red onions|pr",
+      "1|jar|gherkins (Gewürzgurken)|co", "3|tbsp|white wine vinegar|co", "3|tbsp|vegetable oil|st", "1|tsp|sugar|st",
+      "1|bunch|chives|pr", "1|loaf|dark rye bread|ba", "4|tbsp|butter|st", SP, PP,
+    ], [
+      "Cut the sausage and cheese into thin strips; slice the onion into thin rings; slice 4–5 gherkins.",
+      "Whisk vinegar, 3 tbsp pickle brine, oil, sugar, salt and pepper.",
+      "Toss everything with the dressing and let it sit 10 minutes.",
+      "Top with chives. Serve with buttered rye bread.",
+    ]),
+    R("bz4", "Abendbrot with Leberwurst & Eggs", "Buttered rye, liverwurst, eggs and crunchy veg.", "20 min", [
+      "1|loaf|dark rye bread|ba", "8|oz|Leberwurst (liverwurst)|me", "6||egg~eggs|da", "4|tbsp|butter|st", "1||cucumber~cucumbers|pr",
+      "2||Roma tomato~Roma tomatoes|pr", "1|bunch|radishes|pr", "1|bunch|chives|pr", "1|jar|gherkins (Gewürzgurken)|co", SP, PP,
+    ], [
+      "Hard-boil the eggs: 10 minutes in simmering water, then into ice water. Peel and halve.",
+      "Slice bread, cucumber, tomatoes and radishes.",
+      "Spread bread with butter and Leberwurst; top with chives.",
+      "Serve with eggs, veg and gherkins, seasoned with salt and pepper.",
+    ]),
+    R("bz5", "Ham & Cheese Platter with Kräuterquark", "Black Forest ham, mild cheese and a fresh herb dip.", "20 min", [
+      "8|oz|Black Forest ham|me", "6|oz|Butterkäse or mild Gouda|da", "1|cup|quark or plain Greek yogurt|da", "1|bunch|chives|pr",
+      "1|bunch|flat-leaf parsley|pr", "1|clove|garlic|st", "1|loaf|dark rye bread|ba", "4||pretzel roll~pretzel rolls|ba",
+      "1|bunch|radishes|pr", "1||cucumber~cucumbers|pr", SP, PP,
+    ], [
+      "Kräuterquark: stir quark with finely chopped chives and parsley, grated garlic, salt and pepper.",
+      "Slice the bread and rolls; cut cucumber and radishes into sticks.",
+      "Arrange ham and cheese on a board with the veg.",
+      "Serve the herb dip for bread and veg.",
+    ]),
+    R("bz6", "Strammer Max", "Open-face ham on buttered bread with a fried egg.", "15 min", [
+      "1|loaf|rustic farmhouse bread|ba", "8|oz|Black Forest ham|me", "4||egg~eggs|da", "3|tbsp|butter|st",
+      "1|jar|gherkins (Gewürzgurken)|co", "1|bunch|chives|pr", SP, PP,
+    ], [
+      "Toast 4 thick slices of bread in 1 tbsp butter until golden.",
+      "Top each with ham.",
+      "Fry the eggs sunny-side up in the remaining butter.",
+      "Set an egg on each slice; season and scatter chives. Serve with gherkins.",
+    ]),
+  ],
+  sat: [
+    R("cp1", "Slow Cooker Pulled Pork", "Tender BBQ pork on buns with slaw.", "8 hr low", [
+      "3|lb|boneless pork shoulder|me", "1||yellow onion~yellow onions|st", "1|cup|BBQ sauce|co", "2|tbsp|brown sugar|st",
+      "1|tsp|smoked paprika|sp", "1|tsp|garlic powder|sp", "1|tsp|ground cumin|sp", "0.5|cup|chicken broth|pa",
+      "2|tbsp|apple cider vinegar|co", "8||hamburger bun~hamburger buns|ba", "1|bag|coleslaw mix (14 oz)|pr", SP, PP,
+    ], [
+      "Rub pork with brown sugar, smoked paprika, garlic powder, cumin, 2 tsp salt and pepper.",
+      "Put sliced onion in the slow cooker, pork on top, and pour in broth and vinegar.",
+      "Cook on low 8–10 hours (or high 5–6) until it shreds easily.",
+      "Shred, discard most of the liquid, and stir in BBQ sauce.",
+      "Serve on buns with coleslaw. Leftovers are great for Monday.",
+    ]),
+    R("cp2", "Crockpot Beef Stew", "Classic stew with potatoes, carrots and peas.", "8 hr low", [
+      "2|lb|beef stew meat|me", "1.5|lb|baby gold potatoes|pr", "4||carrot~carrots|pr", "2|stalk|celery|pr",
+      "1||yellow onion~yellow onions|st", "3|clove|garlic|st", "3|cup|beef broth|pa", "1|can|tomato paste (6 oz)|pa",
+      "1|tbsp|Worcestershire sauce|co", "3|tbsp|all-purpose flour|st", "1|tsp|dried thyme|sp", "2||bay leaf~bay leaves|sp",
+      "1|cup|frozen peas|fr", SP, PP,
+    ], [
+      "Toss beef with flour, 1 tsp salt and pepper.",
+      "Add beef, halved potatoes, chunked carrots and celery, chopped onion and garlic to the slow cooker.",
+      "Whisk broth with 2 tbsp tomato paste and Worcestershire; pour over. Add thyme and bay leaves.",
+      "Cook on low 8 hours (or high 5) until beef is tender.",
+      "Stir in peas for the last 10 minutes. Remove bay leaves and season.",
+    ]),
+    R("cp3", "Slow Cooker Chicken Tortilla Soup", "Dump-and-go soup with all the toppings.", "6 hr low", [
+      "1.5|lb|boneless chicken breasts|me", "1|can|black beans|pa", "1|can|fire-roasted diced tomatoes (14.5 oz)|pa",
+      "1|can|diced green chiles (4 oz)|pa", "1|cup|frozen corn|fr", "1||yellow onion~yellow onions|st", "3|clove|garlic|st",
+      "4|cup|chicken broth|pa", "2|tsp|chili powder|sp", "1|tsp|ground cumin|sp", "1||lime~limes|pr", "1||avocado~avocados|pr",
+      "1|cup|shredded Mexican cheese blend|da", "1|bag|tortilla chips|pa", "1|bunch|cilantro|pr", SP,
+    ], [
+      "Add chicken, rinsed beans, tomatoes, chiles, corn, diced onion, garlic, broth, chili powder, cumin and 1 tsp salt to the slow cooker.",
+      "Cook on low 6 hours (or high 3–4).",
+      "Shred the chicken in the pot with two forks.",
+      "Stir in lime juice and season.",
+      "Top bowls with avocado, cheese, crushed chips and cilantro.",
+    ]),
+    R("cp4", "Crockpot Pot Roast", "Fall-apart beef with potatoes and carrots.", "8 hr low", [
+      "3|lb|beef chuck roast|me", "1.5|lb|baby gold potatoes|pr", "4||carrot~carrots|pr", "2|stalk|celery|pr",
+      "1||yellow onion~yellow onions|st", "4|clove|garlic|st", "2|cup|beef broth|pa", "1|tbsp|Worcestershire sauce|co",
+      "2|tbsp|vegetable oil|st", "1|tsp|dried thyme|sp", "2||bay leaf~bay leaves|sp", "2|tbsp|cornstarch|pa", SP, PP,
+    ], [
+      "Season roast well with salt and pepper and sear in oil in a skillet, 4 minutes per side (optional, but tastier).",
+      "Put potatoes, carrots, celery, onion and garlic in the slow cooker; set the roast on top.",
+      "Add broth, Worcestershire, thyme and bay leaves.",
+      "Cook on low 8–9 hours until fork-tender.",
+      "For gravy, simmer 2 cups of the liquid with cornstarch mixed in 2 tbsp water until thick.",
+    ]),
+    R("cp5", "Slow Cooker Butter Chicken", "Creamy, mildly spiced curry over rice.", "6 hr low", [
+      "2|lb|boneless chicken thighs|me", "1||yellow onion~yellow onions|st", "4|clove|garlic|st", "2|in|fresh ginger|pr",
+      "1|can|tomato sauce (15 oz)|pa", "2|tbsp|garam masala|sp", "1|tsp|ground turmeric|sp", "1|tsp|ground cumin|sp",
+      "4|tbsp|butter|st", "1|cup|heavy cream|da", "2|cup|white rice|st", "4||naan flatbread~naan flatbreads|ba",
+      "1|bunch|cilantro|pr", SP,
+    ], [
+      "Add chicken, diced onion, grated garlic and ginger, tomato sauce, spices, butter and 1½ tsp salt to the slow cooker.",
+      "Cook on low 6 hours (or high 3–4).",
+      "Stir in the cream and cook 15 minutes more. Break chicken into pieces.",
+      "Meanwhile cook the rice and warm the naan.",
+      "Serve over rice with cilantro.",
+    ]),
+    R("cp6", "Crockpot Swedish Meatballs", "Creamy gravy over egg noodles.", "4 hr low", [
+      "2|lb|frozen meatballs|fr", "2|cup|beef broth|pa", "1|can|cream of mushroom soup (10.5 oz)|pa", "1|tbsp|Worcestershire sauce|co",
+      "0.5|tsp|garlic powder|sp", "1|cup|sour cream|da", "12|oz|wide egg noodles|pa", "1|bunch|flat-leaf parsley|pr", SP, PP,
+    ], [
+      "Add frozen meatballs to the slow cooker.",
+      "Whisk broth, mushroom soup, Worcestershire, garlic powder and pepper; pour over.",
+      "Cook on low 4 hours (or high 2–3).",
+      "Stir in sour cream and cook 15 minutes more.",
+      "Serve over cooked egg noodles with chopped parsley.",
+    ]),
+  ],
+  sun: [
     R("p1", "Margherita Pizza", "Tomato, fresh mozzarella and basil. Makes two 12-inch pies.", "30 min", [
       "2|lb|pizza dough|ba",
       "1|jar|pizza sauce (14 oz)|co",
@@ -552,7 +618,7 @@ const RECIPES = {
       "Bake 10\u201312 minutes until the crust is golden and cheese bubbles.",
       "Top with fresh basil and slice."
     ]),
-    R("p2", "Pepperoni Pizza", "The Friday-night favorite. Two 12-inch pies.", "30 min", [
+    R("p2", "Pepperoni Pizza", "The family favorite. Two 12-inch pies.", "30 min", [
       "2|lb|pizza dough|ba",
       "1|jar|pizza sauce (14 oz)|co",
       "3|cup|shredded mozzarella|da",
@@ -602,22 +668,6 @@ const RECIPES = {
       "Top with veggies, olives and Italian seasoning.",
       "Bake 12\u201314 minutes until golden."
     ]),
-    R("p5", "Sausage & Pepper Sheet-Pan Pizza", "One big thick-crust pizza, no stretching skills needed.", "40 min", [
-      "2|lb|pizza dough|ba",
-      "1|jar|pizza sauce (14 oz)|co",
-      "1|lb|Italian sausage|me",
-      "3|cup|shredded mozzarella|da",
-      "1||red bell pepper~red bell peppers|pr",
-      "1||yellow onion~yellow onions|st",
-      "3|tbsp|olive oil|st",
-      "0.5|tsp|red pepper flakes|sp"
-    ], [
-      "Heat the oven to 450\xB0F. Oil a rimmed sheet pan with 2 tbsp oil.",
-      "Press the dough into the pan; let it rest 10 minutes and press again to the edges.",
-      "Brown the sausage with sliced pepper and onion in the remaining oil, 8 minutes.",
-      "Spread sauce, then cheese, then sausage and peppers over the dough.",
-      "Bake 18\u201322 minutes until the bottom is crisp. Sprinkle with pepper flakes."
-    ]),
     R("p6", "Naan Pizzas", "15-minute personal pizzas on naan.", "15 min", [
       "4||naan flatbread~naan flatbreads|ba",
       "1|jar|pizza sauce (14 oz)|co",
@@ -651,244 +701,6 @@ const RECIPES = {
       "Stretch dough into two rounds; brush with oil. Dollop ricotta, add mozzarella and spinach.",
       "Bake 10\u201312 minutes. Finish with pepper flakes."
     ])
-  ],
-  sat: [
-    R("s1", "Classic Cheeseburgers", "Juicy grilled burgers with all the fixings.", "25 min", [
-      "1.5|lb|ground beef|me",
-      "4|slice|cheddar|da",
-      "4||hamburger bun~hamburger buns|ba",
-      "1|head|iceberg lettuce|pr",
-      "2||Roma tomato~Roma tomatoes|pr",
-      "1||red onion~red onions|pr",
-      "1|tsp|garlic powder|sp",
-      "0||ketchup|co",
-      "0||mustard|co",
-      SP,
-      PP
-    ], [
-      "Heat the grill to medium-high (about 450\xB0F).",
-      "Gently form beef into 4 patties slightly wider than the buns; press a dimple in the center. Season with garlic powder, salt and pepper.",
-      "Grill 4 minutes, flip, add cheese, and grill 3\u20134 minutes more for medium.",
-      "Toast the buns on the grill for 1 minute.",
-      "Build burgers with lettuce, tomato, onion, ketchup and mustard."
-    ]),
-    R("s2", "Lemon-Garlic Chicken Kebabs", "Marinated chicken and veggie skewers.", "45 min", [
-      "2|lb|boneless chicken breasts|me",
-      "4|tbsp|olive oil|st",
-      "2||lemon~lemons|pr",
-      "4|clove|garlic|st",
-      "1|tsp|dried oregano|sp",
-      "1|tsp|paprika|sp",
-      "0.5|tsp|ground cumin|sp",
-      "1||red bell pepper~red bell peppers|pr",
-      "1||green bell pepper~green bell peppers|pr",
-      "1||red onion~red onions|pr",
-      "1||zucchini~zucchini|pr",
-      "8||wooden skewer~wooden skewers|ot",
-      SP,
-      PP
-    ], [
-      "Soak skewers 20 minutes. Cut chicken and veggies into 1\xBD-inch pieces.",
-      "Whisk oil, lemon juice, minced garlic, oregano, paprika, cumin, salt and pepper. Marinate chicken at least 20 minutes.",
-      "Thread chicken and vegetables onto skewers.",
-      "Grill over medium-high 10\u201312 minutes, turning, until chicken reaches 165\xB0F.",
-      "Squeeze extra lemon over the top."
-    ]),
-    R("s3", "Grilled Steak with Chimichurri", "Charred sirloin and a bright herb sauce.", "30 min", [
-      "2|lb|sirloin steak|me",
-      "1|bunch|flat-leaf parsley|pr",
-      "3|clove|garlic|st",
-      "0.5|cup|olive oil|st",
-      "2|tbsp|red wine vinegar|co",
-      "0.5|tsp|red pepper flakes|sp",
-      "1|tsp|dried oregano|sp",
-      SP,
-      PP
-    ], [
-      "Take steak out 30 minutes early; season generously with salt and pepper.",
-      "Chimichurri: finely chop parsley and garlic; stir with oil, vinegar, oregano, pepper flakes and a pinch of salt.",
-      "Grill over high heat 4\u20135 minutes per side for medium-rare (130\xB0F).",
-      "Rest 5\u201310 minutes, then slice against the grain.",
-      "Spoon chimichurri over the top."
-    ]),
-    R("s4", "Honey-BBQ Chicken & Corn", "Sticky grilled thighs with buttered corn.", "45 min", [
-      "2.5|lb|bone-in chicken thighs|me",
-      "1|cup|BBQ sauce|co",
-      "2|tbsp|honey|co",
-      "1|tsp|smoked paprika|sp",
-      "1|tsp|garlic powder|sp",
-      "1|tbsp|vegetable oil|st",
-      "4|ear|corn on the cob|pr",
-      "2|tbsp|butter|st",
-      SP,
-      PP
-    ], [
-      "Heat the grill with one hot side and one cooler side.",
-      "Rub chicken with oil, smoked paprika, garlic powder, salt and pepper. Stir BBQ sauce with honey.",
-      "Grill chicken skin-side down on the hot side 5 minutes, then move to the cooler side, cover, and cook 25\u201330 minutes to 175\xB0F.",
-      "Grill corn alongside 10\u201312 minutes, turning.",
-      "Brush chicken with sauce for the last 5 minutes. Butter and salt the corn."
-    ]),
-    R("s5", "Grilled Salmon & Asparagus", "Light, quick and lemony.", "25 min", [
-      "1.5|lb|salmon fillets|me",
-      "1|lb|asparagus|pr",
-      "3|tbsp|olive oil|st",
-      "2|clove|garlic|st",
-      "1||lemon~lemons|pr",
-      "1|tsp|dried dill|sp",
-      SP,
-      PP
-    ], [
-      "Heat the grill to medium-high and oil the grates well.",
-      "Mix oil, minced garlic, lemon zest and dill. Brush over the salmon and asparagus; season with salt and pepper.",
-      "Grill salmon skin-side down 6\u20138 minutes, covered, until it flakes.",
-      "Grill asparagus crosswise 4\u20135 minutes, turning.",
-      "Squeeze lemon over everything."
-    ]),
-    R("s6", "Brats with Peppers & Onions", "Beer-simmered brats, grilled and piled high.", "40 min", [
-      "1|pack|bratwurst (5 ct)|me",
-      "1|pack|brat buns|ba",
-      "2||yellow onion~yellow onions|st",
-      "1||red bell pepper~red bell peppers|pr",
-      "1||green bell pepper~green bell peppers|pr",
-      "1|tbsp|vegetable oil|st",
-      "1|can|beer (optional)|ot",
-      "0||mustard|co"
-    ], [
-      "Slice onions and peppers. Put them in a foil pan with oil and beer (or broth).",
-      "Grill brats over medium heat 12\u201315 minutes, turning, until 160\xB0F.",
-      "Meanwhile set the pan on the grill to simmer the veggies until soft.",
-      "Move brats into the pan to keep warm. Toast buns.",
-      "Serve brats with peppers, onions and mustard."
-    ])
-  ],
-  sun: [
-    R("c1", "Sunday Pot Roast", "Fall-apart beef with potatoes and carrots.", "4 hr", [
-      "3|lb|beef chuck roast|me",
-      "1.5|lb|baby gold potatoes|pr",
-      "4||carrot~carrots|pr",
-      "2|stalk|celery|pr",
-      "1||yellow onion~yellow onions|st",
-      "4|clove|garlic|st",
-      "1|can|tomato paste (6 oz)|pa",
-      "2|cup|beef broth|pa",
-      "2|tbsp|all-purpose flour|st",
-      "2|tbsp|vegetable oil|st",
-      "1|tbsp|Worcestershire sauce|co",
-      "1|tsp|dried thyme|sp",
-      "2||bay leaf~bay leaves|sp",
-      SP,
-      PP
-    ], [
-      "Heat the oven to 300\xB0F. Season roast well with salt and pepper.",
-      "Sear in oil in a Dutch oven over medium-high, 4 minutes per side. Remove.",
-      "Cook chopped onion 3 minutes; add garlic, 2 tbsp tomato paste and flour for 1 minute. Whisk in broth and Worcestershire.",
-      "Return roast with thyme and bay leaves. Cover and bake 2\xBD hours.",
-      "Add potatoes, carrots and celery; bake 1 hour more until tender. Spoon gravy over to serve."
-    ]),
-    R("c2", "Chicken Pot Pie", "Creamy filling under a flaky crust.", "60 min", [
-      "1||rotisserie chicken~rotisserie chickens|me",
-      "1|box|refrigerated pie crusts (2 ct)|da",
-      "1.5|cup|frozen peas & carrots|fr",
-      "1||yellow onion~yellow onions|st",
-      "2|stalk|celery|pr",
-      "6|tbsp|butter|st",
-      "0.33|cup|all-purpose flour|st",
-      "1.5|cup|chicken broth|pa",
-      "0.75|cup|milk|da",
-      "1|tsp|dried thyme|sp",
-      SP,
-      PP
-    ], [
-      "Heat the oven to 400\xB0F. Shred about 3 cups of chicken.",
-      "Melt butter; cook diced onion and celery 5 minutes. Stir in flour 1 minute.",
-      "Whisk in broth and milk; simmer until thick. Add thyme, chicken, peas & carrots, salt and pepper.",
-      "Fit one crust into a 9-inch pie plate, add filling, top with the second crust, crimp and cut vents.",
-      "Bake 30\u201335 minutes until golden. Rest 10 minutes."
-    ]),
-    R("c3", "Baked Mac & Cheese", "Creamy cheddar sauce, crunchy top.", "50 min", [
-      "16|oz|elbow macaroni|pa",
-      "4|tbsp|butter|st",
-      "0.25|cup|all-purpose flour|st",
-      "3|cup|milk|da",
-      "3|cup|shredded cheddar|da",
-      "1|cup|shredded Gruy\xE8re|da",
-      "0.5|tsp|dry mustard|sp",
-      "0.5|tsp|garlic powder|sp",
-      "0.5|cup|panko breadcrumbs|pa",
-      SP,
-      PP
-    ], [
-      "Heat the oven to 375\xB0F. Boil macaroni 2 minutes less than the package says; drain.",
-      "Melt 3 tbsp butter, whisk in flour 1 minute, then slowly whisk in milk. Simmer until thick.",
-      "Off heat, stir in cheddar, Gruy\xE8re, mustard, garlic powder, salt and pepper.",
-      "Fold in pasta and pour into a 9\xD713 dish.",
-      "Top with panko tossed in the last tbsp of melted butter. Bake 20\u201325 minutes."
-    ]),
-    R("c4", "Meatloaf & Mashed Potatoes", "Tangy glazed meatloaf with buttery mash.", "75 min", [
-      "2|lb|ground beef|me",
-      "1||yellow onion~yellow onions|st",
-      "2|clove|garlic|st",
-      "2||egg~eggs|da",
-      "0.75|cup|plain breadcrumbs|pa",
-      "1|cup|milk|da",
-      "1|tbsp|Worcestershire sauce|co",
-      "1|tsp|dried thyme|sp",
-      "0.5|cup|ketchup|co",
-      "2|tbsp|brown sugar|st",
-      "1|tbsp|apple cider vinegar|co",
-      "2|lb|russet potatoes|pr",
-      "4|tbsp|butter|st",
-      SP,
-      PP
-    ], [
-      "Heat the oven to 375\xB0F. Mix breadcrumbs with \xBD cup milk.",
-      "Add beef, finely diced onion, garlic, eggs, Worcestershire, thyme, 1\xBD tsp salt and pepper. Mix gently and shape into a loaf on a lined pan.",
-      "Stir ketchup, brown sugar and vinegar; spread half on top. Bake 45 minutes, add the rest, bake 15 more (160\xB0F).",
-      "Meanwhile boil peeled, cubed potatoes 15 minutes until tender. Drain.",
-      "Mash with butter, the remaining \xBD cup warm milk, salt and pepper. Rest meatloaf 10 minutes and slice."
-    ]),
-    R("c5", "Chicken Noodle Soup", "The classic, from scratch in under an hour.", "45 min", [
-      "1.5|lb|boneless chicken thighs|me",
-      "3||carrot~carrots|pr",
-      "3|stalk|celery|pr",
-      "1||yellow onion~yellow onions|st",
-      "3|clove|garlic|st",
-      "8|cup|chicken broth|pa",
-      "8|oz|wide egg noodles|pa",
-      "1|tsp|dried thyme|sp",
-      "2||bay leaf~bay leaves|sp",
-      "2|tbsp|butter|st",
-      "1|bunch|flat-leaf parsley|pr",
-      SP,
-      PP
-    ], [
-      "Melt butter in a large pot; cook diced onion, carrots and celery 6 minutes. Add garlic 1 minute.",
-      "Add broth, whole chicken thighs, thyme and bay leaves. Simmer 20 minutes.",
-      "Remove chicken, shred, and return to the pot.",
-      "Add noodles and simmer 6\u20138 minutes until tender.",
-      "Remove bay leaves, season, and stir in chopped parsley."
-    ]),
-    R("c6", "Easy Lasagna", "No-boil noodles, meaty sauce, three cheeses.", "90 min", [
-      "1|lb|ground beef|me",
-      "1||yellow onion~yellow onions|st",
-      "3|clove|garlic|st",
-      "2|jar|marinara sauce (24 oz)|co",
-      "1|box|oven-ready lasagna noodles (9 oz)|pa",
-      "2|cup|ricotta|da",
-      "1||egg~eggs|da",
-      "3|cup|shredded mozzarella|da",
-      "0.5|cup|grated Parmesan|da",
-      "1|tsp|Italian seasoning|sp",
-      SP,
-      PP
-    ], [
-      "Heat the oven to 375\xB0F. Brown beef with diced onion; add garlic, Italian seasoning and marinara. Simmer 5 minutes.",
-      "Stir ricotta with egg, half the Parmesan, salt and pepper.",
-      "In a 9\xD713 dish layer: sauce, noodles, ricotta, mozzarella, sauce. Repeat twice, ending with sauce and mozzarella.",
-      "Top with remaining Parmesan. Cover with foil and bake 40 minutes.",
-      "Uncover and bake 15 minutes more. Rest 15 minutes before slicing."
-    ])
   ]
 };
 const BY_ID = {};
@@ -897,6 +709,7 @@ const VOL = { tsp: 1, tbsp: 3, cup: 48 };
 const WT = { oz: 1, lb: 16 };
 const PLURAL = {
   clove: "cloves",
+  loaf: "loaves",
   can: "cans",
   jar: "jars",
   bunch: "bunches",

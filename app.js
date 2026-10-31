@@ -11,17 +11,31 @@
   function fresh() {
     return { v: 1, ts: 0, picks: {}, servings: {}, checked: {}, themes: Object.assign({}, DEFAULT_THEMES), active: false, weekOf: "" };
   }
+  function dayOf(id) {
+    for (var i = 0; i < DAYS.length; i++) if (RECIPES[DAYS[i]].some(function (r) { return r.id === id; })) return DAYS[i];
+    return null;
+  }
   function normalize(p) {
     var s = fresh();
     if (!p || typeof p !== "object") return s;
     s.ts = p.ts || 0;
     s.picks = {};
+    var moved = {};
     DAYS.forEach(function (d) {
       var id = p.picks && p.picks[d];
-      if (id === "skip" || (id && BY_ID[id])) s.picks[d] = id;
       var sv = p.servings && p.servings[d];
-      if (sv > 0 && sv <= 16) s.servings[d] = sv;
-      if (p.themes && typeof p.themes[d] === "string" && p.themes[d].trim()) s.themes[d] = p.themes[d];
+      if (!(sv > 0 && sv <= 16)) sv = 0;
+      if (id === "skip") s.picks[d] = id;
+      else if (id && BY_ID[id]) {
+        var home = dayOf(id);
+        if (home === d) { s.picks[d] = id; if (sv) s.servings[d] = sv; }
+        else if (home) moved[home] = { id: id, sv: sv }; // e.g. pizza moved from Friday to Sunday
+      } // picks for recipes that no longer exist are dropped
+      var th = p.themes && p.themes[d];
+      if (typeof th === "string" && th.trim() && OLD_DEFAULT_THEMES.indexOf(th) < 0) s.themes[d] = th;
+    });
+    Object.keys(moved).forEach(function (d) {
+      if (!s.picks[d]) { s.picks[d] = moved[d].id; if (moved[d].sv) s.servings[d] = moved[d].sv; }
     });
     s.checked = p.checked && typeof p.checked === "object" ? p.checked : {};
     s.active = !!p.active;
@@ -69,6 +83,7 @@
     });
   }
   var S = readLocal() || fresh();
+  try { if (localStorage.getItem(KEY)) localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {}
   function save() {
     S.ts = Date.now();
     var json = JSON.stringify(S);
