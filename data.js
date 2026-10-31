@@ -416,7 +416,78 @@ const RECIPES = {
       "Stir in rice, remaining Cajun seasoning, thyme, bay leaves, tomatoes and broth.",
       "Return meat, bring to a boil, cover and simmer on low 20\u201325 minutes until rice is tender.",
       "Remove bay leaves and top with green onions."
-    ])
+    ]),
+    R("w7", "Dirty Cabbage", "Ground beef and pork with peppers, onions and cabbage simmered down. The source gives no amounts.", "40 min", [
+      "0|-|ground beef|me", "0|-|ground pork|me", "0|-|tomato paste|pa", "0|-|yellow onions|st", "0|-|bell peppers|pr", "0|-|garlic|st",
+      "0|-|Worcestershire sauce|co", "0|-|Italian seasoning|sp", "0|-|bone broth|pa", "0|-|green cabbage|pr", SP, PP,
+    ], [
+      "Mix ground beef and ground pork in a pan.",
+      "Add tomato paste, onions, bell peppers, garlic, and all the seasonings including Worcestershire sauce.",
+      "Add a little slurry to help thicken the mixture. (The source doesn't say what the slurry is made of.)",
+      "Season with salt, pepper, and Italian seasoning.",
+      "Pour in the bone broth and mix well.",
+      "Add the cabbage and cook until it reduces down.",
+    ], { by: "@LowCarbLove", src: "https://recime.app/p/21fadd76-9897-4d9f-9458-caafc7afd1e8", serves: 4 }),
+    R("w8", "Nudeln mit Kirschtomaten und Champignons", "Pasta with cherry tomatoes and mushrooms, baked with mozzarella. Only the baking step was saved in the source.", "50 min", [
+      "7|oz|short pasta, uncooked (200 g)|pa", "10||cherry tomato~cherry tomatoes|pr", "5|oz|white mushrooms (150 g)|pr", "0.5|can|corn (15 oz)|pa",
+      "0|-|green onions|pr", "3|clove|garlic|st", "1.25|cup|vegetable broth (300 ml)|pa", "0.33|cup|crème fraîche (80 ml)|da",
+      "1|tbsp|tomato paste|pa", "4|tbsp|cream cheese|da", "1.5|cup|shredded mozzarella|da", "0||dried oregano|sp", SP, PP,
+    ], [
+      "Only the baking step was saved in the source recipe. Open the source link for how to assemble the dish.",
+      "Bake covered at 350°F (180°C) for 30 minutes. Then uncover, top with the mozzarella (150 g) and bake 15 minutes more.",
+      "Enjoy!",
+    ], { by: "@Vronis.Kitchen", src: "https://recime.app/p/da5b4d44-86be-45c2-a38d-4c7b14a2bb5c", serves: 4 }),
+    R("w9", "Mininudeln mit Hähnchenbrust, Paprika und Spinat", "Mini pasta with chicken breast, bell pepper and spinach. The source gives no amounts.", "25 min", [
+      "0|-|mini pasta (Mininudeln)|pa", "0|-|tomatoes|pr", "0|-|mozzarella|da", "0|-|boneless chicken breasts|me", "0|-|bell peppers|pr", "0|-|baby spinach|pr",
+    ], [
+      "Make a quick and easy dish with mini pasta.",
+      "Add tomato, mozzarella, chicken breast, bell pepper and spinach.",
+      "Cook everything together until it's well combined and hot.",
+    ], { by: "@kilic_story", src: "https://recime.app/p/1720eb3a-5efe-471c-b250-e9ca0c85c80e", serves: 2 }),
+    R("w10", "Classic Tater Tot Hotdish", "Minnesota-style beef, veg and creamy soup under crispy tots.", "1 hr", [
+      "1|tbsp|butter|st", "2|lb|ground beef|me", "1||yellow onion~yellow onions|st", "16|oz|frozen mixed vegetables|fr",
+      "2|can|cream of mushroom soup (14 oz)|pa", "24|oz|frozen Tater Tots|fr", "0||ketchup|co", SP, PP,
+    ], [
+      "Heat a large frying pan over medium-high heat and melt the butter. Add the ground beef and chopped onion, season with 1½ tsp kosher salt and 1½ tsp pepper, and break up the meat. Cook until no pink remains, about 8 minutes.",
+      "With a slotted spoon, layer half the beef in a 9×13-inch baking dish, draining it. Add half the vegetables, season, and spread one can of soup on top. Repeat with the remaining beef, vegetables and soup. Cover the top with frozen Tater Tots in neat rows.",
+      "Bake in the preheated oven until the tots are well browned and the hotdish bubbles around the sides, about 45 minutes. (The saved recipe doesn't state the oven temperature.) Cool slightly and serve with ketchup if you like.",
+      "Leftovers keep up to 3 days in the fridge. Reheat in the microwave, or covered at 350°F for about 15 minutes.",
+    ], { by: "@simplyrecipes", src: "https://recime.app/p/dbda4424-0127-4844-bf9a-42206fc8c838", serves: 6 }),
+    R("w11", "Schinken Nudel Auflauf", "Ham and pasta bake: uncooked pasta baked in a creamy sauce. The source refers to a sauce-mix packet it doesn't list.", "40 min", [
+      "1.1|lb|pasta, uncooked (500 g)|pa", "3.5|oz|cooked ham (100 g)|me", "0.85|cup|heavy cream|da", "0|-|grated cheese|da",
+    ], [
+      "Put the uncooked pasta in a baking dish and scatter the diced ham on top.",
+      "Heat 3⅓ cups (800 ml) water and the cream (200 ml). Stir in the contents of the sauce packet and boil 1 minute. (The source mentions a packet but doesn't list it in the ingredients.)",
+      "Pour the sauce over the pasta so it's fully covered. Sprinkle with cheese and bake in a preheated oven for about 30 minutes. (The source says \"400C\"; that's probably 400°F / 200°C.)",
+    ], { by: "unknown creator (via ReciMe)", src: "https://recime.app/p/5a98d704-0af0-47ee-a6e4-6dfd8f7ff4cb", serves: 4 }),
+    R("w12", "Budget Bean and Cabbage Stew", "Cheap and filling stew with beans, cabbage, potatoes and ground meat. The source gives no amounts.", "50 min", [
+      "0|-|rice cakes|pa", "0|-|yellow onions|st", "0|-|paprika|sp", "0|-|kidney beans|pa", "0|-|garlic|st", "0|-|white cabbage|pr",
+      "0|-|potatoes|pr", "0|-|tomato paste|pa", "0|-|ground meat or meat-substitute mix|me", "0|-|broth|pa", "0|-|all-purpose flour|st",
+      "0|-|sour cream|da", SP, PP,
+    ], [
+      "Crumble the rice cakes and add a little water.",
+      "Chop the onion and mix it with the rice cakes, water, and spices such as salt, pepper, and paprika.",
+      "Mash the kidney beans and combine them with more spices like salt, garlic, paprika, and pepper.",
+      "Add the white cabbage and potatoes to the mixture.",
+      "Brown the onions in a pan with a bit of tomato paste.",
+      "Add the ground meat (or meat substitute mix) and sauté until sizzling.",
+      "Add the potatoes and white cabbage and cook for about five minutes.",
+      "Pour in the broth (made from leftovers) and bring to a simmer.",
+      "Simmer the whole mixture for another half hour.",
+      "Stir in a bit of flour to thicken the stew.",
+      "Serve with a dollop of sour cream if desired.",
+    ], { by: "@foodandfamily9120", src: "https://recime.app/p/53eb4de2-4d9b-478d-a39a-10ca80be9fca", serves: 8 }),
+    R("w13", "One Pot Veggie Rice", "Jasmine rice, veggies and smoked tofu in a soy-hoisin sauce. Vegan.", "25 min", [
+      "1|cup|jasmine or white rice|st", "1|cup|frozen peas & carrots|fr", "0.5|cup|broccoli florets|pr", "0.5||red onion~red onions|pr",
+      "13|oz|smoked tofu (375 g, 1 large block)|pr", "0.25|cup|soy sauce|co", "2|tbsp|hoisin sauce|co", "3|clove|garlic|st",
+      "1|tbsp|sesame oil|co", "1|tsp|rice vinegar|co", "0|-|green onions|pr",
+    ], [
+      "Add the rice to a medium pot with 1 cup water and all the sauce ingredients (soy sauce, hoisin, 1 tbsp minced garlic, sesame oil, rice vinegar). Stir well.",
+      "Layer the frozen carrots and peas, diced red onion, finely chopped broccoli and cubed smoked tofu on top. Don't stir; layering helps the rice cook underneath.",
+      "Bring to a gentle boil over medium heat. Reduce to low, cover, and cook 15–18 minutes until the liquid is absorbed and the rice is tender.",
+      "Remove from the heat and let sit, covered, 5 minutes. Then gently fold everything together.",
+      "Taste and adjust with more hoisin or rice vinegar. Serve with chopped green onion.",
+    ], { by: "@Carleigh Bodrug", src: "https://recime.app/p/52aaa3b1-4d55-46f0-b00b-5cc802edb7f6", serves: 4 }),
   ],
   thu: [
     R("h1", "Beef & Broccoli", "Better than takeout, glossy garlic-ginger sauce.", "25 min", [
