@@ -65,7 +65,18 @@ const RECIPES = {
       "Tip from the recipe notes: swap the beans for chickpeas, lentils, shredded tofu or vegan ground crumbles. In a rush, use a can of refried beans and skip cooking the beans.",
     ], { by: "PlantYou", src: "https://plantyou.com/sheet-pan-crunchwrap/", serves: 8 }),
   ],
-  wed: [],
+  wed: [
+    R("wjc1", "One Pot Pasta", "Linguine cooked right in the broth with cherry tomatoes, garlic and Parmesan.", "20 min", [
+      "2|tbsp|olive oil (extra virgin)|st", "1||large yellow onion~large yellow onions|st", "2|clove|garlic|st", "12|oz|cherry tomatoes|pr",
+      "1|tbsp|Italian seasoning|sp", "0.25|tsp|red pepper flakes|sp", "12|oz|linguine or spaghetti|pa",
+      "4.5|cup|chicken or vegetable broth (low sodium)|pa", "1|cup|grated Parmesan|da", "6|leaf|fresh basil|pr", SP, PP,
+    ], [
+      "In a large saucepan or Dutch oven, heat the olive oil over medium-high heat. Add the chopped onion and cook until translucent, about 3 minutes. Add the minced garlic and cook another 30 seconds until aromatic.",
+      "Add the halved tomatoes and cook 1 to 2 minutes until they just start to soften. Season with salt, pepper, Italian seasoning and red pepper flakes.",
+      "Add the linguine and broth and bring to a boil over high heat, stirring occasionally. Cook about 10 minutes, until the pasta is fully cooked. Keep stirring so the pasta doesn't stick.",
+      "Serve garnished with freshly grated Parmesan, chopped fresh basil and a drizzle of extra-virgin olive oil.",
+    ], { by: "Jo Cooks", src: "https://www.jocooks.com/recipes/one-pot-pasta/", serves: 4 }),
+  ],
   thu: [],
   fri: [],
   sat: [],
@@ -77,6 +88,7 @@ const VOL = { tsp: 1, tbsp: 3, cup: 48 };
 const WT = { oz: 1, lb: 16 };
 const PLURAL = {
   clove: "cloves",
+  leaf: "leaves",
   packet: "packets",
   handful: "handfuls",
   loaf: "loaves",
