@@ -41,8 +41,16 @@ function parseIng(s) {
 }
 // Category rules that override the recipe data (Romy's preferences):
 // onions of any kind (yellow, red, white, green, sweet...) are veggies -> Produce, never Staples.
+const STAPLE_RE = new RegExp("\\b(" + [
+  "pasta", "linguine", "spaghetti", "penne", "fusilli", "rigatoni", "macaroni", "farfalle", "fettuccine", "orzo", "rotini", "lasagna", "noodles?",
+  "rice", "broth", "stock", "bouillon", "tomato paste", "vinegar", "mayo", "mayonnaise", "mustard", "ketchup",
+  "hot sauce", "sriracha", "tabasco", "nori"
+].join("|") + ")\\b", "i");
 function catRule(name, c) {
   if (/\bonions?\b/i.test(name) && !/powder|flakes|soup|dip|rings/i.test(name)) return "pr";
+  // Shelf-stable basics she keeps on hand -> Staples (so they stay off the weekly Safeway order).
+  // Only for pantry/condiment items; weekly buys like chips, salsa, chili crunch, soy sauce, sesame oil, honey are untouched.
+  if ((c === "pa" || c === "co") && STAPLE_RE.test(name) && !/fresh|refrigerated|frozen/i.test(name)) return "st";
   return c;
 }
 function R(id, name, desc, time, ings, steps, meta) {
