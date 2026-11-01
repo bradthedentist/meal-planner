@@ -81,24 +81,18 @@ const RECIPES = {
   thu: [],
   fri: [],
   sat: [
-    R("cpk1", "Slow Cooker Chicken and Dumplings", "Creamy chicken and veggie stew with Bisquick dumplings. Some amounts aren't given in the source (chicken, butter, seasonings, dumpling mix).", "4–8 hr", [
-      "2|lb|carrots|pr", "1|bunch|celery|pr", "1||white onion~white onions|st", "0|-|garlic|st", "0|-|seasoning salt|sp", "0|-|chicken|me",
-      "0|-|paprika|sp", "4|cup|chicken broth|pa", "0|-|butter|st", "3|tbsp|cornstarch|pa", "1|cup|heavy whipping cream|da",
-      "0|-|Bisquick mix|pa", "0|-|milk|da",
+    R("cpk1", "Crock Pot Chicken and Dumplings", "Chicken breasts slow-cooked in a creamy soup base, topped with biscuit-strip dumplings and veggies.", "5 hr 20 min", [
+      "1||large onion~large onions|st", "1|can|condensed cream of celery soup (10.5 oz)|pa", "1|can|condensed cream of chicken soup (10.5 oz)|pa",
+      "1|tbsp|fresh parsley|pr", "1|tsp|poultry seasoning|sp", "0|-|black pepper|st",
+      "4||boneless skinless chicken breast~boneless skinless chicken breasts|me", "2|cup|reduced-sodium chicken broth|pa",
+      "2|cup|frozen mixed vegetables (or peas and carrots)|fr", "1|can|refrigerated biscuits (16.3 oz)|da",
     ], [
-      "Peel and chop the carrots.",
-      "Chop the celery and the white onion.",
-      "Season the veggies with garlic and seasoning salt.",
-      "Add chicken seasoned with the same seasonings and paprika on top of the veggies. (The source doesn't say which cut or how much chicken.)",
-      "Pour in the chicken broth and add a few tablespoons of butter.",
-      "Cook on low for 6 to 8 hours or high for 3 to 4 hours.",
-      "In the last hour of cooking, shred the chicken.",
-      "Mix the cornstarch with enough water to dissolve it, then add it to the crock pot.",
-      "Add the heavy whipping cream and the shredded chicken back into the pot.",
-      "Make the dumplings with Bisquick mix and milk to a thick texture. (No amounts in the source.)",
-      "Drop the dumplings into the pot and cover.",
-      "Halfway through the dumplings' cooking time, flip them so they cook evenly. (The source doesn't give the dumpling cooking time.)",
-    ], { by: "@karissastevens", src: "https://recime.app/p/39e1d9cd-7159-4d39-a636-bbe06a191820", serves: 6 }),
+      "Dice the onion and add it to a 6-quart crock pot. Top with the chicken breasts.",
+      "In a small bowl, combine the cream of celery soup, cream of chicken soup, chopped parsley, poultry seasoning and pepper. Spread over the chicken. Top with the chicken broth and cook on high for 5 hours.",
+      "About 1 hour before serving (after 4 hours of cooking; allow 60–90 minutes), roll each biscuit thin and flat and cut into 4 strips. Thaw the vegetables, add them to the slow cooker and stir. Add the biscuit strips on top and replace the lid as quickly as possible.",
+      "To serve: remove the chicken breasts and slightly shred them. Add back to the slow cooker and stir (this will break up the dumplings somewhat, which is ok). Cook an additional 10 minutes and serve.",
+      "Note: Some slow cookers need extra time for the biscuits to cook through.",
+    ], { by: "Spend With Pennies", src: "https://www.spendwithpennies.com/crock-pot-chicken-and-dumplings/", serves: 4 }),
   ],
   sun: []
 };
