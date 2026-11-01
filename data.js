@@ -79,7 +79,23 @@ const RECIPES = {
     ], { by: "Jo Cooks", src: "https://www.jocooks.com/recipes/one-pot-pasta/", serves: 4 }),
   ],
   thu: [],
-  fri: [],
+  fri: [
+    R("fri1", "Tomato Soup & Grilled Cheese", "Creamy fire-roasted tomato soup with cheddar grilled cheese \u201csoldiers\u201d for dipping. Bon App\u00e9tit, rated 4.3 (119 ratings).", "About 1 hr", [
+      "4|tbsp|unsalted butter|st", "1||medium red onion~medium red onions|st", "0||kosher salt|st", PP,
+      "2|tbsp|tomato paste|pa", "2|can|crushed fire-roasted tomatoes (28 oz)|pa", "4|cup|vegetable broth|pa",
+      "2|sprig|fresh thyme|pr", "1||bay leaf~bay leaves|sp", "2|tbsp|sugar|st", "0.5|cup|heavy cream|da",
+      "8|tbsp|unsalted butter (room temp, for the bread)|st", "16|slice|Pullman loaf (white sandwich bread)|ba", "16|oz|cheddar cheese|da",
+    ], [
+      "Heat the first portion of butter in a Dutch oven or medium stockpot over medium heat. Add the chopped onion and cook, stirring often, until softened and lightly browned around the edges, 8\u201310 minutes. Season with salt and pepper.",
+      "Add the tomato paste and cook, stirring to coat the onion, until slightly darkened in color, about 2 minutes.",
+      "Add the crushed tomatoes, vegetable broth, thyme, bay leaf and sugar and bring to a simmer. Season with salt and pepper and cook until the flavors are melded, 35\u201340 minutes.",
+      "Remove from heat and stir in the cream. Remove the thyme stems and bay leaf and let cool slightly. Working in batches, pur\u00e9e in a blender until smooth.",
+      "Heat a dry skillet, preferably cast-iron, over medium heat. Spread the room-temperature butter over the bread slices, dividing evenly.",
+      "Grate the cheddar. Top the unbuttered side of half the bread slices with cheddar, dividing evenly. Top with the remaining bread, buttered side up.",
+      "Cook, turning once, until the bread is golden brown and the cheese is melted, about 3 minutes per side.",
+      "Cut the sandwiches into soldiers and serve alongside the hot soup for dipping. (Tip from the source: try pouring the soup directly over the sliced sandwich for a cheesy bread soup.)",
+    ], { by: "Bon App\u00e9tit", src: "https://www.bonappetit.com/recipe/tomato-grilled-cheese-soup", serves: 8 }),
+  ],
   sat: [
     R("cpk1", "Crock Pot Chicken and Dumplings", "Chicken breasts slow-cooked in a creamy soup base, topped with biscuit-strip dumplings and veggies.", "5 hr 20 min", [
       "1||large onion~large onions|st", "1|can|condensed cream of celery soup (10.5 oz)|pa", "1|can|condensed cream of chicken soup (10.5 oz)|pa",
@@ -117,6 +133,7 @@ const PLURAL = {
   bag: "bags",
   stalk: "stalks",
   ear: "ears",
+  sprig: "sprigs",
   cup: "cups"
 };
 const FR = [[0, ""], [0.125, "\u215B"], [0.25, "\xBC"], [1 / 3, "\u2153"], [0.5, "\xBD"], [2 / 3, "\u2154"], [0.75, "\xBE"], [1, ""]];
