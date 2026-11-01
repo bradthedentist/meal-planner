@@ -37,7 +37,13 @@ const CAT_LABEL = {
 function parseIng(s) {
   const [q, u, n, c] = s.split("|");
   const [sing, plur] = n.split("~");
-  return { q: parseFloat(q) || 0, u, sing, plur: plur ?? sing, c };
+  return { q: parseFloat(q) || 0, u, sing, plur: plur ?? sing, c: catRule(sing, c) };
+}
+// Category rules that override the recipe data (Romy's preferences):
+// onions of any kind (yellow, red, white, green, sweet...) are veggies -> Produce, never Staples.
+function catRule(name, c) {
+  if (/\bonions?\b/i.test(name) && !/powder|flakes|soup|dip|rings/i.test(name)) return "pr";
+  return c;
 }
 function R(id, name, desc, time, ings, steps, meta) {
   const m = meta || {};
@@ -69,7 +75,7 @@ const RECIPES = {
   ],
   wed: [
     R("wjc1", "One Pot Pasta", "Linguine cooked right in the broth with cherry tomatoes, garlic and Parmesan.", "20 min", [
-      "2|tbsp|olive oil (extra virgin)|st", "1||large yellow onion~large yellow onions|st", "2|clove|garlic|st", "12|oz|cherry tomatoes|pr",
+      "2|tbsp|olive oil (extra virgin)|st", "1||large yellow onion~large yellow onions|pr", "2|clove|garlic|st", "12|oz|cherry tomatoes|pr",
       "1|tbsp|Italian seasoning|sp", "0.25|tsp|red pepper flakes|sp", "12|oz|linguine or spaghetti|pa",
       "4.5|cup|chicken or vegetable broth (low sodium)|pa", "1|cup|grated Parmesan|da", "6|leaf|fresh basil|pr", SP, PP,
     ], [
@@ -95,7 +101,7 @@ const RECIPES = {
   ],
   fri: [
     R("fri1", "Tomato Soup & Grilled Cheese", "Creamy fire-roasted tomato soup with cheddar grilled cheese \u201csoldiers\u201d for dipping. Bon App\u00e9tit, rated 4.3 (119 ratings).", "About 1 hr", [
-      "4|tbsp|unsalted butter|st", "1||medium red onion~medium red onions|st", "0||kosher salt|st", PP,
+      "4|tbsp|unsalted butter|st", "1||medium red onion~medium red onions|pr", "0||kosher salt|st", PP,
       "2|tbsp|tomato paste|pa", "2|can|crushed fire-roasted tomatoes (28 oz)|pa", "4|cup|vegetable broth|pa",
       "2|sprig|fresh thyme|pr", "1||bay leaf~bay leaves|sp", "2|tbsp|sugar|st", "0.5|cup|heavy cream|da",
       "8|tbsp|unsalted butter (room temp, for the bread)|st", "16|slice|Pullman loaf (white sandwich bread)|ba", "16|oz|cheddar cheese|da",
@@ -112,7 +118,7 @@ const RECIPES = {
   ],
   sat: [
     R("cpk1", "Crock Pot Chicken and Dumplings", "Chicken breasts slow-cooked in a creamy soup base, topped with biscuit-strip dumplings and veggies.", "5 hr 20 min", [
-      "1||large onion~large onions|st", "1|can|condensed cream of celery soup (10.5 oz)|pa", "1|can|condensed cream of chicken soup (10.5 oz)|pa",
+      "1||large onion~large onions|pr", "1|can|condensed cream of celery soup (10.5 oz)|pa", "1|can|condensed cream of chicken soup (10.5 oz)|pa",
       "1|tbsp|fresh parsley|pr", "1|tsp|poultry seasoning|sp", "0|-|black pepper|st",
       "4||boneless skinless chicken breast~boneless skinless chicken breasts|me", "2|cup|reduced-sodium chicken broth|pa",
       "2|cup|frozen mixed vegetables (or peas and carrots)|fr", "1|can|refrigerated biscuits (16.3 oz)|da",
