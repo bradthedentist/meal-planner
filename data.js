@@ -36,8 +36,13 @@ const CAT_LABEL = {
 };
 function parseIng(s) {
   const [q, u, n, c] = s.split("|");
-  const [sing, plur] = n.split("~");
+  const [sing, plur] = n.split("~").map(brandRule);
   return { q: parseFloat(q) || 0, u, sing, plur: plur ?? sing, c: catRule(sing, c) };
+}
+// Romy's brand preference: condensed cream-of soups are Pacific Foods Organic (10.5 oz cans, same as the usual size).
+function brandRule(name) {
+  if (!name || /pacific/i.test(name)) return name;
+  return name.replace(/^(?:canned\s+)?(?:condensed\s+)?cream of (\w+) soup/i, "Pacific Foods Organic condensed cream of $1 soup");
 }
 // Category rules that override the recipe data (Romy's preferences):
 // onions of any kind (yellow, red, white, green, sweet...) are veggies -> Produce, never Staples.
@@ -126,7 +131,7 @@ const RECIPES = {
   ],
   sat: [
     R("cpk1", "Crock Pot Chicken and Dumplings", "Chicken breasts slow-cooked in a creamy soup base, topped with biscuit-strip dumplings and veggies.", "5 hr 20 min", [
-      "1||large onion~large onions|pr", "1|can|condensed cream of celery soup (10.5 oz)|pa", "1|can|condensed cream of chicken soup (10.5 oz)|pa",
+      "1||large onion~large onions|pr", "1|can|Pacific Foods Organic condensed cream of celery soup (10.5 oz)|pa", "1|can|Pacific Foods Organic condensed cream of chicken soup (10.5 oz)|pa",
       "1|tbsp|fresh parsley|pr", "1|tsp|poultry seasoning|sp", "0|-|black pepper|st",
       "4||boneless skinless chicken breast~boneless skinless chicken breasts|me", "2|cup|reduced-sodium chicken broth|pa",
       "2|cup|frozen mixed vegetables (or peas and carrots)|fr", "1|can|refrigerated biscuits (16.3 oz)|da",
