@@ -32,7 +32,7 @@
         else if (home) moved[home] = { id: id, sv: sv }; // e.g. pizza moved from Friday to Sunday
       } // picks for recipes that no longer exist are dropped
       var th = p.themes && p.themes[d];
-      if (typeof th === "string" && th.trim() && OLD_DEFAULT_THEMES.indexOf(th) < 0) s.themes[d] = th;
+      if (typeof th === "string" && th.trim() && OLD_DEFAULT_THEMES.indexOf(th) < 0 && (OLD_DAY_DEFAULTS[d] || []).indexOf(th) < 0) s.themes[d] = th;
     });
     Object.keys(moved).forEach(function (d) {
       if (!s.picks[d]) { s.picks[d] = moved[d].id; if (moved[d].sv) s.servings[d] = moved[d].sv; }

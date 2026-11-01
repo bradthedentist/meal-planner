@@ -13,11 +13,12 @@ const DEFAULT_THEMES = {
   mon: "Leftovers",
   tue: "Sheet Pan",
   wed: "One Pot",
-  thu: "Stir-Fry",
+  thu: "Random Thursday",
   fri: "Brotzeit",
   sat: "Crockpot",
   sun: "Pizza Sunday"
 };
+const OLD_DAY_DEFAULTS = { thu: ["Stir-Fry"] }; // earlier per-day defaults, replaced by the current default
 const OLD_DEFAULT_THEMES = ["Leftover Day", "Taco Tuesday", "One Pot Wednesday", "Stir-Fry Thursday", "Pizza Friday", "Grill Saturday", "Comfort Sunday"];
 const CAT_ORDER = ["st", "sp", "pr", "me", "da", "ba", "fr", "pa", "co", "ot"];
 const CAT_LABEL = {
@@ -78,7 +79,20 @@ const RECIPES = {
       "Serve garnished with freshly grated Parmesan, chopped fresh basil and a drizzle of extra-virgin olive oil.",
     ], { by: "Jo Cooks", src: "https://www.jocooks.com/recipes/one-pot-pasta/", serves: 4 }),
   ],
-  thu: [],
+  thu: [
+    R("thu1", "Sushi Bowls", "Rice bowls with sweet-spicy marinated cucumbers, spicy canned tuna or salmon, edamame, avocado and nori.", "15 min", [
+      "1|tbsp|rice vinegar|co", "2|tbsp|chili crunch (2\u20133 tbsp; stir well)|co", "0.5|tbsp|honey|pa", "0.125|tsp|salt|st", "1||medium cucumber~medium cucumbers|pr",
+      "2|can|cooked salmon or tuna (6 oz)|pa", "0.25|cup|light mayo or plain Greek yogurt|co", "2|tsp|sriracha (2\u20134 tsp)|co", "1|tsp|sesame oil|co",
+      "2|tsp|soy sauce (or tamari)|co", "1|tsp|lime juice|pr", "1.5|cup|shelled edamame|fr", "2|cup|cooked rice|st",
+      "2||large nori sheet~large nori sheets|pa", "1||medium avocado~medium avocados|pr", "0|-|sesame seeds|sp", "0|-|green onion|pr",
+    ], [
+      "Marinated cucumbers: thinly slice the cucumber. Whisk the rice vinegar, chili crunch (2\u20133 tbsp), honey and salt together, then add the cucumbers and toss to coat evenly. Cover and set aside.",
+      "Meanwhile, make the spicy tuna: combine the salmon or tuna, mayo or yogurt, sriracha (2\u20134 tsp; more or less depending on how spicy you want it), sesame oil, soy sauce and lime juice.",
+      "Warm the rice and the edamame, then divide into bowls.",
+      "Cut the nori (2\u20133 sheets) into small pieces, cube the avocado and chop the green onions. Top the bowls with the marinated cucumbers, spicy tuna, nori, avocado, sesame seeds and green onions.",
+      "Drizzle with any remaining marinade from the cucumbers and enjoy!",
+    ], { by: "Jar of Lemons", src: "https://www.jaroflemons.com/sushi-bowls/", serves: 4 }),
+  ],
   fri: [
     R("fri1", "Tomato Soup & Grilled Cheese", "Creamy fire-roasted tomato soup with cheddar grilled cheese \u201csoldiers\u201d for dipping. Bon App\u00e9tit, rated 4.3 (119 ratings).", "About 1 hr", [
       "4|tbsp|unsalted butter|st", "1||medium red onion~medium red onions|st", "0||kosher salt|st", PP,
