@@ -125,23 +125,31 @@
       var id = S.picks[d]; if (!id || id === "skip") return;
       var r = BY_ID[id]; if (!r) return;
       var f = servingsFor(d) / r.serves;
-      r.ing.forEach(function (i) {
+      r.ing.forEach(function (i, idx) {
         if (i.c === "lf") return;
         var fam = famOf(i.u), key = i.sing.toLowerCase() + "|" + fam;
         var base = i.q * f * (fam === "vol" ? VOL[i.u] : fam === "wt" ? WT[i.u] : 1);
-        if (!map[key]) map[key] = { key: key, sing: i.sing, plur: i.plur, cat: i.c, fam: fam, unit: i.u, amt: 0, days: [] };
+        if (!map[key]) map[key] = { key: key, sing: i.sing, plur: i.plur, cat: i.c, fam: fam, unit: i.u, amt: 0, days: [], uses: [] };
         map[key].amt += base;
+        map[key].uses.push({ d: d, idx: idx });
         if (map[key].days.indexOf(d) < 0) map[key].days.push(d);
       });
     });
     var withQty = {};
     Object.keys(map).forEach(function (k) { if (map[k].amt > 0) withQty[map[k].sing.toLowerCase()] = true; });
-    var seenZero = {};
+    var seenZero = {}, orphan = {};
     Object.keys(map).forEach(function (k) {
       var g = map[k], n = g.sing.toLowerCase();
       if (g.amt > 0) return;
-      if (withQty[n] || seenZero[n]) { seenZero[n] = true; delete map[k]; return; }
+      if (withQty[n] || seenZero[n]) { seenZero[n] = true; orphan[n] = (orphan[n] || []).concat(g.uses); delete map[k]; return; }
       seenZero[n] = true;
+    });
+    // "to taste" duplicates were merged into the item with the same name: keep their recipe links.
+    Object.keys(orphan).forEach(function (n) {
+      var k = Object.keys(map).filter(function (x) { return map[x].sing.toLowerCase() === n; })[0];
+      if (!k) return;
+      orphan[n].forEach(function (u) { map[k].uses.push(u); if (map[k].days.indexOf(u.d) < 0) map[k].days.push(u.d); });
+      map[k].days.sort(function (a, b) { return DAYS.indexOf(a) - DAYS.indexOf(b); });
     });
     var groups = [];
     CAT_ORDER.forEach(function (c) {
@@ -179,7 +187,7 @@
 
   // ---------- view state (not persisted) ----------
   var today = todayKey();
-  var V = { tab: S.active ? "week" : "plan", day: today, planDay: firstOpen(), open: "", hideDone: false, showText: false, showBackup: false };
+  var V = { tab: S.active ? "week" : "plan", day: today, planDay: firstOpen(), open: "", hideDone: false, showText: false, showBackup: false, focus: null, back: null, chooser: "" };
   function firstOpen() { for (var i = 0; i < DAYS.length; i++) if (!S.picks[DAYS[i]]) return DAYS[i]; return "mon"; }
 
   // ---------- render ----------
@@ -193,21 +201,110 @@
         '<div class="s">' + esc(sub) + "</div></button>";
     }).join("") + "</div>";
   }
-  function ingList(r, f) {
-    return '<ul class="ing">' + r.ing.map(function (i) {
-      return "<li><span>" + esc(ingText(i, f)) + "</span>" + (i.c === "lf" ? '<span class="tag">leftover</span>' : "") + "</li>";
+  function ingList(r, f, fx) {
+    return '<ul class="ing">' + r.ing.map(function (i, idx) {
+      var hl = fx && fx.idx.indexOf(idx) >= 0;
+      var used = "";
+      if (hl && fx.idx[0] === idx) {
+        used = '<div class="used">' + (fx.steps.length
+          ? "Used in " + (fx.steps.length > 1 ? "steps " : "step ") + fx.steps.map(function (n) {
+              return '<button class="link" data-act="tostep" data-n="' + n + '">' + (n + 1) + "</button>";
+            }).join(", ") + " ↓"
+          : "Not named in the steps") + "</div>";
+      }
+      return '<li data-i="' + idx + '"' + (hl ? ' class="hl"' : "") + '><div class="ln"><span>' + esc(ingText(i, f)) + "</span>" +
+        (i.c === "lf" ? '<span class="tag">leftover</span>' : "") + "</div>" + used + "</li>";
     }).join("") + "</ul>";
   }
   function credit(r) {
     if (!r.src && !r.by) return "";
     return '<p class="src">' + (r.by ? "Recipe by " + esc(r.by) : "") + (r.src ? (r.by ? " · " : "") + '<a href="' + esc(r.src) + '" target="_blank" rel="noopener">Source</a>' : "") + "</p>";
   }
-  function steps(r) {
-    return '<ol class="steps">' + r.steps.map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("") + "</ol>";
+  function steps(r, fx) {
+    return '<ol class="steps">' + r.steps.map(function (s, n) {
+      var hl = fx && fx.steps.indexOf(n) >= 0;
+      return '<li data-n="' + n + '"' + (hl ? ' class="hl"' : "") + ">" + (hl ? markTerms(esc(s), fx.res) : esc(s)) + "</li>";
+    }).join("") + "</ol>";
+  }
+
+  // ---------- "used in": find the steps that mention an ingredient ----------
+  var STOP = ("a an the of and or for to with optional serving servings large small medium big extra virgin fresh freshly low sodium " +
+    "reduced-sodium reduced room temp temperature plain light shelled cooked grated shredded chopped minced diced sliced " +
+    "unsalted salted vegan boneless skinless condensed refrigerated crushed mixed ground whole").split(" ");
+  var GENERIC = "sauce oil cream juice seasoning powder paste soup seed seeds sheet sheets flakes vinegar leaf leaves cheese mix".split(" ");
+  function words(t) {
+    return t.toLowerCase().replace(/[^a-z\u00c0-\u024f\s-]/g, " ").split(/\s+/).filter(function (w) { return w && STOP.indexOf(w) < 0; });
+  }
+  function singular(w) {
+    if (/ies$/.test(w)) return w.slice(0, -3) + "y";
+    if (/(oes|ches|shes|xes|sses)$/.test(w)) return w.slice(0, -2);
+    if (/(leaves|loaves|halves)$/.test(w)) return w.slice(0, -3) + "f";
+    if (/[^s]s$/.test(w)) return w.slice(0, -1);
+    return w;
+  }
+  function wordRe(w) {
+    var b = singular(w), e = function (x) { return x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); };
+    if (/y$/.test(b)) return e(b.slice(0, -1)) + "(?:y|ies)";
+    if (/f$/.test(b)) return e(b.slice(0, -1)) + "(?:f|ves|fs)";
+    return e(b) + "(?:e?s)?";
+  }
+  function phraseRe(ws) { return new RegExp("(^|[^a-z\u00c0-\u024f])(" + ws.map(wordRe).join("[\\s-]+") + ")(?![a-z\u00c0-\u024f])", "gi"); }
+  // Alternatives in a name: "chicken or vegetable broth" -> broth; "salmon or tuna" -> salmon, tuna; "(or tamari)" -> tamari.
+  function alts(name) {
+    var out = [], m, paren = /\(([^)]*)\)/g;
+    while ((m = paren.exec(name))) {
+      var p = m[1];
+      if (!/\d|for |optional|temp|sodium|stir|virgin/i.test(p)) out = out.concat(p.replace(/^\s*or\s+/i, "").split(/\s+or\s+|\s+and\s+|,/));
+    }
+    var main = name.replace(/\([^)]*\)/g, " ").split(/\s+or\s+|,/);
+    if (main.length > 1 && main[0].trim().split(/\s+/).length === 1 && words(main[main.length - 1]).length > 1) main = main.slice(1); // "chicken or vegetable broth"
+    return main.concat(out).map(words).filter(function (ws) { return ws.length; });
+  }
+  function usesIn(r, ingName) {
+    var res = [];
+    alts(ingName).forEach(function (ws) {
+      var head = ws[ws.length - 1];
+      if (GENERIC.indexOf(singular(head)) < 0 && GENERIC.indexOf(head) < 0) { res.push(phraseRe([head])); return; }
+      var levels = ws.length > 1 ? [[phraseRe(ws.slice(-2))], [phraseRe([ws[ws.length - 2]]), phraseRe([head])]] : [[phraseRe([head])]];
+      for (var L = 0; L < levels.length; L++) {
+        if (r.steps.some(function (s) { return levels[L].some(function (re) { re.lastIndex = 0; return re.test(s); }); })) { res = res.concat(levels[L]); return; }
+      }
+    });
+    var hits = [];
+    r.steps.forEach(function (s, n) { if (res.some(function (re) { re.lastIndex = 0; return re.test(s); })) hits.push(n); });
+    return { steps: hits, res: res };
+  }
+  function markTerms(html, res) {
+    res.forEach(function (re) { re.lastIndex = 0; html = html.replace(re, function (all, pre, w) { return pre + "<mark>" + w + "</mark>"; }); });
+    return html;
+  }
+  function findItem(key) {
+    var out = null;
+    grocery().forEach(function (g) { g.items.forEach(function (i) { if (i.key === key) out = i; }); });
+    return out;
+  }
+  function goToUse(item, d) {
+    var r = recipeFor(d); if (!r) return;
+    var idx = item.uses.filter(function (u) { return u.d === d; }).map(function (u) { return u.idx; });
+    var u = usesIn(r, r.ing[idx[0]].sing);
+    if (!V.back) V.back = { y: window.scrollY || 0 };
+    V.tab = "week"; V.day = d; V.chooser = "";
+    V.focus = { d: d, idx: idx, steps: u.steps, res: u.res };
+    render();
+    var li = $app.querySelector('.ing li[data-i="' + idx[0] + '"]');
+    if (li) {
+      scrollToEl(li);
+      li.classList.add("flash");
+      setTimeout(function () { li.classList.remove("flash"); }, 1600);
+    }
+  }
+  function scrollToEl(el) {
+    try { el.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (e) { el.scrollIntoView(); }
   }
 
   function renderWeek() {
     var d = V.day, id = S.picks[d], r = id && id !== "skip" ? BY_ID[id] : null;
+    var fx = V.focus && V.focus.d === d ? V.focus : null;
     var h = dayStrip(d, false);
     h += "<h2>" + esc(DAY_FULL[d]) + " · " + esc(S.themes[d]) + "</h2>";
     if (r) {
@@ -216,7 +313,7 @@
         '<div class="stepper"><span class="cap" style="margin:0">Servings</span><button data-act="serv" data-n="-1" aria-label="Fewer">−</button><b>' +
         servingsFor(d) + '</b><button data-act="serv" data-n="1" aria-label="More">+</button></div>' +
         (srcNote(r) ? '<p class="cap" style="margin:-4px 0 8px">' + esc(srcNote(r)) + "</p>" : "") +
-        "<h3>Ingredients</h3>" + ingList(r, servingsFor(d) / r.serves) + "<h3>Steps</h3>" + steps(r) + credit(r) + "</div>";
+        "<h3>Ingredients</h3>" + ingList(r, servingsFor(d) / r.serves, fx) + "<h3>Steps</h3>" + steps(r, fx) + credit(r) + "</div>";
     } else {
       h += '<p class="cap">' + (id === "skip" ? "Night off. No cooking planned." : "No recipe picked for this day.") + "</p>" +
         '<div class="row"><button class="btn" data-act="pickfor" data-d="' + d + '">Pick for ' + DAY_SHORT[d] + "</button></div>";
@@ -250,7 +347,7 @@
     var groups = grocery(), total = 0, done = 0;
     groups.forEach(function (g) { g.items.forEach(function (i) { total++; if (S.checked[i.key]) done++; }); });
     if (!total) return '<p class="cap">Pick some recipes first, then your list shows up here.</p>';
-    var h = '<p class="cap">' + done + " of " + total + " checked · Copy exports what's unchecked</p>" +
+    var h = '<p class="cap">' + done + " of " + total + " checked · Tap the box to check off, the name to see the recipe</p>" +
       '<div class="row"><button class="btn primary" data-act="copylist">Copy list</button>' +
       '<button class="btn" data-act="showtext">' + (V.showText ? "Hide text" : "Show as text") + "</button>" +
       '<button class="btn" data-act="hidedone">' + (V.hideDone ? "Show checked" : "Hide checked") + "</button>" +
@@ -262,9 +359,12 @@
       h += "<h3>" + esc(CAT_LABEL[g.cat]) + "</h3>";
       h += items.map(function (i) {
         var on = !!S.checked[i.key];
-        return '<div class="check' + (on ? " on" : "") + '" role="checkbox" aria-checked="' + on + '" data-act="check" data-key="' + esc(i.key) + '">' +
-          '<span class="box">' + (on ? "✓" : "") + '</span><span class="lbl">' + esc(shopLine(i)) + '</span><span class="m">' +
-          i.days.map(function (d) { return DAY_SHORT[d]; }).join(" · ") + "</span></div>";
+        return '<div class="check' + (on ? " on" : "") + '" data-row="' + esc(i.key) + '">' +
+          '<button class="hit" role="checkbox" aria-checked="' + on + '" aria-label="Check off ' + esc(i.sing) + '" data-act="check" data-key="' + esc(i.key) + '">' +
+          '<span class="box">' + (on ? "✓" : "") + "</span></button>" +
+          '<button class="go" data-act="usedin" data-key="' + esc(i.key) + '" aria-label="Show where ' + esc(i.sing) + ' is used">' +
+          '<span class="lbl">' + esc(shopLine(i)) + '</span><span class="m">' +
+          i.days.map(function (d) { return DAY_SHORT[d]; }).join(" · ") + '</span><span class="chev">›</span></button></div>';
       }).join("");
     });
     return h;
@@ -290,7 +390,7 @@
     tabs.push(["plan", "Plan"]);
     if (pickedCount()) tabs.push(["list", "List"]);
     tabs.push(["themes", "Themes"]);
-    if (!tabs.some(function (t) { return t[0] === V.tab; })) V.tab = "plan";
+    if (!tabs.some(function (t) { return t[0] === V.tab; }) && !(V.tab === "week" && V.back)) V.tab = "plan";
     $tabs.innerHTML = tabs.map(function (t) {
       return '<button role="tab" data-act="tab" data-tab="' + t[0] + '" class="' + (V.tab === t[0] ? "on" : "") + '">' + t[1] + "</button>";
     }).join("");
@@ -302,7 +402,29 @@
       $bar.className = "show";
       $bar.innerHTML = '<button class="btn primary" data-act="start"' + (n ? "" : " disabled") + ">" +
         (n ? (S.active ? "Save week (" + n + ")" : "Start week (" + n + ")") : "Pick a recipe to start") + "</button>";
+    } else if (V.tab === "week" && V.back) {
+      $bar.className = "show";
+      $bar.innerHTML = '<button class="btn primary" data-act="backlist">‹ Back to grocery list</button>';
     } else { $bar.className = ""; $bar.innerHTML = ""; }
+    renderSheet();
+  }
+  function renderSheet() {
+    var $s = document.getElementById("sheet");
+    var it = V.chooser && V.tab === "list" ? findItem(V.chooser) : null;
+    if (!it) { $s.className = ""; $s.innerHTML = ""; return; }
+    var seen = {}, rows = "";
+    it.uses.slice().sort(function (a, b) { return DAYS.indexOf(a.d) - DAYS.indexOf(b.d); }).forEach(function (u) {
+      if (seen[u.d]) return; seen[u.d] = true;
+      var r = recipeFor(u.d); if (!r) return;
+      var f = servingsFor(u.d) / r.serves;
+      var amt = it.uses.filter(function (x) { return x.d === u.d; }).map(function (x) { return ingText(r.ing[x.idx], f); }).join(" + ");
+      rows += '<button class="pickuse" data-act="gouse" data-d="' + u.d + '"><span class="pu-d">' + DAY_SHORT[u.d] + '</span><span class="pu-r"><b>' +
+        esc(r.name) + '</b><span>' + esc(amt) + '</span></span><span class="chev">›</span></button>';
+    });
+    $s.className = "show";
+    $s.innerHTML = '<div class="scrim" data-act="closesheet"></div><div class="panel" role="dialog" aria-label="Used in">' +
+      '<div class="pt">' + esc(it.sing) + ' is used in</div>' + rows +
+      '<button class="btn" data-act="closesheet" style="width:100%;margin-top:10px">Cancel</button></div>';
   }
   function toTop() { try { window.scrollTo({ top: 0, behavior: "smooth" }); } catch (e) { window.scrollTo(0, 0); } }
 
@@ -311,7 +433,7 @@
     var el = e.target.closest("[data-act]");
     if (!el) return;
     var act = el.getAttribute("data-act");
-    if (act === "tab") { V.tab = el.getAttribute("data-tab"); if (V.tab === "week") V.day = today; render(); toTop(); return; }
+    if (act === "tab") { V.back = null; V.focus = null; V.chooser = ""; V.tab = el.getAttribute("data-tab"); if (V.tab === "week") V.day = today; render(); toTop(); return; }
     if (act === "day") {
       var d = el.getAttribute("data-d");
       if (V.tab === "week") V.day = d; else { V.planDay = d; V.open = ""; }
@@ -347,6 +469,24 @@
       var sv = Math.min(16, Math.max(1, servingsFor(V.day) + parseInt(el.getAttribute("data-n"), 10)));
       var servings = Object.assign({}, S.servings); servings[V.day] = sv; set({ servings: servings }); return;
     }
+    if (act === "usedin") {
+      var it = findItem(el.getAttribute("data-key")); if (!it) return;
+      var ds = it.uses.map(function (u) { return u.d; }).filter(function (d, n, a) { return a.indexOf(d) === n && recipeFor(d); });
+      if (ds.length === 1) { goToUse(it, ds[0]); return; }
+      V.chooser = it.key; renderSheet(); return;
+    }
+    if (act === "gouse") { var it2 = findItem(V.chooser); if (it2) goToUse(it2, el.getAttribute("data-d")); return; }
+    if (act === "closesheet") { V.chooser = ""; renderSheet(); return; }
+    if (act === "tostep") {
+      var st = $app.querySelector('ol.steps li[data-n="' + el.getAttribute("data-n") + '"]');
+      if (st) { scrollToEl(st); st.classList.add("flash"); setTimeout(function () { st.classList.remove("flash"); }, 1600); }
+      return;
+    }
+    if (act === "backlist") {
+      var y = V.back ? V.back.y : 0;
+      V.back = null; V.focus = null; V.tab = "list"; render();
+      window.scrollTo(0, y); return;
+    }
     if (act === "check") {
       var k = el.getAttribute("data-key"), ch = Object.assign({}, S.checked);
       if (ch[k]) delete ch[k]; else ch[k] = true;
@@ -379,6 +519,7 @@
     }
   }
   document.addEventListener("click", onClick);
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && V.chooser) { V.chooser = ""; renderSheet(); } });
   document.addEventListener("input", function (e) {
     var d = e.target && e.target.getAttribute && e.target.getAttribute("data-theme");
     if (!d) return;

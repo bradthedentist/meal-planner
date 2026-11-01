@@ -51,16 +51,30 @@ h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: v
 .btn.pick { min-width: 84px; }
 .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 10px 0; }
 .ing { list-style: none; margin: 0; padding: 0; }
-.ing li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.ing li { padding: 10px 0; border-bottom: 1px solid var(--line); scroll-margin: 150px 0 110px; }
+.ing .ln { display: flex; justify-content: space-between; gap: 12px; }
+.ing li.hl, ol.steps li.hl { background: var(--soft); border-radius: 10px; margin: 0 -8px; padding-left: 8px; padding-right: 8px; }
+ol.steps li.hl { padding-left: 48px; }
+ol.steps li.hl::before { left: 8px; background: var(--accent); color: var(--accent-ink); }
+.ing li.hl .ln { font-weight: 650; }
+.used { font-size: 13px; color: var(--muted); margin-top: 4px; }
+mark { background: none; color: var(--accent); font-weight: 650; }
+.flash { animation: flash 1.6s ease-out; }
+@keyframes flash { 0%, 30% { box-shadow: 0 0 0 3px var(--accent); } 100% { box-shadow: 0 0 0 3px transparent; } }
 .ing .tag { color: var(--faint); font-size: 12px; white-space: nowrap; }
 ol.steps { margin: 6px 0 0; padding-left: 0; list-style: none; counter-reset: s; }
-ol.steps li { counter-increment: s; position: relative; padding: 8px 0 8px 40px; }
+ol.steps li { counter-increment: s; position: relative; padding: 8px 0 8px 40px; scroll-margin: 150px 0 110px; }
 ol.steps li::before { content: counter(s); position: absolute; left: 0; top: 8px; width: 28px; height: 28px; border-radius: 99px;
   background: var(--soft); color: var(--accent); font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; }
 .stepper { display: flex; align-items: center; gap: 12px; margin: 10px 0; }
 .stepper button { width: 42px; height: 42px; border-radius: 99px; border: 1px solid var(--line2); background: var(--card); font-size: 22px; line-height: 1; }
 .stepper b { min-width: 22px; text-align: center; }
-.check { display: flex; align-items: center; gap: 12px; padding: 11px 2px; border-bottom: 1px solid var(--line); min-height: 46px; user-select: none; -webkit-user-select: none; }
+.check { display: flex; align-items: stretch; border-bottom: 1px solid var(--line); min-height: 48px; user-select: none; -webkit-user-select: none; }
+.check button { border: 0; background: none; padding: 0; text-align: left; }
+.check .hit { flex: 0 0 auto; display: flex; align-items: center; padding: 0 12px 0 2px; min-width: 48px; }
+.check .go { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; padding: 11px 2px; }
+.check .go:active { background: var(--soft); }
+.chev { color: var(--faint); font-size: 20px; line-height: 1; }
 .box { flex: 0 0 auto; width: 24px; height: 24px; border-radius: 7px; border: 2px solid var(--line2); display: flex; align-items: center; justify-content: center; color: var(--accent-ink); font-size: 15px; }
 .check.on .box { background: var(--accent); border-color: var(--accent); }
 .check .lbl { flex: 1; min-width: 0; }
@@ -84,3 +98,14 @@ textarea { min-height: 120px; font: 13px/1.4 ui-monospace, Menlo, monospace; wor
 .src a { color: var(--accent); font-weight: 600; }
 .empty { background: var(--card); border: 1px dashed var(--line2); border-radius: var(--radius); padding: 22px 16px; margin: 10px 0; text-align: center; }
 .empty-t { font-weight: 650; font-size: 17px; }
+#sheet { display: none; }
+#sheet.show { display: block; position: fixed; inset: 0; z-index: 30; }
+#sheet .scrim { position: absolute; inset: 0; background: rgba(0,0,0,.35); }
+#sheet .panel { position: absolute; left: 0; right: 0; bottom: 0; max-width: 520px; margin: 0 auto; background: var(--bg);
+  border-radius: 18px 18px 0 0; padding: 16px calc(16px + var(--safe-r)) calc(16px + var(--safe-b)) calc(16px + var(--safe-l)); box-shadow: 0 -6px 24px rgba(0,0,0,.18); }
+#sheet .pt { font-weight: 700; font-size: 17px; margin: 0 0 8px; }
+.pickuse { display: flex; width: 100%; align-items: center; gap: 12px; text-align: left; border: 1px solid var(--line2); background: var(--card);
+  border-radius: 12px; padding: 10px 12px; margin: 8px 0; min-height: 54px; }
+.pickuse .pu-d { font-weight: 700; font-size: 14px; color: var(--accent); min-width: 34px; }
+.pickuse .pu-r { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.pickuse .pu-r span { color: var(--muted); font-size: 14px; }
