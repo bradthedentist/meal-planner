@@ -60,7 +60,7 @@ function catRule(name, c) {
 }
 function R(id, name, desc, time, ings, steps, meta) {
   const m = meta || {};
-  return { id, name, desc, time, ing: ings.map(parseIng), steps, by: m.by || "", src: m.src || "", serves: m.serves || 4, keep: !!m.keep, yieldUnit: m.yieldUnit || "" };
+  return { id, name, desc, time, ing: ings.map(parseIng), steps, by: m.by || "", src: m.src || "", serves: m.serves || 4, keep: !!m.keep, yieldUnit: m.yieldUnit || "", incomplete: !!m.incomplete, note: m.note || "" };
 }
 const SP = "0||salt|st";
 const PP = "0||black pepper|st";
@@ -185,6 +185,19 @@ const SECTIONS = [
       "Add the finely chopped parsley and garden herbs (chives) just before serving.",
       "For a clear broth, use the meat for something else, such as chicken fricassee.",
     ], { src: "https://recime.app/p/ad2e1a4b-2551-4826-b4c0-1f6ef6cddb48", serves: 6 }),
+    R("sou2", "Hackfleisch Käsesuppe", "Mama's ground beef and cheese soup with leeks, broth, Philadelphia, Maggi herb sauce and mushrooms. Added as given: the source is incomplete. Philadelphia is listed twice in the source (200 g each). Source makes 6; shown for 4.", "Time not given", [
+      "1|kg|ground beef|me", "5||leek (5–6 in the source)~leeks (5–6 in the source)|pr", "2|l|bouillon-cube broth (Würfelbrühe)|pa",
+      "200|g|Philadelphia cream cheese|da", "2||Kräuter (herbs not specified)~Kräuter (herbs not specified)|pr",
+      "200|g|Philadelphia cream cheese (listed a second time in the source)|da", "1|packet|Maggi Kräutersauce (herb sauce mix)|pa",
+      "1|can|mushrooms (Schwammerl; can size not given)|pa",
+    ], [
+      "Brown the ground beef well in the pan / in the pot.",
+      "Pour the dissolved broth (2 L in the source, about 8½ cups) over it and add the peeled leeks. (This line is in the source's ingredient list.)",
+      "Prepare the Maggi herb sauce and add it. (This line is a heading in the source's ingredient list.)",
+      "After cooking for ½ hour, take it back out (the source doesn't say what — likely the leeks) before it overcooks. Add the Philadelphia and mushrooms and stir.",
+      "Source note, unclear as written: \u201cEinpíesen möglich\u201d.",
+    ], { by: "Mama", src: "https://recime.app/p/5ba10c5d-3af5-4bd6-abb7-29dd21441203", serves: 6, incomplete: true,
+      note: "Step order is reconstructed from the source; amounts for herbs and the mushroom can aren't given." }),
     R("sou3", "Yayla Corbasi (Turkish Yogurt Soup)", "Chickpeas and basmati rice simmered, then thickened with a yogurt–egg yolk mix and finished with parsley–chili butter.", "About 1 hr 30 min", [
       "0.5|cup|dried garbanzo beans (chickpeas), rinsed|pa", "0.5|cup|basmati rice, uncooked, rinsed|pa", "1|cup|plain Greek yogurt|da",
       "1||large egg (yolk only)~large eggs (yolks only)|da", "1|tbsp|flour|st", "0||salt|st", PP, "2|tbsp|unsalted butter|st",
@@ -249,6 +262,13 @@ const SECTIONS = [
       "Pour the dressing over the vegetables and toss to combine.",
       "Stir in the crispy pasta, then top with grated Parmesan and serve.",
     ], { by: "Just a Taste", src: "https://www.justataste.com/crispy-pasta-salad-recipe/", serves: 8 }),
+    R("sal2", "Cowboy Caviar - Summer salad", "Black beans, chickpeas, cucumber, cherry tomatoes, mozzarella pearls, red onion and banana peppers with a simple oil–vinegar–Dijon dressing. Added as given: the source is incomplete.", "Time not given", [
+      "1|can|black beans|pa", "2|can|chickpeas|pa", "0.5||cucumber (½–1 in the source)~cucumbers (½–1 in the source)|pr",
+      "0|-|cherry tomatoes (\u201ca couple\u201d; amount not given)|pr", "1|ball|small mozzarella pearls|da", "0.5||red onion~red onions|pr",
+      "0|-|banana peppers (amount not given)|co",
+      "0|-|olive oil for the dressing (amount not given)|st", "0|-|vinegar or balsamic (amount not given)|co", "0|-|banana pepper juice (amount not given)|co",
+      "0|-|Dijon mustard (amount not given)|co", SP, PP,
+    ], [], { src: "https://recime.app/p/b2b91064-4ca7-4c11-add3-5c96de0b7c81", serves: 4, incomplete: true, note: "Source has no steps." }),
   ] },
 ];
 const BY_ID = {};
@@ -282,7 +302,8 @@ const PLURAL = {
   stalk: "stalks",
   ear: "ears",
   sprig: "sprigs",
-  cup: "cups"
+  cup: "cups",
+  ball: "balls"
 };
 const FR = [[0, ""], [0.125, "\u215B"], [0.25, "\xBC"], [1 / 3, "\u2153"], [0.5, "\xBD"], [2 / 3, "\u2154"], [0.75, "\xBE"], [1, ""]];
 function fmtNum(n) {

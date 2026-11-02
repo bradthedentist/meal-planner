@@ -239,8 +239,11 @@
     if (!r.src && !r.by) return "";
     return '<p class="src">' + (r.by ? "Recipe by " + esc(r.by) : "") + (r.src ? (r.by ? " · " : "") + '<a href="' + esc(r.src) + '" target="_blank" rel="noopener">Source</a>' : "") + "</p>";
   }
+  function nameHtml(r) { return esc(r.name) + (r.incomplete ? ' <span class="inc">Incomplete source</span>' : ""); }
   function steps(r, fx) {
-    return '<ol class="steps">' + r.steps.map(function (s, n) {
+    var note = r.note ? '<p class="cap note-src">' + esc(r.note) + "</p>" : "";
+    if (!r.steps.length) return note;
+    return note + '<ol class="steps">' + r.steps.map(function (s, n) {
       var hl = fx && fx.steps.indexOf(n) >= 0;
       return '<li data-n="' + n + '"' + (hl ? ' class="hl"' : "") + ">" + (hl ? markTerms(esc(s), fx.res) : esc(s)) + "</li>";
     }).join("") + "</ol>";
@@ -338,7 +341,7 @@
     var h = dayStrip(d, false);
     h += "<h2>" + esc(DAY_FULL[d]) + " · " + esc(S.themes[d]) + "</h2>";
     if (r) {
-      h += '<div class="card"><div class="opt"><div class="info"><div class="name" style="font-size:19px">' + esc(r.name) + '</div>' +
+      h += '<div class="card"><div class="opt"><div class="info"><div class="name" style="font-size:19px">' + nameHtml(r) + '</div>' +
         '<div class="desc">' + esc(r.desc) + '</div><div class="meta">' + esc(r.time) + "</div></div></div>" +
         recipeBody(r, d, fx) + "</div>";
     } else {
@@ -366,7 +369,7 @@
     h += RECIPES[d].map(function (r) {
       var on = cur === r.id, open = V.open === r.id;
       return '<div class="card' + (on ? " on" : "") + '"><div class="opt"><div class="info" data-act="toggle" data-id="' + r.id + '">' +
-        '<div class="name">' + esc(r.name) + '</div><div class="desc">' + esc(r.desc) + "</div>" +
+        '<div class="name">' + nameHtml(r) + '</div><div class="desc">' + esc(r.desc) + "</div>" +
         '<div class="meta">' + esc(r.time) + ' · ' + (r.keep ? "makes " + r.serves + (r.yieldUnit ? " " + esc(r.yieldUnit) : "") : "serves " + HOUSEHOLD + (r.serves !== HOUSEHOLD ? " (source makes " + r.serves + ")" : "")) + ' · <button class="link" data-act="toggle" data-id="' + r.id + '">' + (open ? "Hide" : "See recipe") + "</button></div></div>" +
         '<button class="btn pick' + (on ? " primary" : "") + '" data-act="pick" data-id="' + r.id + '">' + (on ? "Picked" : "Pick") + "</button></div>" +
         (open ? "<h3>Ingredients</h3>" + ingList(r, defServ(r) / r.serves) + "<h3>Steps</h3>" + steps(r) + credit(r) : "") + "</div>";
@@ -417,7 +420,7 @@
       var on = S.extras.indexOf(r.id) >= 0, open = V.xopen === r.id, slot = "x:" + r.id;
       var fx = open && V.focus && V.focus.d === slot ? V.focus : null;
       return '<div class="card' + (on ? " on" : "") + '"><div class="opt"><div class="info" data-act="xtoggle" data-id="' + r.id + '">' +
-        '<div class="name">' + esc(r.name) + '</div><div class="desc">' + esc(r.desc) + "</div>" +
+        '<div class="name">' + nameHtml(r) + '</div><div class="desc">' + esc(r.desc) + "</div>" +
         '<div class="meta">' + esc(r.time) + ' · <button class="link" data-act="xtoggle" data-id="' + r.id + '">' + (open ? "Hide" : "See recipe") + "</button></div></div>" +
         '<button class="btn pick' + (on ? " primary" : "") + '" data-act="extra" data-id="' + r.id + '">' + (on ? "Added ✓" : "Add to week") + "</button></div>" +
         (open ? recipeBody(r, slot, fx) : "") + "</div>";
