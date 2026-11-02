@@ -60,12 +60,26 @@ function catRule(name, c) {
 }
 function R(id, name, desc, time, ings, steps, meta) {
   const m = meta || {};
-  return { id, name, desc, time, ing: ings.map(parseIng), steps, by: m.by || "", src: m.src || "", serves: m.serves || 4 };
+  return { id, name, desc, time, ing: ings.map(parseIng), steps, by: m.by || "", src: m.src || "", serves: m.serves || 4, keep: !!m.keep, yieldUnit: m.yieldUnit || "" };
 }
 const SP = "0||salt|st";
 const PP = "0||black pepper|st";
 // Recipes are added as Romy tests them. Older recipes live in git history.
 // serves = the SOURCE yield (used only for scaling). The app always defaults to 4 servings (HOUSEHOLD in app.js).
+// Pizza dough is shared by Pizza Sunday and the Baking Savory section.
+const PIZZATEIG = R("bsv1", "Der perfekte Pizzateig", "Neapolitan-style pizza dough with 00 flour and a tiny bit of fresh yeast; long cold rise. Makes 6 dough balls (about 10 oz / 280 g each). Toppings not included.", "15 min + 1–2 hr rest + 12–24 hr in the fridge", [
+  "1.5|g|fresh yeast|da", "1|kg|pizza flour (Type 00)|pa", "25|g|fine sea salt|st", "620|ml|water|st",
+], [
+  "Weigh out all the ingredients and set them out.",
+  "Put about 2⅔ cups (620 ml) of water in a mixing bowl and dissolve the yeast in it.",
+  "Add half of the flour to the water and mix.",
+  "Then add the salt and mix well.",
+  "Add the rest of the flour to the dough and knead for 15 minutes, until the pizza dough is elastic and has a smooth surface.",
+  "Cover the dough in the mixing bowl or in a pizza dough box and let it rest for 1–2 hours at room temperature.",
+  "After this first rise, divide the dough into six pieces of about 10 oz (280 g) each and shape them into balls.",
+  "Place the dough balls in the dough box with some space between them and cover.",
+  "Put the box in the fridge for the second rise, 12–24 hours.",
+], { src: "https://recime.app/p/50992ab0-d325-4a28-a7d0-951c176cc947", serves: 6, keep: true, yieldUnit: "dough balls" });
 const RECIPES = {
   mon: [],
   tue: [
@@ -143,12 +157,113 @@ const RECIPES = {
       "Note: Some slow cookers need extra time for the biscuits to cook through.",
     ], { by: "Spend With Pennies", src: "https://www.spendwithpennies.com/crock-pot-chicken-and-dumplings/", serves: 4 }),
   ],
-  sun: []
+  sun: [PIZZATEIG]
 };
+// Extra sections (not weekdays). Recipes here can be added to the week as extras so they join the grocery list.
+// keep: true = baked goods keep the source yield instead of the 4-serving default; yieldUnit labels the stepper.
+const SECTIONS = [
+  { id: "soups", name: "Soups", recipes: [
+    R("sou1", "Bayrische Hühnersuppe", "Bavarian chicken soup: a whole soup chicken simmered 3 hours with soup greens and root vegetables. Source makes 6; shown for 4.", "Cook time 3 hr", [
+      "1||whole soup chicken (stewing hen), oven-ready~whole soup chickens (stewing hens), oven-ready|me", "0||salt|st", "1|tsp|black peppercorns|sp",
+      "2||large onion~large onions|pr", "1|clove|garlic|st", "3|bunch|soup greens (Suppengrün)|pr", "3||bay leaf~bay leaves|sp",
+      "4||carrot~carrots|pr", "2||leek~leeks|pr", "0.5||celery root (celeriac)~celery roots (celeriac)|pr", "2||parsnip~parsnips|pr",
+      "1|bunch|fresh parsley|pr", "1|bunch|fresh chives|pr", PP,
+    ], [
+      "Remove the fat gland at the tail (the parson's nose).",
+      "Put the chicken in 2–3 quarts (2–3 liters) of cold salted water.",
+      "Use enough water that the chicken is completely covered.",
+      "Add the halved onions with their skins on, the bay leaves, garlic and peppercorns, and bring everything to a boil.",
+      "Regularly skim off the foam that forms on the surface.",
+      "Wash and trim the vegetables and soup greens, peel the celery root, and cut everything into ½-inch (1 cm) pieces.",
+      "Add everything to the boiling water and turn the heat down to low.",
+      "Simmer the soup over low heat for 3 hours.",
+      "Then carefully lift the chicken out with a ladle.",
+      "Remove the skin, pull the meat off the bones and cut it into pieces.",
+      "Strain the soup and remove the vegetables.",
+      "Return the chopped chicken meat to the soup and warm it up again.",
+      "Season to taste with salt and pepper.",
+      "Add the finely chopped parsley and garden herbs (chives) just before serving.",
+      "For a clear broth, use the meat for something else, such as chicken fricassee.",
+    ], { src: "https://recime.app/p/ad2e1a4b-2551-4826-b4c0-1f6ef6cddb48", serves: 6 }),
+    R("sou3", "Yayla Corbasi (Turkish Yogurt Soup)", "Chickpeas and basmati rice simmered, then thickened with a yogurt–egg yolk mix and finished with parsley–chili butter.", "About 1 hr 30 min", [
+      "0.5|cup|dried garbanzo beans (chickpeas), rinsed|pa", "0.5|cup|basmati rice, uncooked, rinsed|pa", "1|cup|plain Greek yogurt|da",
+      "1||large egg (yolk only)~large eggs (yolks only)|da", "1|tbsp|flour|st", "0||salt|st", PP, "2|tbsp|unsalted butter|st",
+      "1|tbsp|dried parsley|sp", "1|tsp|red pepper flakes|sp",
+    ], [
+      "Add the chickpeas and 8 cups (1.9 L) of water to a Dutch oven or pot over medium-high heat and bring to a boil.",
+      "Place a lid on the pot and reduce the heat to medium-low. Simmer the chickpeas over medium-low for 1 hour.",
+      "After the chickpeas have been simmering for 1 hour, stir the rice into the pot with the chickpeas.",
+      "Place the lid back on the pot and simmer for about 25 more minutes.",
+      "In a small bowl, whisk together the yogurt, egg yolk, flour and 1 tsp salt.",
+      "Whisk ¼ cup (60 ml) of the cooking water from the pot into the yogurt mixture until well combined, then whisk ¼ cup (60 ml) more cooking water into the yogurt mixture until well combined.",
+      "Slowly stir the yogurt mixture into the pot.",
+      "Continue to simmer the soup, uncovered, over medium-low heat about 1 more minute (as written in the source) or until the rice is very tender.",
+      "In a small bowl, melt the butter and mix it with the parsley, red pepper flakes and ½ tsp salt.",
+      "Stir the butter mixture into the soup, then taste and season with salt and pepper if needed.",
+    ], { by: "YepRecipes", src: "https://www.yeprecipes.com/img-yayla-corbasi--turkish-yogurt-soup--2004.htm", serves: 4 }),
+  ] },
+  { id: "sweet", name: "Baking Sweet", recipes: [
+    R("bsw1", "Banana Chocolate Chip Cookies", "Soft banana cookies loaded with chocolate chips. Makes 24 cookies.", "About 25 min", [
+      "1|cup|butter|st", "1|cup|light brown sugar|st", "2||egg~eggs|da", "2||banana~bananas|pr", "2|tsp|vanilla extract|sp",
+      "3|cup|flour|st", "1|tsp|baking powder|st", "1|tsp|baking soda|st", "1|tsp|salt|st", "2|cup|chocolate chips|pa",
+    ], [
+      "Preheat your oven to 350°F (175°C).",
+      "Start by creaming the butter and sugar together on low for 2 minutes.",
+      "Add the eggs, bananas and vanilla and combine on low speed for another 2 minutes.",
+      "Add the flour, baking soda, baking powder and salt and fold to combine.",
+      "Add the chocolate chips and fold until combined.",
+      "Scoop onto a lined baking sheet and bake at 350°F (175°C) for 10–12 minutes.",
+    ], { src: "https://recime.app/p/95d120d9-f10f-4ebb-8c42-2b997c95d22b", serves: 24, keep: true, yieldUnit: "cookies" }),
+    R("bsw2", "Jungle Bar Hawaii", "Graham cracker crust layered with sweetened condensed milk, chocolate chips, coconut and toasted macadamia nuts. Makes 20 bars.", "About 35 min + cooling", [
+      "1.5|cup|graham cracker crumbs|pa", "0.5|cup|butter|st", "1|can|sweetened condensed milk (14 oz)|pa",
+      "1|cup|chocolate chips (semi-sweet or milk chocolate)|pa", "2|cup|flaked coconut (sweetened or unsweetened)|pa", "0.75|cup|macadamia nuts|pa",
+    ], [
+      "Preheat your oven to 350°F (175°C). Toast the macadamia nuts if they aren't already toasted.",
+      "In a small bowl, mix the graham cracker crumbs with the melted butter.",
+      "Press the crumb mixture into the bottom of a 13 x 9-inch (33 x 23 cm) baking pan so the whole pan is covered. You don't need to grease it since the mixture won't stick, but lining it with parchment paper makes the bars easier to remove.",
+      "Pour half of the sweetened condensed milk over the crumb mixture, covering as much of it as you can.",
+      "Sprinkle the chocolate chips, coconut and macadamia nuts all over the pan, layering them evenly. Press everything down with a fork.",
+      "Pour the rest of the sweetened condensed milk over the top.",
+      "Bake for 25 minutes or until golden brown.",
+      "Let the bars cool completely. Chill them if you want to enjoy them sooner.",
+      "Cut into the shape and size you like.",
+    ], { src: "https://recime.app/p/68293de0-54ee-41db-a01f-2dae06dd8db0", serves: 20, keep: true, yieldUnit: "bars" }),
+  ] },
+  { id: "savory", name: "Baking Savory", recipes: [PIZZATEIG] },
+  { id: "salads", name: "Salads", recipes: [
+    R("sal1", "Crispy Pasta Salad", "Air-fried crispy rotini tossed with tomatoes, green pepper, provolone, salami and olives in a red wine vinaigrette. Source makes 8; shown for 4.", "1 hr", [
+      "12|oz|rotini pasta|pa", "2|tbsp|olive oil (extra virgin)|st", "1|cup|cherry tomatoes, halved|pr", "0.667|cup|green bell pepper, diced|pr",
+      "0.333|cup|red onion, diced|pr", "0.5|cup|provolone, cubed (¼ inch / 6 mm)|da", "1|cup|hard salami, cubed (¼ inch / 6 mm)|me",
+      "0.5|cup|pitted black or Kalamata olives|pa", "0|-|grated Parmesan (for serving)|da",
+      "0.333|cup|red wine vinegar|co", "2|tsp|lemon juice, freshly squeezed|pr", "2|tsp|dried oregano|sp", "1.5|tsp|minced garlic|st",
+      "1|tsp|sugar|st", "0.5|cup|olive oil (extra virgin)|st", "1|tsp|kosher salt|st", "0.5|tsp|black pepper|st",
+    ], [
+      "Make the pasta salad: Bring a large pot of salted water to a boil. Add the pasta and cook until al dente, about 10 minutes.",
+      "Drain the pasta and add it to a large bowl. Drizzle it with the olive oil, then sprinkle it with ½ tsp kosher salt and ¼ tsp black pepper and toss to combine.",
+      "Preheat the air fryer to 400°F (200°C).",
+      "Add the pasta to the air fryer and cook for 20 minutes, stopping and shaking the basket every 5 minutes. (The pasta doesn't have to be in a single layer, but stop and shake the basket so the pasta doesn't stick together.)",
+      "Remove the pasta from the air fryer and set it aside to cool.",
+      "In a large bowl, combine the cherry tomatoes, green pepper, red onion, provolone, salami and olives.",
+      "Make the dressing: In a small bowl, whisk together the red wine vinegar, lemon juice, dried oregano, garlic and sugar with ½ tsp kosher salt and ¼ tsp black pepper.",
+      "While whisking, stream in the olive oil until combined. Taste and season the dressing with more salt and pepper.",
+      "Pour the dressing over the vegetables and toss to combine.",
+      "Stir in the crispy pasta, then top with grated Parmesan and serve.",
+    ], { by: "Just a Taste", src: "https://www.justataste.com/crispy-pasta-salad-recipe/", serves: 8 }),
+  ] },
+];
 const BY_ID = {};
 for (const d of DAYS) for (const r of RECIPES[d]) BY_ID[r.id] = r;
-const VOL = { tsp: 1, tbsp: 3, cup: 48 };
-const WT = { oz: 1, lb: 16 };
+for (const sec of SECTIONS) for (const r of sec.recipes) BY_ID[r.id] = r;
+const VOL = { tsp: 1, tbsp: 3, cup: 48, ml: 1 / 4.92892, l: 202.884 };
+const WT = { oz: 1, lb: 16, g: 1 / 28.3495, kg: 35.274 };
+const METRIC = { g: 1, kg: 1, ml: 1, l: 1 };
+// Metric source amounts: shown in US units first with the metric amount in parentheses.
+function metricText(q, u) {
+  const base = u === "kg" || u === "l" ? q * 1000 : q;
+  const unit = u === "g" || u === "kg" ? "g" : "ml";
+  if (base >= 1000) return `${Math.round(base / 10) / 100} ${unit === "g" ? "kg" : "L"}`;
+  return `${base < 10 ? Math.round(base * 10) / 10 : Math.round(base)} ${unit}`;
+}
 const PLURAL = {
   clove: "cloves",
   leaf: "leaves",
@@ -186,12 +301,16 @@ function unitLabel(u, q) {
   if (q > 1 && PLURAL[u]) return PLURAL[u];
   return u;
 }
+// "1", "½", "⅔"... read as singular ("1 cup", "½ cup"); anything above 1 is plural.
+function oneOrLess(n) { return n === "1" || /^[\u215B\xBC\u2153\xBD\u2154\xBE]$/.test(n); }
 function ingText(i, f) {
   if (i.u === "-") return i.sing;
   if (i.q <= 0) return `${i.sing}, to taste`;
   const q = i.q * f;
-  const name = !i.u && q > 1 ? i.plur : i.sing;
-  return [fmtNum(q), unitLabel(i.u, q), name].filter((x) => x).join(" ");
+  if ((i.u === "cup" && q < 0.25) || (i.u === "tbsp" && q < 1)) return `${gQty({ amt: q * VOL[i.u], fam: "vol" })} ${i.sing}`;
+  if (METRIC[i.u]) return `${gQty({ amt: q * (WT[i.u] || VOL[i.u]), fam: WT[i.u] ? "wt" : "vol" })} (${metricText(q, i.u)}) ${i.sing}`;
+  const n = fmtNum(q), many = !oneOrLess(n);
+  return [n, unitLabel(i.u, many ? 2 : 1), !i.u && many ? i.plur : i.sing].filter((x) => x).join(" ");
 }
 function famOf(u) {
   if (VOL[u]) return "vol";
@@ -203,20 +322,22 @@ function gQty(g) {
   if (g.fam === "vol") {
     const t = g.amt;
     if (t >= 12) {
-      const v = t / 48;
-      return `${fmtNum(v)} ${v > 1 ? "cups" : "cup"}`;
+      const n = fmtNum(t / 48);
+      return `${n} ${n === "1" || /^[\u215B\xBC\u2153\xBD\u2154\xBE]$/.test(n) ? "cup" : "cups"}`;
     }
     if (t >= 3) return `${fmtNum(t / 3)} tbsp`;
     return `${fmtNum(t)} tsp`;
   }
   if (g.fam === "wt") {
+    if (g.amt < 0.25) return `${Math.round(g.amt * 100) / 100} oz`;
     if (g.amt >= 16) return `${fmtNum(g.amt / 16)} lb`;
     return `${fmtNum(g.amt)} oz`;
   }
-  return [fmtNum(g.amt), unitLabel(g.unit, g.amt)].filter((x) => x).join(" ");
+  const n = fmtNum(g.amt);
+  return [n, unitLabel(g.unit, oneOrLess(n) ? 1 : 2)].filter((x) => x).join(" ");
 }
 function gName(g) {
-  return !g.unit && g.amt > 1 ? g.plur : g.sing;
+  return !g.unit && !oneOrLess(fmtNum(g.amt)) && g.amt > 1 ? g.plur : g.sing;
 }
 function gLine(g) {
   return [gQty(g), gName(g)].filter((x) => x).join(" ");

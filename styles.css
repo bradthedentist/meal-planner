@@ -109,3 +109,11 @@ textarea { min-height: 120px; font: 13px/1.4 ui-monospace, Menlo, monospace; wor
 .pickuse .pu-d { font-weight: 700; font-size: 14px; color: var(--accent); min-width: 34px; }
 .pickuse .pu-r { flex: 1; min-width: 0; display: flex; flex-direction: column; }
 .pickuse .pu-r span { color: var(--muted); font-size: 14px; }
+.chips { display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 2px 0 4px; scrollbar-width: none; }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex: 0 0 auto; border: 1px solid var(--line2); background: var(--card); border-radius: 999px; padding: 0 14px; min-height: 38px; font-weight: 600; font-size: 14px; }
+.chip.on { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.chip .cnt { display: inline-block; min-width: 18px; padding: 0 5px; margin-left: 4px; border-radius: 99px; background: var(--soft); color: var(--accent); font-size: 12px; }
+.xrow { display: flex; width: 100%; justify-content: space-between; align-items: center; gap: 10px; text-align: left; border: 0; border-bottom: 1px solid var(--line);
+  background: none; padding: 12px 2px; min-height: 46px; }
+.xrow .m { color: var(--faint); font-size: 13px; white-space: nowrap; }

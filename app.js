@@ -2,6 +2,7 @@
 (function () {
   "use strict";
   var KEY = "romy-meal-plan-app-v1";
+  var MAXSERV = 48;
   var $app = document.getElementById("app");
   var $tabs = document.getElementById("tabs");
   var $bar = document.getElementById("bar");
@@ -9,7 +10,7 @@
   var $toast = document.getElementById("toast");
 
   function fresh() {
-    return { v: 1, ts: 0, picks: {}, servings: {}, checked: {}, themes: Object.assign({}, DEFAULT_THEMES), active: false, weekOf: "" };
+    return { v: 1, ts: 0, picks: {}, servings: {}, checked: {}, themes: Object.assign({}, DEFAULT_THEMES), active: false, weekOf: "", extras: [] };
   }
   function dayOf(id) {
     for (var i = 0; i < DAYS.length; i++) if (RECIPES[DAYS[i]].some(function (r) { return r.id === id; })) return DAYS[i];
@@ -24,7 +25,7 @@
     DAYS.forEach(function (d) {
       var id = p.picks && p.picks[d];
       var sv = p.servings && p.servings[d];
-      if (!(sv > 0 && sv <= 16)) sv = 0;
+      if (!(sv > 0 && sv <= MAXSERV)) sv = 0;
       if (id === "skip") s.picks[d] = id;
       else if (id && BY_ID[id]) {
         var home = dayOf(id);
@@ -37,8 +38,13 @@
     Object.keys(moved).forEach(function (d) {
       if (!s.picks[d]) { s.picks[d] = moved[d].id; if (moved[d].sv) s.servings[d] = moved[d].sv; }
     });
+    s.extras = Array.isArray(p.extras) ? p.extras.filter(function (id, n, a) { return BY_ID[id] && a.indexOf(id) === n; }) : [];
+    Object.keys(p.servings || {}).forEach(function (k) {
+      var v = p.servings[k];
+      if (k.indexOf("x:") === 0 && BY_ID[k.slice(2)] && v > 0 && v <= MAXSERV) s.servings[k] = v;
+    });
     s.checked = p.checked && typeof p.checked === "object" ? p.checked : {};
-    s.active = !!p.active && DAYS.some(function (d) { return s.picks[d] && s.picks[d] !== "skip"; });
+    s.active = !!p.active && (DAYS.some(function (d) { return s.picks[d] && s.picks[d] !== "skip"; }) || s.extras.length > 0);
     s.weekOf = s.active ? p.weekOf || "" : "";
     return s;
   }
@@ -102,9 +108,23 @@
     d.setDate(d.getDate() + (dow === 1 ? 0 : (8 - dow) % 7));
     return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
   }
-  function recipeFor(d) { var id = S.picks[d]; return id && id !== "skip" ? BY_ID[id] : null; }
-  var HOUSEHOLD = 4; // every recipe defaults to 4 servings, scaled from the source yield
-  function servingsFor(d) { return S.servings[d] || HOUSEHOLD; }
+  // A "slot" is a weekday key ("mon") or an extra recipe added from a section ("x:<recipe id>").
+  function isExtra(slot) { return String(slot).indexOf("x:") === 0; }
+  function recipeFor(d) {
+    if (isExtra(d)) { var xid = d.slice(2); return S.extras.indexOf(xid) >= 0 ? BY_ID[xid] : null; }
+    var id = S.picks[d]; return id && id !== "skip" ? BY_ID[id] : null;
+  }
+  var HOUSEHOLD = 4; // meals default to 4 servings, scaled from the source yield
+  function defServ(r) { return r && r.keep ? r.serves : HOUSEHOLD; } // baked goods keep the source yield
+  function servingsFor(d) {
+    if (S.servings[d]) return S.servings[d];
+    return defServ(isExtra(d) ? BY_ID[d.slice(2)] : recipeFor(d));
+  }
+  function slots() { return DAYS.concat(S.extras.map(function (id) { return "x:" + id; })); }
+  function slotOrder(a, b) { var ia = DAYS.indexOf(a), ib = DAYS.indexOf(b); return (ia < 0 ? 7 : ia) - (ib < 0 ? 7 : ib); }
+  function slotShort(d) { return isExtra(d) ? "Extra" : DAY_SHORT[d]; }
+  function secOf(id) { for (var i = 0; i < SECTIONS.length; i++) if (SECTIONS[i].recipes.some(function (r) { return r.id === id; })) return SECTIONS[i].id; return SECTIONS[0].id; }
+  function servLabel(r) { return r.yieldUnit ? "Makes" : "Servings"; }
   // Grocery list: round packaged/count items up to whole units you can buy, noting the amount used.
   function shopLine(g) {
     var frac = g.amt > 0 && Math.abs(g.amt - Math.round(g.amt)) > 0.01;
@@ -113,7 +133,7 @@
     var buy = Object.assign({}, g, { amt: whole });
     return gLine(buy) + " (use " + fmtNum(g.amt) + ")";
   }
-  function srcNote(r) { return r.serves !== HOUSEHOLD ? "Source makes " + r.serves + ", scaled to your servings" : ""; }
+  function srcNote(r) { return !r.keep && r.serves !== HOUSEHOLD ? "Source makes " + r.serves + ", scaled to your servings" : ""; }
   function pickedCount() { return DAYS.filter(function (d) { return S.picks[d] && S.picks[d] !== "skip"; }).length; }
   function toast(msg) {
     $toast.textContent = msg; $toast.classList.add("show");
@@ -121,9 +141,8 @@
   }
   function grocery() {
     var map = {};
-    DAYS.forEach(function (d) {
-      var id = S.picks[d]; if (!id || id === "skip") return;
-      var r = BY_ID[id]; if (!r) return;
+    slots().forEach(function (d) {
+      var r = recipeFor(d); if (!r) return;
       var f = servingsFor(d) / r.serves;
       r.ing.forEach(function (i, idx) {
         if (i.c === "lf") return;
@@ -149,7 +168,7 @@
       var k = Object.keys(map).filter(function (x) { return map[x].sing.toLowerCase() === n; })[0];
       if (!k) return;
       orphan[n].forEach(function (u) { map[k].uses.push(u); if (map[k].days.indexOf(u.d) < 0) map[k].days.push(u.d); });
-      map[k].days.sort(function (a, b) { return DAYS.indexOf(a) - DAYS.indexOf(b); });
+      map[k].days.sort(slotOrder);
     });
     var groups = [];
     CAT_ORDER.forEach(function (c) {
@@ -187,7 +206,7 @@
 
   // ---------- view state (not persisted) ----------
   var today = todayKey();
-  var V = { tab: S.active ? "week" : "plan", day: today, planDay: firstOpen(), open: "", hideDone: false, showText: false, showBackup: false, focus: null, back: null, chooser: "" };
+  var V = { tab: S.active ? "week" : "plan", day: today, planDay: firstOpen(), open: "", hideDone: false, showText: false, showBackup: false, focus: null, back: null, chooser: "", sec: SECTIONS[0].id, xopen: "" };
   function firstOpen() { for (var i = 0; i < DAYS.length; i++) if (!S.picks[DAYS[i]]) return DAYS[i]; return "mon"; }
 
   // ---------- render ----------
@@ -288,7 +307,9 @@
     var idx = item.uses.filter(function (u) { return u.d === d; }).map(function (u) { return u.idx; });
     var u = usesIn(r, r.ing[idx[0]].sing);
     if (!V.back) V.back = { y: window.scrollY || 0 };
-    V.tab = "week"; V.day = d; V.chooser = "";
+    if (isExtra(d)) { V.tab = "recipes"; V.sec = secOf(d.slice(2)); V.xopen = d.slice(2); }
+    else { V.tab = "week"; V.day = d; }
+    V.chooser = "";
     V.focus = { d: d, idx: idx, steps: u.steps, res: u.res };
     render();
     var li = $app.querySelector('.ing li[data-i="' + idx[0] + '"]');
@@ -302,6 +323,15 @@
     try { el.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (e) { el.scrollIntoView(); }
   }
 
+  function stepper(r, slot) {
+    return '<div class="stepper"><span class="cap" style="margin:0">' + servLabel(r) + '</span><button data-act="serv" data-slot="' + slot + '" data-n="-1" aria-label="Fewer">−</button><b>' +
+      servingsFor(slot) + '</b><button data-act="serv" data-slot="' + slot + '" data-n="1" aria-label="More">+</button>' +
+      (r.yieldUnit ? '<span class="cap" style="margin:0">' + esc(r.yieldUnit) + "</span>" : "") + "</div>";
+  }
+  function recipeBody(r, slot, fx) {
+    return stepper(r, slot) + (srcNote(r) ? '<p class="cap" style="margin:-4px 0 8px">' + esc(srcNote(r)) + "</p>" : "") +
+      "<h3>Ingredients</h3>" + ingList(r, servingsFor(slot) / r.serves, fx) + "<h3>Steps</h3>" + steps(r, fx) + credit(r);
+  }
   function renderWeek() {
     var d = V.day, id = S.picks[d], r = id && id !== "skip" ? BY_ID[id] : null;
     var fx = V.focus && V.focus.d === d ? V.focus : null;
@@ -310,13 +340,17 @@
     if (r) {
       h += '<div class="card"><div class="opt"><div class="info"><div class="name" style="font-size:19px">' + esc(r.name) + '</div>' +
         '<div class="desc">' + esc(r.desc) + '</div><div class="meta">' + esc(r.time) + "</div></div></div>" +
-        '<div class="stepper"><span class="cap" style="margin:0">Servings</span><button data-act="serv" data-n="-1" aria-label="Fewer">−</button><b>' +
-        servingsFor(d) + '</b><button data-act="serv" data-n="1" aria-label="More">+</button></div>' +
-        (srcNote(r) ? '<p class="cap" style="margin:-4px 0 8px">' + esc(srcNote(r)) + "</p>" : "") +
-        "<h3>Ingredients</h3>" + ingList(r, servingsFor(d) / r.serves, fx) + "<h3>Steps</h3>" + steps(r, fx) + credit(r) + "</div>";
+        recipeBody(r, d, fx) + "</div>";
     } else {
       h += '<p class="cap">' + (id === "skip" ? "Night off. No cooking planned." : "No recipe picked for this day.") + "</p>" +
         '<div class="row"><button class="btn" data-act="pickfor" data-d="' + d + '">Pick for ' + DAY_SHORT[d] + "</button></div>";
+    }
+    if (S.extras.length) {
+      h += "<h3>Extras this week</h3>" + S.extras.map(function (xid) {
+        var xr = BY_ID[xid];
+        return '<button class="xrow" data-act="openx" data-id="' + xid + '"><span>' + esc(xr.name) + '</span><span class="m">' +
+          esc(secName(secOf(xid))) + ' ›</span></button>';
+      }).join("");
     }
     h += '<div class="row" style="margin-top:22px"><button class="btn" data-act="newweek">Plan a new week</button></div>';
     return h;
@@ -333,9 +367,9 @@
       var on = cur === r.id, open = V.open === r.id;
       return '<div class="card' + (on ? " on" : "") + '"><div class="opt"><div class="info" data-act="toggle" data-id="' + r.id + '">' +
         '<div class="name">' + esc(r.name) + '</div><div class="desc">' + esc(r.desc) + "</div>" +
-        '<div class="meta">' + esc(r.time) + ' · serves ' + HOUSEHOLD + (r.serves !== HOUSEHOLD ? " (source makes " + r.serves + ")" : "") + ' · <button class="link" data-act="toggle" data-id="' + r.id + '">' + (open ? "Hide" : "See recipe") + "</button></div></div>" +
+        '<div class="meta">' + esc(r.time) + ' · ' + (r.keep ? "makes " + r.serves + (r.yieldUnit ? " " + esc(r.yieldUnit) : "") : "serves " + HOUSEHOLD + (r.serves !== HOUSEHOLD ? " (source makes " + r.serves + ")" : "")) + ' · <button class="link" data-act="toggle" data-id="' + r.id + '">' + (open ? "Hide" : "See recipe") + "</button></div></div>" +
         '<button class="btn pick' + (on ? " primary" : "") + '" data-act="pick" data-id="' + r.id + '">' + (on ? "Picked" : "Pick") + "</button></div>" +
-        (open ? "<h3>Ingredients</h3>" + ingList(r, HOUSEHOLD / r.serves) + "<h3>Steps</h3>" + steps(r) + credit(r) : "") + "</div>";
+        (open ? "<h3>Ingredients</h3>" + ingList(r, defServ(r) / r.serves) + "<h3>Steps</h3>" + steps(r) + credit(r) : "") + "</div>";
     }).join("");
     var btns = "";
     if (RECIPES[d].length || cur === "skip") btns += '<button class="btn" data-act="pick" data-id="skip">' + (cur === "skip" ? "Skipped (undo)" : "Skip this day") + "</button>";
@@ -364,9 +398,30 @@
           '<span class="box">' + (on ? "✓" : "") + "</span></button>" +
           '<button class="go" data-act="usedin" data-key="' + esc(i.key) + '" aria-label="Show where ' + esc(i.sing) + ' is used">' +
           '<span class="lbl">' + esc(shopLine(i)) + '</span><span class="m">' +
-          i.days.map(function (d) { return DAY_SHORT[d]; }).join(" · ") + '</span><span class="chev">›</span></button></div>';
+          i.days.map(slotShort).filter(function (x, n, a) { return a.indexOf(x) === n; }).join(" · ") + '</span><span class="chev">›</span></button></div>';
       }).join("");
     });
+    return h;
+  }
+  function secName(id) { for (var i = 0; i < SECTIONS.length; i++) if (SECTIONS[i].id === id) return SECTIONS[i].name; return ""; }
+  function renderRecipes() {
+    var sec = SECTIONS.filter(function (x) { return x.id === V.sec; })[0] || SECTIONS[0];
+    var h = '<div class="chips">' + SECTIONS.map(function (x) {
+      var n = x.recipes.filter(function (r) { return S.extras.indexOf(r.id) >= 0; }).length;
+      return '<button class="chip' + (x.id === sec.id ? " on" : "") + '" data-act="sec" data-sec="' + x.id + '">' + esc(x.name) +
+        (n ? ' <span class="cnt">' + n + "</span>" : "") + "</button>";
+    }).join("") + "</div>";
+    h += "<h2>" + esc(sec.name) + '</h2><p class="cap">Add a recipe to this week and its ingredients join your grocery list.</p>';
+    if (!sec.recipes.length) h += '<div class="empty"><div class="empty-t">No recipes yet</div></div>';
+    h += sec.recipes.map(function (r) {
+      var on = S.extras.indexOf(r.id) >= 0, open = V.xopen === r.id, slot = "x:" + r.id;
+      var fx = open && V.focus && V.focus.d === slot ? V.focus : null;
+      return '<div class="card' + (on ? " on" : "") + '"><div class="opt"><div class="info" data-act="xtoggle" data-id="' + r.id + '">' +
+        '<div class="name">' + esc(r.name) + '</div><div class="desc">' + esc(r.desc) + "</div>" +
+        '<div class="meta">' + esc(r.time) + ' · <button class="link" data-act="xtoggle" data-id="' + r.id + '">' + (open ? "Hide" : "See recipe") + "</button></div></div>" +
+        '<button class="btn pick' + (on ? " primary" : "") + '" data-act="extra" data-id="' + r.id + '">' + (on ? "Added ✓" : "Add to week") + "</button></div>" +
+        (open ? recipeBody(r, slot, fx) : "") + "</div>";
+    }).join("");
     return h;
   }
   function renderThemes() {
@@ -388,21 +443,22 @@
     var tabs = [];
     if (S.active) tabs.push(["week", "Week"]);
     tabs.push(["plan", "Plan"]);
-    if (pickedCount()) tabs.push(["list", "List"]);
+    if (pickedCount() || S.extras.length) tabs.push(["list", "List"]);
+    tabs.push(["recipes", "Recipes"]);
     tabs.push(["themes", "Themes"]);
     if (!tabs.some(function (t) { return t[0] === V.tab; }) && !(V.tab === "week" && V.back)) V.tab = "plan";
     $tabs.innerHTML = tabs.map(function (t) {
       return '<button role="tab" data-act="tab" data-tab="' + t[0] + '" class="' + (V.tab === t[0] ? "on" : "") + '">' + t[1] + "</button>";
     }).join("");
     $sub.textContent = S.active && S.weekOf ? "Week of " + S.weekOf + " · " + pickedCount() + " dinners" : "Pick a dinner for each night";
-    $app.innerHTML = V.tab === "week" ? renderWeek() : V.tab === "plan" ? renderPlan() : V.tab === "list" ? renderList() : renderThemes();
+    $app.innerHTML = V.tab === "week" ? renderWeek() : V.tab === "plan" ? renderPlan() : V.tab === "list" ? renderList() : V.tab === "recipes" ? renderRecipes() : renderThemes();
     var n = pickedCount();
     var anyRecipes = DAYS.some(function (x) { return RECIPES[x].length > 0; });
     if (V.tab === "plan" && (anyRecipes || n)) {
       $bar.className = "show";
       $bar.innerHTML = '<button class="btn primary" data-act="start"' + (n ? "" : " disabled") + ">" +
         (n ? (S.active ? "Save week (" + n + ")" : "Start week (" + n + ")") : "Pick a recipe to start") + "</button>";
-    } else if (V.tab === "week" && V.back) {
+    } else if ((V.tab === "week" || V.tab === "recipes") && V.back) {
       $bar.className = "show";
       $bar.innerHTML = '<button class="btn primary" data-act="backlist">‹ Back to grocery list</button>';
     } else { $bar.className = ""; $bar.innerHTML = ""; }
@@ -413,12 +469,12 @@
     var it = V.chooser && V.tab === "list" ? findItem(V.chooser) : null;
     if (!it) { $s.className = ""; $s.innerHTML = ""; return; }
     var seen = {}, rows = "";
-    it.uses.slice().sort(function (a, b) { return DAYS.indexOf(a.d) - DAYS.indexOf(b.d); }).forEach(function (u) {
+    it.uses.slice().sort(function (a, b) { return slotOrder(a.d, b.d); }).forEach(function (u) {
       if (seen[u.d]) return; seen[u.d] = true;
       var r = recipeFor(u.d); if (!r) return;
       var f = servingsFor(u.d) / r.serves;
       var amt = it.uses.filter(function (x) { return x.d === u.d; }).map(function (x) { return ingText(r.ing[x.idx], f); }).join(" + ");
-      rows += '<button class="pickuse" data-act="gouse" data-d="' + u.d + '"><span class="pu-d">' + DAY_SHORT[u.d] + '</span><span class="pu-r"><b>' +
+      rows += '<button class="pickuse" data-act="gouse" data-d="' + u.d + '"><span class="pu-d">' + slotShort(u.d) + '</span><span class="pu-r"><b>' +
         esc(r.name) + '</b><span>' + esc(amt) + '</span></span><span class="chev">›</span></button>';
     });
     $s.className = "show";
@@ -455,20 +511,29 @@
     }
     if (act === "clear") {
       if (!confirm("Clear all picks and checkmarks?")) return;
-      V.planDay = "mon"; set({ picks: {}, servings: {}, checked: {}, active: false, weekOf: "" }); return;
+      V.planDay = "mon"; set({ picks: {}, servings: {}, checked: {}, active: false, weekOf: "", extras: [] }); return;
     }
     if (act === "newweek") {
       if (!confirm("Start planning a new week? This clears this week's picks and checkmarks.")) return;
-      V.tab = "plan"; V.planDay = "mon"; set({ picks: {}, servings: {}, checked: {}, active: false, weekOf: "" }); toTop(); return;
+      V.tab = "plan"; V.planDay = "mon"; set({ picks: {}, servings: {}, checked: {}, active: false, weekOf: "", extras: [] }); toTop(); return;
     }
     if (act === "start") {
       V.tab = "week"; V.day = today; set({ active: true, weekOf: nextMonday(), checked: {} }); toTop(); toast("Week saved"); return;
     }
     if (act === "pickfor") { V.planDay = el.getAttribute("data-d"); V.tab = "plan"; render(); toTop(); return; }
     if (act === "serv") {
-      var sv = Math.min(16, Math.max(1, servingsFor(V.day) + parseInt(el.getAttribute("data-n"), 10)));
-      var servings = Object.assign({}, S.servings); servings[V.day] = sv; set({ servings: servings }); return;
+      var slot = el.getAttribute("data-slot") || V.day;
+      var sv = Math.min(MAXSERV, Math.max(1, servingsFor(slot) + parseInt(el.getAttribute("data-n"), 10)));
+      var servings = Object.assign({}, S.servings); servings[slot] = sv; set({ servings: servings }); return;
     }
+    if (act === "sec") { V.sec = el.getAttribute("data-sec"); V.xopen = ""; V.focus = null; render(); return; }
+    if (act === "xtoggle") { e.stopPropagation(); var xid = el.getAttribute("data-id"); V.xopen = V.xopen === xid ? "" : xid; V.focus = null; render(); return; }
+    if (act === "extra") {
+      var eid = el.getAttribute("data-id"), ex = S.extras.slice(), at = ex.indexOf(eid);
+      if (at >= 0) ex.splice(at, 1); else ex.push(eid);
+      set({ extras: ex }); toast(at >= 0 ? "Removed from this week" : "Added to this week · on your list"); return;
+    }
+    if (act === "openx") { var oid = el.getAttribute("data-id"); V.tab = "recipes"; V.sec = secOf(oid); V.xopen = oid; V.focus = null; render(); toTop(); return; }
     if (act === "usedin") {
       var it = findItem(el.getAttribute("data-key")); if (!it) return;
       var ds = it.uses.map(function (u) { return u.d; }).filter(function (d, n, a) { return a.indexOf(d) === n && recipeFor(d); });
