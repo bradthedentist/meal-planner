@@ -247,7 +247,7 @@
             }).join(", ") + " ↓"
           : "Not named in the steps") + "</div>";
       }
-      return (a && idx === a.ingredientStart ? '<li class="alternative-heading">' + esc(a.options[S.alternatives[r.id] || a.default].label) + ' ingredients</li>' : '') + '<li data-i="' + idx + '"' + (hl ? ' class="hl"' : "") + '><div class="ln"><span>' + esc(ingText(i, f)) + "</span>" +
+      return (r.ingredientGroups && r.ingredientGroups[idx] ? '<li class="alternative-heading">' + esc(r.ingredientGroups[idx]) + '</li>' : '') + (a && idx === a.ingredientStart ? '<li class="alternative-heading">' + esc(a.options[S.alternatives[r.id] || a.default].label) + ' ingredients</li>' : '') + '<li data-i="' + idx + '"' + (hl ? ' class="hl"' : "") + '><div class="ln"><span>' + esc(ingText(i, f)) + "</span>" +
         (i.c === "lf" ? '<span class="tag">leftover</span>' : "") + "</div>" + used + "</li>";
     }).join("") + "</ul>";
   }
@@ -300,7 +300,7 @@
     var out = [], m, paren = /\(([^)]*)\)/g;
     while ((m = paren.exec(name))) {
       var p = m[1];
-      if (!/\d|for |optional|temp|sodium|stir|virgin/i.test(p)) out = out.concat(p.replace(/^\s*or\s+/i, "").split(/\s+or\s+|\s+and\s+|,/));
+      if (!/\d|for |optional|temp|sodium|stir|virgin|choose one|amount not specified/i.test(p)) out = out.concat(p.replace(/^\s*or\s+/i, "").split(/\s+or\s+|\s+and\s+|,/));
     }
     var main = name.replace(/\([^)]*\)/g, " ").split(/\s+or\s+|,/);
     if (main.length > 1 && main[0].trim().split(/\s+/).length === 1 && words(main[main.length - 1]).length > 1) main = main.slice(1); // "chicken or vegetable broth"

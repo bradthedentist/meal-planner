@@ -83,22 +83,21 @@ const PIZZATEIG = R("bsv1", "Der perfekte Pizzateig", "Neapolitan-style pizza do
 const RECIPES = {
   mon: [],
   tue: [
-    R("spc1", "Sheet Pan Crunchwrap", "One giant crunchwrap with spiced black beans, baked and cut into squares. Vegan. Source makes 8 (6–8 depending on how you cut it); shown for 4.", "40 min", [
-      "8||large tortilla~large tortillas|ba", "2|clove|garlic|st", "1|can|black beans (large, 540 ml / 19 oz)|pa", "1|packet|taco seasoning|sp",
-      "2||Roma tomato~Roma tomatoes|pr", "1||red onion~red onions|pr", "1.5|cup|tortilla chips|pa", "1|head|romaine lettuce (optional)|pr",
-      "1|handful|vegan shredded cheese|da", "1|cup|vegan sour cream or coconut yogurt|da", "1|cup|vegan queso (optional)|da",
-      "0|-|guacamole (for serving)|pr", "0|-|jalapeños (for serving)|pr", "0|-|salsa (for serving)|co",
+    R("spc1", "Sheet Pan Crunchwrap", "Romy's adaptation: one giant crunchwrap with ground beef, black beans, shredded cheese and fresh toppings. Shown for 4 with 6 tortillas.", "About 40 min", [
+      "6||large tortilla~large tortillas|ba", "1|clove|garlic|st", "1|can|black beans (large, 540 ml / 19 oz)|pa", "0.5|packet|taco seasoning|sp",
+      "1||Roma tomato~Roma tomatoes|pr", "0.5||red onion~red onions|pr", "0.75|cup|tortilla chips|pa", "0.5|head|romaine lettuce (optional)|pr",
+      "1||small bag of shredded cheese~small bags of shredded cheese|da", "0|-|sour cream|da", "0|-|queso (optional)|da",
+      "0|-|ground beef (amount not specified)|me", "0|-|guacamole (for serving)|pr", "0|-|jalapeños (for serving)|pr", "0|-|salsa (for serving)|co",
     ], [
       "Preheat your oven to 400°F (200°C) and line a large sheet pan with parchment paper.",
-      "In a pan over medium heat, sauté the minced garlic for 1 to 2 minutes until fragrant.",
-      "Add the drained and rinsed black beans (or a Beyond Meat packet) and the taco seasoning along with ½ cup of water. Cook 5 to 7 minutes, stirring often, until soft and flavorful. Lightly mash with the back of a spoon for a chunky texture.",
-      "Lay 6 of the tortillas slightly overlapping across the sheet pan so they cover the base and hang over the sides. Place 1 tortilla in the center to fully cover the bottom, reserving the last one to close the top.",
-      "Spoon the bean mixture evenly over the tortillas. Top with vegan cheese or vegan queso and the crushed tortilla chips. Add the diced tomatoes, onion and lettuce now, or save them for topping at the end.",
-      "Fold the overhanging edges toward the center to seal, with the last tortilla in the middle. Place another sheet pan on top to keep it flat and compact.",
-      "Bake 15 to 20 minutes, removing the top sheet pan halfway through if you'd like it extra crisp.",
-      "Let cool slightly, then slice into squares. Serve with your fresh toppings, extra sour cream, salsa or guacamole.",
-      "Tip from the recipe notes: swap the beans for chickpeas, lentils, shredded tofu or vegan ground crumbles. In a rush, use a can of refried beans and skip cooking the beans.",
-    ], { by: "PlantYou", src: "https://plantyou.com/sheet-pan-crunchwrap/", serves: 8 }),
+      "Cook the ground beef in a skillet, breaking it into crumbles, until cooked through and a food thermometer reads 160°F (71°C). The ground beef amount was not specified. Drain excess fat if needed. Add the minced garlic and cook until fragrant.",
+      "Add the drained and rinsed black beans and taco seasoning with a little water as needed. Cook, stirring, until the beans are hot and the filling is well combined; lightly mash some of the beans if desired.",
+      "Lay most of the tortillas slightly overlapping across the sheet pan, covering the base with edges hanging over the sides. Reserve enough tortilla to cover any gap when closing the top; use all 6 tortillas for the 4-serving batch.",
+      "Spoon the beef and bean filling over the tortillas. Top with shredded cheese or queso and crushed tortilla chips. Add the diced tomatoes, onion and lettuce now, or save them for topping at the end.",
+      "Fold the overhanging tortilla edges toward the center and cover any gap with the reserved tortilla. Place another sheet pan on top to keep it flat and compact.",
+      "Bake 15 to 20 minutes, removing the top sheet pan halfway through if you would like it extra crisp.",
+      "Let cool slightly, then slice into squares. Serve with the fresh toppings, sour cream, salsa, guacamole or jalapeños. Sour cream and queso amounts are up to you.",
+    ], { by: "PlantYou", src: "https://plantyou.com/sheet-pan-crunchwrap/", serves: 4, note: "Romy's adaptation of the source recipe. Ground beef quantity was not specified; sour cream and queso are intentionally unmeasured. Ingredient amounts scale with servings except these unmeasured items." }),
   ],
   wed: [
     R("wjc1", "One Pot Pasta", "Linguine cooked right in the broth with cherry tomatoes, garlic and Parmesan.", "20 min", [
@@ -127,21 +126,15 @@ const RECIPES = {
     ], { by: "Jar of Lemons", src: "https://www.jaroflemons.com/sushi-bowls/", serves: 4 }),
   ],
   fri: [
-    R("fri1", "Tomato Soup & Grilled Cheese", "Creamy fire-roasted tomato soup with cheddar grilled cheese \u201csoldiers\u201d for dipping. Bon App\u00e9tit, rated 4.3 (119 ratings).", "About 1 hr", [
-      "4|tbsp|unsalted butter|st", "1||medium red onion~medium red onions|pr", "0||kosher salt|st", PP,
-      "2|tbsp|tomato paste|pa", "2|can|crushed fire-roasted tomatoes (28 oz)|pa", "4|cup|vegetable broth|pa",
-      "2|sprig|fresh thyme|pr", "1||bay leaf~bay leaves|sp", "2|tbsp|sugar|st", "0.5|cup|heavy cream|da",
-      "8|tbsp|unsalted butter (room temp, for the bread)|st", "16|slice|Pullman loaf (white sandwich bread)|ba", "16|oz|cheddar cheese|da",
+    R("fri1", "Tomato Soup & Grilled Cheese", "Romy's adaptation: simple tomato soup with bread and ghost pepper or pepper jack grilled cheese. Choose fresh tomatoes or crushed fire-roasted tomatoes, not both.", "Cook until tomatoes are tender and sandwiches are toasted", [
+      "2|tbsp|tomato paste|pa", "56|oz|fresh tomatoes or crushed fire-roasted tomatoes (choose one)|pr", "4|cup|vegetable broth (optional, only if needed)|pa", "1||bay leaf~bay leaves|sp",
+      "16|slice|bread|ba", "16|oz|ghost pepper or pepper jack cheese (choose one)|da",
     ], [
-      "Heat the first portion of butter in a Dutch oven or medium stockpot over medium heat. Add the chopped onion and cook, stirring often, until softened and lightly browned around the edges, 8\u201310 minutes. Season with salt and pepper.",
-      "Add the tomato paste and cook, stirring to coat the onion, until slightly darkened in color, about 2 minutes.",
-      "Add the crushed tomatoes, vegetable broth, thyme, bay leaf and sugar and bring to a simmer. Season with salt and pepper and cook until the flavors are melded, 35\u201340 minutes.",
-      "Remove from heat and stir in the cream. Remove the thyme stems and bay leaf and let cool slightly. Working in batches, pur\u00e9e in a blender until smooth.",
-      "Heat a dry skillet, preferably cast-iron, over medium heat. Spread the room-temperature butter over the bread slices, dividing evenly.",
-      "Grate the cheddar. Top the unbuttered side of half the bread slices with cheddar, dividing evenly. Top with the remaining bread, buttered side up.",
-      "Cook, turning once, until the bread is golden brown and the cheese is melted, about 3 minutes per side.",
-      "Cut the sandwiches into soldiers and serve alongside the hot soup for dipping. (Tip from the source: try pouring the soup directly over the sliced sandwich for a cheesy bread soup.)",
-    ], { by: "Bon App\u00e9tit", src: "https://www.bonappetit.com/recipe/tomato-grilled-cheese-soup", serves: 8 }),
+      "Tomato soup: if using fresh tomatoes, chop them and keep their juices; otherwise use crushed fire-roasted tomatoes. Use one tomato option, not both. Put the tomatoes, tomato paste and bay leaf in a saucepan. Add vegetable broth only if needed to loosen the soup, using as much or as little of the listed amount as needed.",
+      "Tomato soup: bring to a gentle simmer, then cook over low heat, stirring regularly, until the fresh tomatoes are tender or the canned tomatoes are heated through and the flavors have blended. Add a little more of the optional broth if the soup is too thick. Remove the bay leaf. Leave chunky or carefully blend until smooth.",
+      "Grilled cheese: put ghost pepper or pepper jack cheese between slices of bread. Use one cheese option, not both.",
+      "Grilled cheese: heat a dry nonstick skillet over medium-low heat. Cook the sandwiches, turning carefully, until the bread is toasted on both sides and the cheese is melted. Cut and serve with the hot tomato soup.",
+    ], { by: "Bon Appétit", src: "https://www.bonappetit.com/recipe/tomato-grilled-cheese-soup", serves: 8, note: "Romy's adaptation; the source credit is retained. Source amounts are kept where applicable: at 4 servings use 1 tbsp tomato paste, 28 oz tomatoes (fresh OR crushed fire-roasted), up to 2 cups optional broth, ½ bay leaf, 8 slices bread and 8 oz cheese. Broth is only needed if the soup is too thick." }),
   ],
   sat: [
     R("cpk1", "Crock Pot Chicken and Dumplings", "Chicken breasts slow-cooked in a creamy soup base, topped with biscuit-strip dumplings and veggies.", "5 hr 20 min", [
@@ -159,6 +152,7 @@ const RECIPES = {
   ],
   sun: [PIZZATEIG]
 };
+RECIPES.fri[0].ingredientGroups = { 0: "Tomato soup", 4: "Grilled cheese" };
 // Only the dumpling portion is adapted from Lauren Allen (source yield: 6).
 // Store exact 2/3-scale amounts for our 4-serving soup; never round the underlying quantities.
 const CHICKEN_DUMPLINGS = RECIPES.sat.find(r => r.id === "cpk1");
