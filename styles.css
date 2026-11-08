@@ -119,3 +119,5 @@ textarea { min-height: 120px; font: 13px/1.4 ui-monospace, Menlo, monospace; wor
 .xrow .m { color: var(--faint); font-size: 13px; white-space: nowrap; }
 .inc { display: inline-block; vertical-align: 2px; margin-left: 4px; padding: 1px 7px; border-radius: 99px; border: 1px solid var(--line2); color: var(--muted); font-size: 11px; font-weight: 600; white-space: nowrap; }
 .note-src { font-style: italic; margin-top: 6px; }
+
+.alternatives{border:1px solid var(--line,#ddd);border-radius:12px;margin:12px 0;padding:12px;min-width:0}.alternatives legend{font-weight:600;padding:0 5px}.alternatives .cap{margin:10px 0 0}.alternative-heading{font-weight:700;list-style:none;padding-top:12px}

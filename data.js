@@ -159,6 +159,31 @@ const RECIPES = {
   ],
   sun: [PIZZATEIG]
 };
+// Only the dumpling portion is adapted from Lauren Allen (source yield: 6).
+// Store exact 2/3-scale amounts for our 4-serving soup; never round the underlying quantities.
+const CHICKEN_DUMPLINGS = RECIPES.sat.find(r => r.id === "cpk1");
+CHICKEN_DUMPLINGS.alternatives = {
+  label: "Dumplings", default: "biscuits", ingredientStart: 9, stepStart: 2,
+  options: {
+    biscuits: { label: "Biscuit dough" },
+    homemade: {
+      label: "Homemade", desc: "Chicken breasts slow-cooked in the same creamy soup base, with homemade drop dumplings and veggies.", time: "About 6 hr (allow longer if dumplings need it)", by: "Lauren Allen · Tastes Better From Scratch",
+      src: "https://tastesbetterfromscratch.com/chicken-and-dumplings/",
+      note: "Homemade dumplings only: source serves 6, scaled to your servings. Slow-cooker method adapted to the existing soup; soup ingredients are unchanged. Allow about 45 minutes on HIGH after adding homemade dumplings, longer if needed.",
+      ing: [
+        "1.1111111111111112|cup|all-purpose flour|st", "2|tsp|baking powder|st",
+        "0.3333333333333333|tsp|kosher salt|st", "0.5|cup|milk|da",
+        "0.16666666666666666|cup|sour cream|da", "1.3333333333333333|tbsp|butter (melted)|st"
+      ].map(s => Object.assign(parseIng(s), { practical: true })),
+      steps: [
+        "Once the base soup has cooked on HIGH for 5 hours, thaw the mixed vegetables and stir them into the hot soup. Keep the slow cooker on HIGH. Use homemade dumplings instead of the biscuit strips.",
+        "Homemade dumplings: combine the flour, baking powder and kosher salt in a bowl. Make a well in the center, add the milk, sour cream and melted butter, and stir just until combined. Do not overmix.",
+        "Drop teaspoon-sized portions of dough over the hot soup; they will double in size. Press them slightly under the liquid and cover promptly. Cook on HIGH for 45 minutes. Gently separate dumplings if needed and cut one open to check the center; if still doughy, cover and continue cooking until cooked through.",
+        CHICKEN_DUMPLINGS.steps[3]
+      ]
+    }
+  }
+};
 // Extra sections (not weekdays). Recipes here can be added to the week as extras so they join the grocery list.
 // keep: true = baked goods keep the source yield instead of the 4-serving default; yieldUnit labels the stepper.
 const SECTIONS = [
@@ -324,10 +349,23 @@ function unitLabel(u, q) {
 }
 // "1", "½", "⅔"... read as singular ("1 cup", "½ cup"); anything above 1 is plural.
 function oneOrLess(n) { return n === "1" || /^[\u215B\xBC\u2153\xBD\u2154\xBE]$/.test(n); }
+// Exact cup + tablespoon + teaspoon measures avoid awkward 1 1/9-cup flour.
+function practicalVolume(t) {
+  const cupAmount = t / 48;
+  if (t >= 12 && FR.some(c => Math.abs(c[0] - (cupAmount - Math.floor(cupAmount))) < 1e-8)) return fmtNum(cupAmount) + (cupAmount <= 1 ? " cup" : " cups");
+  const cups = Math.floor((t + 1e-9) / 48);
+  t -= cups * 48;
+  const tbsp = Math.floor((t + 1e-9) / 3);
+  t -= tbsp * 3;
+  const exact = FR.some(c => Math.abs(c[0] - (t - Math.floor(t))) < 1e-8);
+  const remainder = exact ? fmtNum(t) : "≈ " + Math.round(t * 100) / 100;
+  return [cups ? cups + (cups === 1 ? " cup" : " cups") : "", tbsp ? tbsp + " tbsp" : "", t > 1e-8 ? remainder + " tsp" : ""].filter(Boolean).join(" + ");
+}
 function ingText(i, f) {
   if (i.u === "-") return i.sing;
   if (i.q <= 0) return `${i.sing}, to taste`;
   const q = i.q * f;
+  if (i.practical && VOL[i.u]) return `${practicalVolume(q * VOL[i.u])} ${i.sing}`;
   if ((i.u === "cup" && q < 0.25) || (i.u === "tbsp" && q < 1)) return `${gQty({ amt: q * VOL[i.u], fam: "vol" })} ${i.sing}`;
   if (METRIC[i.u]) return `${gQty({ amt: q * (WT[i.u] || VOL[i.u]), fam: WT[i.u] ? "wt" : "vol" })} (${metricText(q, i.u)}) ${i.sing}`;
   const n = fmtNum(q), many = !oneOrLess(n);
@@ -340,6 +378,7 @@ function famOf(u) {
 }
 function gQty(g) {
   if (g.amt <= 0) return "";
+  if (g.practical && g.fam === "vol") return practicalVolume(g.amt);
   if (g.fam === "vol") {
     const t = g.amt;
     if (t >= 12) {

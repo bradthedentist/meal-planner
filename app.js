@@ -10,7 +10,7 @@
   var $toast = document.getElementById("toast");
 
   function fresh() {
-    return { v: 1, ts: 0, picks: {}, servings: {}, checked: {}, themes: Object.assign({}, DEFAULT_THEMES), active: false, weekOf: "", extras: [] };
+    return { v: 1, ts: 0, picks: {}, servings: {}, alternatives: {}, checked: {}, themes: Object.assign({}, DEFAULT_THEMES), active: false, weekOf: "", extras: [] };
   }
   function dayOf(id) {
     for (var i = 0; i < DAYS.length; i++) if (RECIPES[DAYS[i]].some(function (r) { return r.id === id; })) return DAYS[i];
@@ -42,6 +42,10 @@
     Object.keys(p.servings || {}).forEach(function (k) {
       var v = p.servings[k];
       if (k.indexOf("x:") === 0 && BY_ID[k.slice(2)] && v > 0 && v <= MAXSERV) s.servings[k] = v;
+    });
+    Object.keys(p.alternatives || {}).forEach(function (id) {
+      var r = BY_ID[id], choice = p.alternatives[id];
+      if (r && r.alternatives && r.alternatives.options[choice]) s.alternatives[id] = choice;
     });
     s.checked = p.checked && typeof p.checked === "object" ? p.checked : {};
     s.active = !!p.active && (DAYS.some(function (d) { return s.picks[d] && s.picks[d] !== "skip"; }) || s.extras.length > 0);
@@ -110,9 +114,19 @@
   }
   // A "slot" is a weekday key ("mon") or an extra recipe added from a section ("x:<recipe id>").
   function isExtra(slot) { return String(slot).indexOf("x:") === 0; }
+  function selectedRecipe(r) {
+    if (!r || !r.alternatives) return r;
+    var a = r.alternatives, choice = S.alternatives[r.id] || a.default, opt = a.options[choice];
+    if (!opt.ing) return r;
+    return Object.assign({}, r, {
+      ing: r.ing.slice(0, a.ingredientStart).concat(opt.ing),
+      steps: r.steps.slice(0, a.stepStart).concat(opt.steps),
+      alternativeNote: opt.note, alternativeCredit: opt, desc: opt.desc || r.desc, time: opt.time || r.time
+    });
+  }
   function recipeFor(d) {
-    if (isExtra(d)) { var xid = d.slice(2); return S.extras.indexOf(xid) >= 0 ? BY_ID[xid] : null; }
-    var id = S.picks[d]; return id && id !== "skip" ? BY_ID[id] : null;
+    if (isExtra(d)) { var xid = d.slice(2); return S.extras.indexOf(xid) >= 0 ? selectedRecipe(BY_ID[xid]) : null; }
+    var id = S.picks[d]; return id && id !== "skip" ? selectedRecipe(BY_ID[id]) : null;
   }
   var HOUSEHOLD = 4; // meals default to 4 servings, scaled from the source yield
   function defServ(r) { return r && r.keep ? r.serves : HOUSEHOLD; } // baked goods keep the source yield
@@ -148,8 +162,9 @@
         if (i.c === "lf") return;
         var fam = famOf(i.u), key = i.sing.toLowerCase() + "|" + fam;
         var base = i.q * f * (fam === "vol" ? VOL[i.u] : fam === "wt" ? WT[i.u] : 1);
-        if (!map[key]) map[key] = { key: key, sing: i.sing, plur: i.plur, cat: i.c, fam: fam, unit: i.u, amt: 0, days: [], uses: [] };
+        if (!map[key]) map[key] = { key: key, sing: i.sing, plur: i.plur, cat: i.c, fam: fam, unit: i.u, amt: 0, practical: false, days: [], uses: [] };
         map[key].amt += base;
+        map[key].practical = map[key].practical || !!i.practical;
         map[key].uses.push({ d: d, idx: idx });
         if (map[key].days.indexOf(d) < 0) map[key].days.push(d);
       });
@@ -221,7 +236,8 @@
     }).join("") + "</div>";
   }
   function ingList(r, f, fx) {
-    return '<ul class="ing">' + r.ing.map(function (i, idx) {
+    var a = r.alternatives;
+    return (a ? '<p class="cap">Soup base + ' + esc(a.options[S.alternatives[r.id] || a.default].label) + ' only</p>' : '') + '<ul class="ing">' + r.ing.map(function (i, idx) {
       var hl = fx && fx.idx.indexOf(idx) >= 0;
       var used = "";
       if (hl && fx.idx[0] === idx) {
@@ -231,21 +247,29 @@
             }).join(", ") + " ↓"
           : "Not named in the steps") + "</div>";
       }
-      return '<li data-i="' + idx + '"' + (hl ? ' class="hl"' : "") + '><div class="ln"><span>' + esc(ingText(i, f)) + "</span>" +
+      return (a && idx === a.ingredientStart ? '<li class="alternative-heading">' + esc(a.options[S.alternatives[r.id] || a.default].label) + ' ingredients</li>' : '') + '<li data-i="' + idx + '"' + (hl ? ' class="hl"' : "") + '><div class="ln"><span>' + esc(ingText(i, f)) + "</span>" +
         (i.c === "lf" ? '<span class="tag">leftover</span>' : "") + "</div>" + used + "</li>";
     }).join("") + "</ul>";
   }
+  function alternativePicker(r) {
+    if (!r.alternatives) return "";
+    var a = r.alternatives, chosen = S.alternatives[r.id] || a.default;
+    return '<fieldset class="alternatives"><legend>' + esc(a.label) + ' — choose one</legend><div class="row">' + Object.keys(a.options).map(function (key) {
+      return '<button class="btn' + (key === chosen ? ' primary' : '') + '" data-act="alternative" data-id="' + r.id + '" data-choice="' + key + '" aria-pressed="' + (key === chosen) + '">' + esc(a.options[key].label) + '</button>';
+    }).join('') + '</div><p class="cap">Only your selected option goes on the grocery list. Choice saves on this device.</p></fieldset>';
+  }
   function credit(r) {
     if (!r.src && !r.by) return "";
-    return '<p class="src">' + (r.by ? "Recipe by " + esc(r.by) : "") + (r.src ? (r.by ? " · " : "") + '<a href="' + esc(r.src) + '" target="_blank" rel="noopener">Source</a>' : "") + "</p>";
+    return '<p class="src">' + (r.by ? "Recipe by " + esc(r.by) : "") + (r.src ? (r.by ? " · " : "") + '<a href="' + esc(r.src) + '" target="_blank" rel="noopener">Source</a>' : "") + "</p>" + (r.alternativeCredit ? '<p class="src">Homemade dumplings by ' + esc(r.alternativeCredit.by) + ' · <a href="' + esc(r.alternativeCredit.src) + '" target="_blank" rel="noopener">Dumpling source</a></p>' : '');
   }
   function nameHtml(r) { return esc(r.name) + (r.incomplete ? ' <span class="inc">Incomplete source</span>' : ""); }
   function steps(r, fx) {
     var note = r.note ? '<p class="cap note-src">' + esc(r.note) + "</p>" : "";
+    if (r.alternativeNote) note += '<p class="cap note-src">' + esc(r.alternativeNote) + "</p>";
     if (!r.steps.length) return note;
     return note + '<ol class="steps">' + r.steps.map(function (s, n) {
       var hl = fx && fx.steps.indexOf(n) >= 0;
-      return '<li data-n="' + n + '"' + (hl ? ' class="hl"' : "") + ">" + (hl ? markTerms(esc(s), fx.res) : esc(s)) + "</li>";
+      return '<li data-n="' + n + '"' + (hl ? ' class="hl"' : "") + ">" + (r.alternatives && n === r.alternatives.stepStart ? "<b>" + esc(r.alternatives.options[S.alternatives[r.id] || r.alternatives.default].label) + " option: </b>" : "") + (hl ? markTerms(esc(s), fx.res) : esc(s)) + "</li>";
     }).join("") + "</ol>";
   }
 
@@ -332,11 +356,11 @@
       (r.yieldUnit ? '<span class="cap" style="margin:0">' + esc(r.yieldUnit) + "</span>" : "") + "</div>";
   }
   function recipeBody(r, slot, fx) {
-    return stepper(r, slot) + (srcNote(r) ? '<p class="cap" style="margin:-4px 0 8px">' + esc(srcNote(r)) + "</p>" : "") +
+    return stepper(r, slot) + alternativePicker(r) + (srcNote(r) ? '<p class="cap" style="margin:-4px 0 8px">' + esc(srcNote(r)) + "</p>" : "") +
       "<h3>Ingredients</h3>" + ingList(r, servingsFor(slot) / r.serves, fx) + "<h3>Steps</h3>" + steps(r, fx) + credit(r);
   }
   function renderWeek() {
-    var d = V.day, id = S.picks[d], r = id && id !== "skip" ? BY_ID[id] : null;
+    var d = V.day, id = S.picks[d], r = id && id !== "skip" ? selectedRecipe(BY_ID[id]) : null;
     var fx = V.focus && V.focus.d === d ? V.focus : null;
     var h = dayStrip(d, false);
     h += "<h2>" + esc(DAY_FULL[d]) + " · " + esc(S.themes[d]) + "</h2>";
@@ -367,12 +391,13 @@
       h += '<div class="empty"><div class="empty-t">No recipes yet</div><div class="cap" style="margin:4px 0 0">Send recipes to Meal Planner to add them.</div></div>';
     }
     h += RECIPES[d].map(function (r) {
+      r = selectedRecipe(r);
       var on = cur === r.id, open = V.open === r.id;
       return '<div class="card' + (on ? " on" : "") + '"><div class="opt"><div class="info" data-act="toggle" data-id="' + r.id + '">' +
         '<div class="name">' + nameHtml(r) + '</div><div class="desc">' + esc(r.desc) + "</div>" +
         '<div class="meta">' + esc(r.time) + ' · ' + (r.keep ? "makes " + r.serves + (r.yieldUnit ? " " + esc(r.yieldUnit) : "") : "serves " + HOUSEHOLD + (r.serves !== HOUSEHOLD ? " (source makes " + r.serves + ")" : "")) + ' · <button class="link" data-act="toggle" data-id="' + r.id + '">' + (open ? "Hide" : "See recipe") + "</button></div></div>" +
         '<button class="btn pick' + (on ? " primary" : "") + '" data-act="pick" data-id="' + r.id + '">' + (on ? "Picked" : "Pick") + "</button></div>" +
-        (open ? "<h3>Ingredients</h3>" + ingList(r, defServ(r) / r.serves) + "<h3>Steps</h3>" + steps(r) + credit(r) : "") + "</div>";
+        (open ? alternativePicker(r) + "<h3>Ingredients</h3>" + ingList(r, defServ(r) / r.serves) + "<h3>Steps</h3>" + steps(r) + credit(r) : "") + "</div>";
     }).join("");
     var btns = "";
     if (RECIPES[d].length || cur === "skip") btns += '<button class="btn" data-act="pick" data-id="skip">' + (cur === "skip" ? "Skipped (undo)" : "Skip this day") + "</button>";
@@ -524,6 +549,12 @@
       V.tab = "week"; V.day = today; set({ active: true, weekOf: nextMonday(), checked: {} }); toTop(); toast("Week saved"); return;
     }
     if (act === "pickfor") { V.planDay = el.getAttribute("data-d"); V.tab = "plan"; render(); toTop(); return; }
+    if (act === "alternative") {
+      var rid = el.getAttribute("data-id"), choice = el.getAttribute("data-choice"), recipe = BY_ID[rid];
+      if (!recipe || !recipe.alternatives || !recipe.alternatives.options[choice]) return;
+      var alternatives = Object.assign({}, S.alternatives); alternatives[rid] = choice;
+      V.focus = null; V.chooser = ""; set({ alternatives: alternatives }); return;
+    }
     if (act === "serv") {
       var slot = el.getAttribute("data-slot") || V.day;
       var sv = Math.min(MAXSERV, Math.max(1, servingsFor(slot) + parseInt(el.getAttribute("data-n"), 10)));
