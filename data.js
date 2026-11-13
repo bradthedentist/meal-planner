@@ -9,17 +9,6 @@ const DAY_FULL = {
   sat: "Saturday",
   sun: "Sunday"
 };
-const DEFAULT_THEMES = {
-  mon: "Leftovers",
-  tue: "Sheet Pan",
-  wed: "One Pot",
-  thu: "Random Thursday",
-  fri: "Brotzeit",
-  sat: "Crockpot",
-  sun: "Pizza Sunday"
-};
-const OLD_DAY_DEFAULTS = { thu: ["Stir-Fry"] }; // earlier per-day defaults, replaced by the current default
-const OLD_DEFAULT_THEMES = ["Leftover Day", "Taco Tuesday", "One Pot Wednesday", "Stir-Fry Thursday", "Pizza Friday", "Grill Saturday", "Comfort Sunday"];
 const CAT_ORDER = ["st", "sp", "pr", "me", "da", "ba", "fr", "pa", "co", "ot"];
 const CAT_LABEL = {
   st: "Staples",
@@ -66,7 +55,7 @@ const SP = "0||salt|st";
 const PP = "0||black pepper|st";
 // Recipes are added as Romy tests them. Older recipes live in git history.
 // serves = the SOURCE yield (used only for scaling). The app always defaults to 4 servings (HOUSEHOLD in app.js).
-// Pizza dough is shared by Pizza Sunday and the Baking Savory section.
+// Pizza dough is shared by Sunday and the Baking Savory section.
 const PIZZATEIG = R("bsv1", "Der perfekte Pizzateig", "Neapolitan-style pizza dough with 00 flour and a tiny bit of fresh yeast; long cold rise. Makes 6 dough balls (about 10 oz / 280 g each). Toppings not included.", "15 min + 1–2 hr rest + 12–24 hr in the fridge", [
   "1.5|g|fresh yeast|da", "1|kg|pizza flour (Type 00)|pa", "25|g|fine sea salt|st", "620|ml|water|st",
 ], [

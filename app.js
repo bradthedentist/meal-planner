@@ -10,7 +10,7 @@
   var $toast = document.getElementById("toast");
 
   function fresh() {
-    return { v: 1, ts: 0, picks: {}, servings: {}, alternatives: {}, checked: {}, themes: Object.assign({}, DEFAULT_THEMES), active: false, weekOf: "", extras: [] };
+    return { v: 1, ts: 0, picks: {}, servings: {}, alternatives: {}, checked: {}, active: false, weekOf: "", extras: [] };
   }
   function dayOf(id) {
     for (var i = 0; i < DAYS.length; i++) if (RECIPES[DAYS[i]].some(function (r) { return r.id === id; })) return DAYS[i];
@@ -32,8 +32,6 @@
         if (home === d) { s.picks[d] = id; if (sv) s.servings[d] = sv; }
         else if (home) moved[home] = { id: id, sv: sv }; // e.g. pizza moved from Friday to Sunday
       } // picks for recipes that no longer exist are dropped
-      var th = p.themes && p.themes[d];
-      if (typeof th === "string" && th.trim() && OLD_DEFAULT_THEMES.indexOf(th) < 0 && (OLD_DAY_DEFAULTS[d] || []).indexOf(th) < 0) s.themes[d] = th;
     });
     Object.keys(moved).forEach(function (d) {
       if (!s.picks[d]) { s.picks[d] = moved[d].id; if (moved[d].sv) s.servings[d] = moved[d].sv; }
@@ -228,7 +226,7 @@
   function dayStrip(sel, withDots) {
     return '<div class="days">' + DAYS.map(function (d) {
       var id = S.picks[d];
-      var sub = id === "skip" ? "Night off" : id && BY_ID[id] ? BY_ID[id].name : S.themes[d];
+      var sub = id === "skip" ? "Night off" : id && BY_ID[id] ? BY_ID[id].name : "";
       return '<button class="day' + (d === sel ? " on" : "") + '" data-act="day" data-d="' + d + '">' +
         '<div class="d">' + DAY_SHORT[d] + (d === today ? '<span class="t">today</span>' : "") +
         (withDots && id ? '<span class="dot"></span>' : "") + "</div>" +
@@ -363,7 +361,7 @@
     var d = V.day, id = S.picks[d], r = id && id !== "skip" ? selectedRecipe(BY_ID[id]) : null;
     var fx = V.focus && V.focus.d === d ? V.focus : null;
     var h = dayStrip(d, false);
-    h += "<h2>" + esc(DAY_FULL[d]) + " · " + esc(S.themes[d]) + "</h2>";
+    h += "<h2>" + esc(DAY_FULL[d]) + "</h2>";
     if (r) {
       h += '<div class="card"><div class="opt"><div class="info"><div class="name" style="font-size:19px">' + nameHtml(r) + '</div>' +
         '<div class="desc">' + esc(r.desc) + '</div><div class="meta">' + esc(r.time) + "</div></div></div>" +
@@ -386,7 +384,7 @@
     var d = V.planDay, cur = S.picks[d];
     var decided = DAYS.filter(function (x) { return !!S.picks[x]; }).length;
     var h = dayStrip(d, true);
-    h += "<h2>" + esc(DAY_FULL[d]) + " · " + esc(S.themes[d]) + "</h2><p class=\"cap\">" + decided + " of 7 days decided</p>";
+    h += "<h2>" + esc(DAY_FULL[d]) + "</h2><p class=\"cap\">" + decided + " of 7 days decided</p>";
     if (!RECIPES[d].length) {
       h += '<div class="empty"><div class="empty-t">No recipes yet</div><div class="cap" style="margin:4px 0 0">Send recipes to Meal Planner to add them.</div></div>';
     }
@@ -452,13 +450,8 @@
     }).join("");
     return h;
   }
-  function renderThemes() {
-    var h = "<h2>Day themes</h2><p class=\"cap\">Rename any day. Each day keeps its recipe options.</p>";
-    h += DAYS.map(function (d) {
-      return '<label class="field"><span>' + DAY_FULL[d] + '</span><input data-theme="' + d + '" value="' + esc(S.themes[d]) + '" autocomplete="off"></label>';
-    }).join("");
-    h += '<div class="row"><button class="btn" data-act="resetthemes">Reset themes</button></div>';
-    h += '<h3>Backup</h3><p class="cap">Your plan saves on this phone automatically. A backup lets you move it to another device.</p>' +
+  function renderBackup() {
+    var h = "<h2>Backup</h2><p class=\"cap\">Your plan saves on this phone automatically. A backup lets you move it to another device.</p>" +
       '<div class="row"><button class="btn" data-act="copybackup">Copy backup</button><button class="btn" data-act="showbackup">' +
       (V.showBackup ? "Hide restore" : "Restore a backup") + "</button></div>";
     if (V.showBackup) {
@@ -473,13 +466,13 @@
     tabs.push(["plan", "Plan"]);
     if (pickedCount() || S.extras.length) tabs.push(["list", "List"]);
     tabs.push(["recipes", "Recipes"]);
-    tabs.push(["themes", "Themes"]);
+    tabs.push(["backup", "Backup"]);
     if (!tabs.some(function (t) { return t[0] === V.tab; }) && !(V.tab === "week" && V.back)) V.tab = "plan";
     $tabs.innerHTML = tabs.map(function (t) {
       return '<button role="tab" data-act="tab" data-tab="' + t[0] + '" class="' + (V.tab === t[0] ? "on" : "") + '">' + t[1] + "</button>";
     }).join("");
     $sub.textContent = S.active && S.weekOf ? "Week of " + S.weekOf + " · " + pickedCount() + " dinners" : "Pick a dinner for each night";
-    $app.innerHTML = V.tab === "week" ? renderWeek() : V.tab === "plan" ? renderPlan() : V.tab === "list" ? renderList() : V.tab === "recipes" ? renderRecipes() : renderThemes();
+    $app.innerHTML = V.tab === "week" ? renderWeek() : V.tab === "plan" ? renderPlan() : V.tab === "list" ? renderList() : V.tab === "recipes" ? renderRecipes() : renderBackup();
     var n = pickedCount();
     var anyRecipes = DAYS.some(function (x) { return RECIPES[x].length > 0; });
     if (V.tab === "plan" && (anyRecipes || n)) {
@@ -600,7 +593,6 @@
     if (act === "showtext") { V.showText = !V.showText; render(); return; }
     if (act === "hidedone") { V.hideDone = !V.hideDone; render(); return; }
     if (act === "uncheck") { set({ checked: {} }); return; }
-    if (act === "resetthemes") { set({ themes: Object.assign({}, DEFAULT_THEMES) }); return; }
     if (act === "copybackup") {
       var b = "MEALPLAN:" + btoa(unescape(encodeURIComponent(JSON.stringify(S))));
       copy(b).then(function (ok) { toast(ok ? "Backup copied" : "Copy blocked"); });
@@ -619,17 +611,6 @@
   }
   document.addEventListener("click", onClick);
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && V.chooser) { V.chooser = ""; renderSheet(); } });
-  document.addEventListener("input", function (e) {
-    var d = e.target && e.target.getAttribute && e.target.getAttribute("data-theme");
-    if (!d) return;
-    S.themes[d] = e.target.value; save(); // no re-render while typing
-  });
-  document.addEventListener("change", function (e) {
-    var d = e.target && e.target.getAttribute && e.target.getAttribute("data-theme");
-    if (!d) return;
-    if (!e.target.value.trim()) S.themes[d] = DEFAULT_THEMES[d];
-    save(); render();
-  });
   // Re-open on today's weekday when the app comes back after a day change.
   document.addEventListener("visibilitychange", function () {
     if (document.visibilityState !== "visible") return;
