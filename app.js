@@ -687,7 +687,7 @@
     if (S.active) tabs.push(["week", "Week"]);
     tabs.push(["plan", "Plan"]);
     if (pickedCount() || S.extras.length || S.restock.length) tabs.push(["list", "List"]);
-    tabs.push(["recipes", "Recipes"]);
+    tabs.push(["recipes", "Other recipes"]);
     tabs.push(["inventory", "Inventory"]);
     tabs.push(["backup", "Backup"]);
     if (!tabs.some(function (t) { return t[0] === V.tab; }) && !(V.tab === "week" && V.back)) V.tab = "plan";
