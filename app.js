@@ -10,7 +10,7 @@
   var $toast = document.getElementById("toast");
 
   function fresh() {
-    return { v: 1, ts: 0, picks: {}, servings: {}, alternatives: {}, checked: {}, active: false, weekOf: "", extras: [] };
+    return { v: 1, ts: 0, picks: {}, servings: {}, alternatives: {}, checked: {}, active: false, weekOf: "", extras: [], inventory: [], needAnyway: {} };
   }
   function dayOf(id) {
     for (var i = 0; i < DAYS.length; i++) if (RECIPES[DAYS[i]].some(function (r) { return r.id === id; })) return DAYS[i];
@@ -46,9 +46,26 @@
       if (r && r.alternatives && r.alternatives.options[choice]) s.alternatives[id] = choice;
     });
     s.checked = p.checked && typeof p.checked === "object" ? p.checked : {};
+    s.inventory = normInventory(p.inventory);
+    s.needAnyway = {};
+    if (p.needAnyway && typeof p.needAnyway === "object") Object.keys(p.needAnyway).forEach(function (k) { if (p.needAnyway[k]) s.needAnyway[k] = true; });
     s.active = !!p.active && (DAYS.some(function (d) { return s.picks[d] && s.picks[d] !== "skip"; }) || s.extras.length > 0);
     s.weekOf = s.active ? p.weekOf || "" : "";
     return s;
+  }
+
+  // ---------- inventory (what's already on hand) ----------
+  var LOCS = [["pantry", "Pantry"], ["fridge", "Fridge"], ["freezer", "Freezer"]];
+  function locOk(l) { return LOCS.some(function (x) { return x[0] === l; }); }
+  function normInventory(list) {
+    if (!Array.isArray(list)) return [];
+    var seen = {};
+    return list.filter(function (it) { return it && typeof it.name === "string" && it.name.trim(); }).map(function (it, n) {
+      var id = typeof it.id === "string" && it.id && !seen[it.id] ? it.id : "i" + Date.now().toString(36) + n;
+      seen[id] = true;
+      return { id: id, name: it.name.trim().slice(0, 120), amt: typeof it.amt === "string" ? it.amt.trim().slice(0, 60) : "",
+        date: typeof it.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(it.date) ? it.date : "", loc: locOk(it.loc) ? it.loc : "pantry" };
+    });
   }
 
   // ---------- storage: localStorage primary, IndexedDB backup ----------
@@ -193,9 +210,9 @@
     return groups;
   }
   function listText() {
-    var lines = ["Groceries" + (S.weekOf ? " — week of " + S.weekOf : "")];
+    var lines = ["Groceries" + (S.weekOf ? " — week of " + S.weekOf : "")], keys = invKeys();
     grocery().forEach(function (g) {
-      var items = g.items.filter(function (i) { return !S.checked[i.key]; });
+      var items = g.items.filter(function (i) { return !S.checked[i.key] && !onHand(i, keys); });
       if (!items.length) return;
       lines.push("", CAT_LABEL[g.cat].toUpperCase());
       items.forEach(function (i) { lines.push("- " + shopLine(i)); });
@@ -322,6 +339,23 @@
     res.forEach(function (re) { re.lastIndex = 0; html = html.replace(re, function (all, pre, w) { return pre + "<mark>" + w + "</mark>"; }); });
     return html;
   }
+  // Inventory matching: same words after dropping sizes/descriptors and singularizing ("Onions" = "large onion").
+  var MATCH_STOP = "frozen canned dried organic ripe raw uncooked can cans jar jars bag bags package packages pack box bunch".split(" ");
+  function matchKey(ws) {
+    return ws.map(singular).filter(function (w) { return MATCH_STOP.indexOf(w) < 0; }).sort().join(" ");
+  }
+  function invKeys() {
+    var out = {};
+    S.inventory.forEach(function (it) { var k = matchKey(words(it.name.replace(/\([^)]*\)/g, " "))); if (k) out[k] = it; });
+    return out;
+  }
+  function onHandFor(item, keys) {
+    keys = keys || invKeys();
+    var names = [words(item.sing.replace(/\([^)]*\)/g, " "))].concat(alts(item.sing));
+    for (var n = 0; n < names.length; n++) { var k = matchKey(names[n]); if (k && keys[k]) return keys[k]; }
+    return null;
+  }
+  function onHand(item, keys) { return !S.needAnyway[item.key] && !!onHandFor(item, keys); }
   function findItem(key) {
     var out = null;
     grocery().forEach(function (g) { g.items.forEach(function (i) { if (i.key === key) out = i; }); });
@@ -404,30 +438,101 @@
     return h;
   }
   function renderList() {
-    var groups = grocery(), total = 0, done = 0;
-    groups.forEach(function (g) { g.items.forEach(function (i) { total++; if (S.checked[i.key]) done++; }); });
-    if (!total) return '<p class="cap">Pick some recipes first, then your list shows up here.</p>';
+    var groups = grocery(), keys = invKeys(), total = 0, done = 0, have = [];
+    groups.forEach(function (g) { g.items.forEach(function (i) {
+      if (onHand(i, keys)) { have.push(i); return; }
+      total++; if (S.checked[i.key]) done++;
+    }); });
+    if (!total && !have.length) return '<p class="cap">Pick some recipes first, then your list shows up here.</p>';
     var h = '<p class="cap">' + done + " of " + total + " checked · Tap the box to check off, the name to see the recipe</p>" +
       '<div class="row"><button class="btn primary" data-act="copylist">Copy list</button>' +
       '<button class="btn" data-act="showtext">' + (V.showText ? "Hide text" : "Show as text") + "</button>" +
       '<button class="btn" data-act="hidedone">' + (V.hideDone ? "Show checked" : "Hide checked") + "</button>" +
       '<button class="btn" data-act="uncheck">Uncheck all</button></div>';
+    if (have.length) h += '<p class="cap onhand-cap">' + have.length + (have.length === 1 ? " item is" : " items are") + " in your inventory and left off the copied list.</p>";
     if (V.showText) h += '<textarea readonly>' + esc(listText()) + "</textarea>";
+    function daysOf(i) { return i.days.map(slotShort).filter(function (x, n, a) { return a.indexOf(x) === n; }).join(" · "); }
     groups.forEach(function (g) {
-      var items = V.hideDone ? g.items.filter(function (i) { return !S.checked[i.key]; }) : g.items;
+      var items = g.items.filter(function (i) { return !onHand(i, keys) && !(V.hideDone && S.checked[i.key]); });
       if (!items.length) return;
       h += "<h3>" + esc(CAT_LABEL[g.cat]) + "</h3>";
       h += items.map(function (i) {
-        var on = !!S.checked[i.key];
+        var on = !!S.checked[i.key], forced = S.needAnyway[i.key] && onHandFor(i, keys);
         return '<div class="check' + (on ? " on" : "") + '" data-row="' + esc(i.key) + '">' +
           '<button class="hit" role="checkbox" aria-checked="' + on + '" aria-label="Check off ' + esc(i.sing) + '" data-act="check" data-key="' + esc(i.key) + '">' +
           '<span class="box">' + (on ? "✓" : "") + "</span></button>" +
           '<button class="go" data-act="usedin" data-key="' + esc(i.key) + '" aria-label="Show where ' + esc(i.sing) + ' is used">' +
-          '<span class="lbl">' + esc(shopLine(i)) + '</span><span class="m">' +
-          i.days.map(slotShort).filter(function (x, n, a) { return a.indexOf(x) === n; }).join(" · ") + '</span><span class="chev">›</span></button></div>';
+          '<span class="lbl">' + esc(shopLine(i)) + (forced ? ' <span class="badge">Need anyway</span>' : "") + '</span><span class="m">' +
+          daysOf(i) + '</span><span class="chev">›</span></button>' +
+          (forced ? '<button class="undo" data-act="needanyway" data-key="' + esc(i.key) + '" aria-label="Back to on hand">Undo</button>' : "") + "</div>";
       }).join("");
     });
+    if (have.length) {
+      h += '<details class="onhand"' + (V.onHandOpen ? " open" : "") + '><summary><span>On hand</span><span class="cnt">' + have.length + '</span><span class="m">Not on the copied list</span></summary>';
+      h += have.map(function (i) {
+        var inv = onHandFor(i, keys);
+        return '<div class="check have" data-row="' + esc(i.key) + '">' +
+          '<button class="go" data-act="usedin" data-key="' + esc(i.key) + '" aria-label="Show where ' + esc(i.sing) + ' is used">' +
+          '<span class="lbl">' + esc(shopLine(i)) + ' <span class="badge">On hand</span>' +
+          '<span class="m sub">' + esc(locName(inv.loc)) + ": " + esc(inv.name) + (inv.amt ? " · " + esc(inv.amt) : "") + "</span></span>" +
+          '<span class="m">' + daysOf(i) + '</span></button>' +
+          '<button class="btn need" data-act="needanyway" data-key="' + esc(i.key) + '">Need anyway</button></div>';
+      }).join("") + "</details>";
+    }
     return h;
+  }
+  function locName(l) { for (var i = 0; i < LOCS.length; i++) if (LOCS[i][0] === l) return LOCS[i][1]; return "Pantry"; }
+  function fmtDate(d) {
+    var p = d.split("-"), dt = new Date(+p[0], +p[1] - 1, +p[2]);
+    return dt.toLocaleDateString(undefined, { month: "short", day: "numeric", year: dt.getFullYear() === new Date().getFullYear() ? undefined : "numeric" });
+  }
+  function isoToday() { var t = new Date(); return t.getFullYear() + "-" + String(t.getMonth() + 1).padStart(2, "0") + "-" + String(t.getDate()).padStart(2, "0"); }
+  function invForm(it, mode) {
+    var loc = it ? it.loc : V.invLoc || "pantry";
+    return '<form class="invform" data-form="' + mode + '"' + (it ? ' data-id="' + esc(it.id) + '"' : "") + ">" +
+      '<label class="field"><span>Item</span><input name="name" required maxlength="120" autocomplete="off" placeholder="e.g. Black beans" value="' + esc(it ? it.name : "") + '"></label>' +
+      '<div class="invgrid"><label class="field"><span>Amount (optional)</span><input name="amt" maxlength="60" autocomplete="off" placeholder="e.g. 2 cans" value="' + esc(it ? it.amt : "") + '"></label>' +
+      '<label class="field"><span>' + (loc === "freezer" ? "Frozen on" : "Best by") + ' (optional)</span><input name="date" type="date" value="' + esc(it ? it.date : "") + '"></label></div>' +
+      '<div class="seg" role="radiogroup" aria-label="Where">' + LOCS.map(function (x) {
+        return '<label class="segopt"><input type="radio" name="loc" value="' + x[0] + '"' + (x[0] === loc ? " checked" : "") + "><span>" + x[1] + "</span></label>";
+      }).join("") + "</div>" +
+      '<div class="row"><button class="btn primary" type="submit">' + (mode === "invadd" ? "Add item" : "Save") + "</button>" +
+      (mode === "invedit" ? '<button class="btn" type="button" data-act="invcancel">Cancel</button><button class="btn danger" type="button" data-act="invremove" data-id="' + esc(it.id) + '">Remove</button>' : "") +
+      "</div></form>";
+  }
+  function renderInventory() {
+    var h = '<h2>Inventory</h2><p class="cap">What you already have. Matching grocery items are marked On hand and left off the copied list.</p>';
+    h += '<input class="search" type="search" data-inv-search placeholder="Search inventory" aria-label="Search inventory" value="' + esc(V.invQ || "") + '">';
+    h += V.invAdding ? '<div class="card">' + invForm(null, "invadd") + "</div>" :
+      '<div class="row"><button class="btn primary" data-act="invnew">+ Add item</button></div>';
+    var today0 = isoToday();
+    LOCS.forEach(function (x) {
+      var items = S.inventory.filter(function (it) { return it.loc === x[0]; }).sort(function (a, b) { return a.name.localeCompare(b.name); });
+      h += '<section class="invsec" data-loc="' + x[0] + '"><h3>' + x[1] + ' <span class="cnt">' + items.length + "</span></h3>";
+      if (!items.length) h += '<p class="cap invnone">Nothing here yet.</p>';
+      h += items.map(function (it) {
+        if (V.invEdit === it.id) return '<div class="card invrow-edit" data-inv="' + esc(it.id) + '" data-name="' + esc(it.name.toLowerCase()) + '">' + invForm(it, "invedit") + "</div>";
+        var past = it.date && x[0] !== "freezer" && it.date < today0;
+        var meta = [it.amt ? esc(it.amt) : "", it.date ? (x[0] === "freezer" ? "Frozen " : "Best by ") + esc(fmtDate(it.date)) : ""].filter(Boolean).join(" · ");
+        return '<div class="invrow" data-inv="' + esc(it.id) + '" data-name="' + esc((it.name + " " + it.amt).toLowerCase()) + '">' +
+          '<button class="go" data-act="invedit" data-id="' + esc(it.id) + '" aria-label="Edit ' + esc(it.name) + '"><span class="lbl">' + esc(it.name) +
+          (meta ? '<span class="m sub">' + meta + "</span>" : "") + "</span>" + (past ? '<span class="badge warn">Past date</span>' : "") + '<span class="chev">›</span></button>' +
+          '<button class="x" data-act="invremove" data-id="' + esc(it.id) + '" aria-label="Remove ' + esc(it.name) + '">✕</button></div>';
+      }).join("");
+      h += '<p class="cap invnomatch" hidden>No matches.</p></section>';
+    });
+    return h;
+  }
+  function applyInvSearch() {
+    var q = (V.invQ || "").trim().toLowerCase();
+    Array.prototype.forEach.call($app.querySelectorAll(".invsec"), function (sec) {
+      var rows = sec.querySelectorAll("[data-inv]"), shown = 0;
+      Array.prototype.forEach.call(rows, function (r) {
+        var hit = !q || r.getAttribute("data-name").indexOf(q) >= 0 || r.classList.contains("invrow-edit");
+        r.hidden = !hit; if (hit) shown++;
+      });
+      var nm = sec.querySelector(".invnomatch"); if (nm) nm.hidden = !(q && rows.length && !shown);
+    });
   }
   function secName(id) { for (var i = 0; i < SECTIONS.length; i++) if (SECTIONS[i].id === id) return SECTIONS[i].name; return ""; }
   function renderRecipes() {
@@ -466,13 +571,15 @@
     tabs.push(["plan", "Plan"]);
     if (pickedCount() || S.extras.length) tabs.push(["list", "List"]);
     tabs.push(["recipes", "Recipes"]);
+    tabs.push(["inventory", "Inventory"]);
     tabs.push(["backup", "Backup"]);
     if (!tabs.some(function (t) { return t[0] === V.tab; }) && !(V.tab === "week" && V.back)) V.tab = "plan";
     $tabs.innerHTML = tabs.map(function (t) {
       return '<button role="tab" data-act="tab" data-tab="' + t[0] + '" class="' + (V.tab === t[0] ? "on" : "") + '">' + t[1] + "</button>";
     }).join("");
     $sub.textContent = S.active && S.weekOf ? "Week of " + S.weekOf + " · " + pickedCount() + " dinners" : "Pick a dinner for each night";
-    $app.innerHTML = V.tab === "week" ? renderWeek() : V.tab === "plan" ? renderPlan() : V.tab === "list" ? renderList() : V.tab === "recipes" ? renderRecipes() : renderBackup();
+    $app.innerHTML = V.tab === "week" ? renderWeek() : V.tab === "plan" ? renderPlan() : V.tab === "list" ? renderList() : V.tab === "recipes" ? renderRecipes() : V.tab === "inventory" ? renderInventory() : renderBackup();
+    if (V.tab === "inventory") applyInvSearch();
     var n = pickedCount();
     var anyRecipes = DAYS.some(function (x) { return RECIPES[x].length > 0; });
     if (V.tab === "plan" && (anyRecipes || n)) {
@@ -510,7 +617,7 @@
     var el = e.target.closest("[data-act]");
     if (!el) return;
     var act = el.getAttribute("data-act");
-    if (act === "tab") { V.back = null; V.focus = null; V.chooser = ""; V.tab = el.getAttribute("data-tab"); if (V.tab === "week") V.day = today; render(); toTop(); return; }
+    if (act === "tab") { V.invEdit = ""; V.invAdding = false; V.back = null; V.focus = null; V.chooser = ""; V.tab = el.getAttribute("data-tab"); if (V.tab === "week") V.day = today; render(); toTop(); return; }
     if (act === "day") {
       var d = el.getAttribute("data-d");
       if (V.tab === "week") V.day = d; else { V.planDay = d; V.open = ""; }
@@ -530,13 +637,26 @@
       }
       render(); return;
     }
+    if (act === "needanyway") {
+      var nk = el.getAttribute("data-key"), na = Object.assign({}, S.needAnyway);
+      if (na[nk]) { delete na[nk]; toast("Marked on hand"); } else { na[nk] = true; toast("Added back to your list"); }
+      set({ needAnyway: na }); return;
+    }
+    if (act === "invnew") { V.invAdding = true; V.invEdit = ""; render(); var f0 = $app.querySelector('[data-form=invadd] input[name=name]'); if (f0) f0.focus(); return; }
+    if (act === "invedit") { V.invEdit = el.getAttribute("data-id"); V.invAdding = false; render(); return; }
+    if (act === "invcancel") { V.invEdit = ""; render(); return; }
+    if (act === "invremove") {
+      var rid0 = el.getAttribute("data-id"), rit = S.inventory.filter(function (x) { return x.id === rid0; })[0];
+      if (!rit || !confirm("Remove " + rit.name + " from your inventory?")) return;
+      V.invEdit = ""; set({ inventory: S.inventory.filter(function (x) { return x.id !== rid0; }) }); toast("Removed " + rit.name); return;
+    }
     if (act === "clear") {
       if (!confirm("Clear all picks and checkmarks?")) return;
-      V.planDay = "mon"; set({ picks: {}, servings: {}, checked: {}, active: false, weekOf: "", extras: [] }); return;
+      V.planDay = "mon"; set({ picks: {}, servings: {}, checked: {}, active: false, weekOf: "", extras: [], needAnyway: {} }); return;
     }
     if (act === "newweek") {
       if (!confirm("Start planning a new week? This clears this week's picks and checkmarks.")) return;
-      V.tab = "plan"; V.planDay = "mon"; set({ picks: {}, servings: {}, checked: {}, active: false, weekOf: "", extras: [] }); toTop(); return;
+      V.tab = "plan"; V.planDay = "mon"; set({ picks: {}, servings: {}, checked: {}, active: false, weekOf: "", extras: [], needAnyway: {} }); toTop(); return;
     }
     if (act === "start") {
       V.tab = "week"; V.day = today; set({ active: true, weekOf: nextMonday(), checked: {} }); toTop(); toast("Week saved"); return;
@@ -603,13 +723,42 @@
       var txt = (document.getElementById("restore").value || "").trim();
       try {
         var body = txt.indexOf("MEALPLAN:") === 0 ? decodeURIComponent(escape(atob(txt.slice(9)))) : txt;
-        var p = normalize(JSON.parse(body));
+        var raw = JSON.parse(body), p = normalize(raw);
+        if (!raw || !Array.isArray(raw.inventory)) p.inventory = S.inventory.slice();
         S = p; save(); V.tab = S.active ? "week" : "plan"; V.day = today; V.showBackup = false; render(); toast("Plan restored");
       } catch (err) { toast("That backup didn't work"); }
       return;
     }
   }
   document.addEventListener("click", onClick);
+  document.addEventListener("submit", function (e) {
+    var f = e.target, mode = f && f.getAttribute && f.getAttribute("data-form");
+    if (mode !== "invadd" && mode !== "invedit") return;
+    e.preventDefault();
+    var name = (f.elements.name.value || "").trim(); if (!name) { f.elements.name.focus(); return; }
+    var locEl = f.querySelector("input[name=loc]:checked");
+    var data = { name: name.slice(0, 120), amt: (f.elements.amt.value || "").trim().slice(0, 60),
+      date: /^\d{4}-\d{2}-\d{2}$/.test(f.elements.date.value) ? f.elements.date.value : "", loc: locEl && locOk(locEl.value) ? locEl.value : "pantry" };
+    var inv = S.inventory.slice();
+    if (mode === "invadd") {
+      data.id = "i" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+      inv.push(data); V.invLoc = data.loc; V.invAdding = false; set({ inventory: inv }); toast("Added to " + locName(data.loc));
+    } else {
+      var eid0 = f.getAttribute("data-id");
+      inv = inv.map(function (x) { return x.id === eid0 ? Object.assign({ id: eid0 }, data) : x; });
+      V.invEdit = ""; set({ inventory: inv }); toast("Saved");
+    }
+  });
+  document.addEventListener("input", function (e) {
+    if (e.target && e.target.hasAttribute && e.target.hasAttribute("data-inv-search")) { V.invQ = e.target.value; applyInvSearch(); }
+  });
+  document.addEventListener("change", function (e) {
+    // Date label follows the chosen place: freezer = "Frozen on", otherwise "Best by".
+    if (e.target && e.target.name === "loc" && e.target.form) {
+      var lab = e.target.form.querySelector("input[name=date]"); if (lab && lab.previousElementSibling) lab.previousElementSibling.textContent = (e.target.value === "freezer" ? "Frozen on" : "Best by") + " (optional)";
+    }
+  });
+  document.addEventListener("toggle", function (e) { if (e.target && e.target.classList && e.target.classList.contains("onhand")) V.onHandOpen = e.target.open; }, true);
   document.addEventListener("keydown", function (e) { if (e.key === "Escape" && V.chooser) { V.chooser = ""; renderSheet(); } });
   // Re-open on today's weekday when the app comes back after a day change.
   document.addEventListener("visibilitychange", function () {
