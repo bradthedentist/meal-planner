@@ -158,3 +158,22 @@ textarea { min-height: 120px; font: 13px/1.4 ui-monospace, Menlo, monospace; wor
 .check .btn.need { border: 1px solid var(--line2); min-height: 36px; padding: 0 12px; font-size: 13px; flex: 0 0 auto; }
 .check .undo { flex: 0 0 auto; color: var(--accent); font-weight: 600; font-size: 13px; padding: 0 6px; }
 [hidden] { display: none !important; }
+
+/* I have it / Cooked / Restock */
+.check .btn.ihave { border: 1px solid var(--line2); min-height: 34px; padding: 0 10px; font-size: 12.5px; flex: 0 0 auto; align-self: center; margin-left: 4px; white-space: nowrap; }
+.check .go.static { cursor: default; }
+.check .x { flex: 0 0 auto; width: 40px; text-align: center; color: var(--faint); font-size: 15px; }
+.btn.cook { flex: 0 0 auto; min-width: 92px; }
+.btn.cook.done { background: var(--green); border-color: var(--green); color: #fff; }
+.xline { display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--line); }
+.xline .xrow { flex: 1; min-width: 0; border-bottom: 0; }
+.xline .btn.cook { min-height: 36px; font-size: 13px; padding: 0 12px; min-width: 0; }
+#toast { display: flex; align-items: center; gap: 12px; }
+#toast.act { pointer-events: auto; }
+.tundo { border: 0; background: none; color: var(--accent); font-weight: 700; padding: 2px 4px; }
+#sheet .panel { max-height: 85vh; overflow-y: auto; }
+.cookrow { border-bottom: 1px solid var(--line); padding: 10px 0; }
+.cookrow .m { color: var(--faint); font-size: 12px; }
+.cookrow .cq { color: var(--muted); font-size: 14px; }
+.cookrow .zero { color: #B3261E; font-weight: 600; }
+.cookrow .seg { margin-top: 8px; }

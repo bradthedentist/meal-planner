@@ -10,7 +10,7 @@
   var $toast = document.getElementById("toast");
 
   function fresh() {
-    return { v: 1, ts: 0, picks: {}, servings: {}, alternatives: {}, checked: {}, active: false, weekOf: "", extras: [], inventory: [], needAnyway: {} };
+    return { v: 1, ts: 0, picks: {}, servings: {}, alternatives: {}, checked: {}, active: false, weekOf: "", extras: [], inventory: [], needAnyway: {}, restock: [], cooked: {} };
   }
   function dayOf(id) {
     for (var i = 0; i < DAYS.length; i++) if (RECIPES[DAYS[i]].some(function (r) { return r.id === id; })) return DAYS[i];
@@ -49,6 +49,20 @@
     s.inventory = normInventory(p.inventory);
     s.needAnyway = {};
     if (p.needAnyway && typeof p.needAnyway === "object") Object.keys(p.needAnyway).forEach(function (k) { if (p.needAnyway[k]) s.needAnyway[k] = true; });
+    s.restock = normRestock(p.restock);
+    s.cooked = {};
+    if (p.cooked && typeof p.cooked === "object") Object.keys(p.cooked).forEach(function (slot) {
+      var c = p.cooked[slot];
+      var valid = DAYS.indexOf(slot) >= 0 ? !!s.picks[slot] && s.picks[slot] !== "skip" : String(slot).indexOf("x:") === 0 && s.extras.indexOf(slot.slice(2)) >= 0;
+      if (!valid || !c || typeof c !== "object") return;
+      var ops = (Array.isArray(c.ops) ? c.ops : []).map(function (op) {
+        if (!op) return null;
+        if (op.t === "upd") { var b = normInventory([op.before])[0], a = normInventory([op.after])[0]; return b && a ? { t: "upd", before: b, after: a } : null; }
+        if (op.t === "del") { var it = normInventory([op.item])[0]; return it ? { t: "del", item: it, idx: op.idx >= 0 ? op.idx : 0 } : null; }
+        return null;
+      }).filter(Boolean);
+      s.cooked[slot] = { ts: +c.ts || 0, ops: ops, restock: Array.isArray(c.restock) ? c.restock.filter(function (x) { return typeof x === "string"; }) : [] };
+    });
     s.active = !!p.active && (DAYS.some(function (d) { return s.picks[d] && s.picks[d] !== "skip"; }) || s.extras.length > 0);
     s.weekOf = s.active ? p.weekOf || "" : "";
     return s;
@@ -64,9 +78,74 @@
       var id = typeof it.id === "string" && it.id && !seen[it.id] ? it.id : "i" + Date.now().toString(36) + n;
       seen[id] = true;
       return { id: id, name: it.name.trim().slice(0, 120), amt: typeof it.amt === "string" ? it.amt.trim().slice(0, 60) : "",
-        date: typeof it.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(it.date) ? it.date : "", loc: locOk(it.loc) ? it.loc : "pantry" };
+        date: typeof it.date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(it.date) ? it.date : "", loc: locOk(it.loc) ? it.loc : "pantry",
+        qty: qtyOk(it.qty) ? { n: it.qty.n, fam: it.qty.fam, unit: typeof it.qty.unit === "string" ? it.qty.unit : "" } : parseQty(typeof it.amt === "string" ? it.amt : ""),
+        cat: CAT_ORDER.indexOf(it.cat) >= 0 ? it.cat : "" };
     });
   }
+  function normRestock(list) {
+    if (!Array.isArray(list)) return [];
+    var seen = {};
+    return list.filter(function (r) { return r && typeof r.name === "string" && r.name.trim(); }).map(function (r, n) {
+      var id = typeof r.id === "string" && r.id && !seen[r.id] ? r.id : "r" + Date.now().toString(36) + n;
+      seen[id] = true;
+      return { id: id, name: r.name.trim().slice(0, 120), cat: CAT_ORDER.indexOf(r.cat) >= 0 ? r.cat : "ot" };
+    });
+  }
+  // ---------- quantities: exact amounts in base units (tsp for volume, oz for weight, count for everything else) ----------
+  function qtyOk(q) { return q && typeof q === "object" && typeof q.n === "number" && isFinite(q.n) && q.n > 0 && typeof q.fam === "string"; }
+  var UF = { "\u00BC": .25, "\u00BD": .5, "\u00BE": .75, "\u2153": 1 / 3, "\u2154": 2 / 3, "\u215B": .125, "\u215C": .375, "\u215D": .625, "\u215E": .875 };
+  var UFR = "[\u00BC\u00BD\u00BE\u2153\u2154\u215B\u215C\u215D\u215E]";
+  var UNIT_ALIAS = { tsp: "tsp", teaspoon: "tsp", teaspoons: "tsp", tbsp: "tbsp", tbs: "tbsp", tbl: "tbsp", tablespoon: "tbsp", tablespoons: "tbsp",
+    cup: "cup", cups: "cup", ml: "ml", milliliter: "ml", milliliters: "ml", millilitre: "ml", l: "l", liter: "l", liters: "l", litre: "l", litres: "l",
+    oz: "oz", ounce: "oz", ounces: "oz", lb: "lb", lbs: "lb", pound: "lb", pounds: "lb", g: "g", gram: "g", grams: "g", kg: "kg", kilogram: "kg", kilograms: "kg" };
+  var EXTRA_VOL = { "fl oz": 6, "fluid ounce": 6, "fluid ounces": 6, pint: 96, pints: 96, pt: 96, quart: 192, quarts: 192, qt: 192, gallon: 768, gallons: 768, gal: 768 };
+  function parseNum(t) {
+    t = t.trim(); var v = null, m;
+    if ((m = t.match(/^(\d+)\s+(\d+)\/(\d+)/))) v = +m[1] + m[2] / m[3];
+    else if ((m = t.match(/^(\d+)\/(\d+)/))) v = m[1] / m[2];
+    else if ((m = t.match(new RegExp("^(\\d+(?:[.,]\\d+)?)\\s*(" + UFR + ")?")))) v = parseFloat(m[1].replace(",", ".")) + (m[2] ? UF[m[2]] : 0);
+    else if ((m = t.match(new RegExp("^(" + UFR + ")")))) v = UF[m[1]];
+    if (v === null || !isFinite(v)) return null;
+    return [v, t.slice(m[0].length).trim()];
+  }
+  function countUnit(w) {
+    if (PLURAL[w]) return w;
+    for (var k in PLURAL) if (PLURAL[k] === w) return k;
+    return singular(w);
+  }
+  function parseQty(text) {
+    if (!text || typeof text !== "string") return null;
+    var parts = text.split("+"), total = 0, fam = null, unit = "";
+    for (var i = 0; i < parts.length; i++) {
+      var pn = parseNum(parts[i]); if (!pn) return null;
+      var rest = pn[1].toLowerCase().replace(/\./g, "").replace(/\s+/g, " ").trim(), f, u, mult;
+      if (!rest) { f = "u:"; u = ""; mult = 1; }
+      else if (EXTRA_VOL[rest]) { f = "vol"; u = "cup"; mult = EXTRA_VOL[rest]; }
+      else {
+        var w = rest.split(" ")[0], al = UNIT_ALIAS[rest] || UNIT_ALIAS[w];
+        if (al) { f = VOL[al] ? "vol" : "wt"; u = al; mult = VOL[al] || WT[al]; }
+        else { u = countUnit(w); f = "u:" + u; mult = 1; }
+      }
+      if (fam && fam !== f) return null;
+      fam = f; if (!unit) unit = u; total += pn[0] * mult;
+    }
+    return total > 0 ? { n: total, fam: fam, unit: unit } : null;
+  }
+  function formatQty(q) {
+    if (!qtyOk(q)) return "";
+    if (q.fam === "vol" || q.fam === "wt") return gQty({ amt: q.n, fam: q.fam });
+    var n = fmtNum(q.n);
+    return [n, unitLabel(q.unit, oneOrLess(n) ? 1 : 2)].filter(Boolean).join(" ");
+  }
+  // Amount a recipe ingredient uses at the chosen servings, in the same base units.
+  function needOf(i, f) {
+    if (!(i.q > 0) || i.u === "-") return null;
+    var fam = famOf(i.u);
+    return { n: i.q * f * (fam === "vol" ? VOL[i.u] : fam === "wt" ? WT[i.u] : 1), fam: fam, unit: i.u };
+  }
+  function locForCat(c) { return c === "fr" ? "freezer" : c === "pr" || c === "me" || c === "da" ? "fridge" : "pantry"; }
+  function newId(p) { return p + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
   // ---------- storage: localStorage primary, IndexedDB backup ----------
   function readLocal() {
@@ -164,14 +243,21 @@
   }
   function srcNote(r) { return !r.keep && r.serves !== HOUSEHOLD ? "Source makes " + r.serves + ", scaled to your servings" : ""; }
   function pickedCount() { return DAYS.filter(function (d) { return S.picks[d] && S.picks[d] !== "skip"; }).length; }
+  function snapshot() { return JSON.stringify({ inventory: S.inventory, needAnyway: S.needAnyway, restock: S.restock, cooked: S.cooked }); }
+  function toastUndo(msg, snap) {
+    $toast.innerHTML = '<span>' + esc(msg) + '</span><button class="tundo" data-act="undo">Undo</button>';
+    $toast.classList.add("show", "act"); V.undoSnap = snap;
+    clearTimeout(toast._t); toast._t = setTimeout(function () { $toast.classList.remove("show", "act"); V.undoSnap = null; }, 7000);
+  }
   function toast(msg) {
+    $toast.classList.remove("act"); V.undoSnap = null;
     $toast.textContent = msg; $toast.classList.add("show");
     clearTimeout(toast._t); toast._t = setTimeout(function () { $toast.classList.remove("show"); }, 2200);
   }
   function grocery() {
     var map = {};
     slots().forEach(function (d) {
-      var r = recipeFor(d); if (!r) return;
+      var r = recipeFor(d); if (!r || S.cooked[d]) return; // cooked meals no longer need shopping
       var f = servingsFor(d) / r.serves;
       r.ing.forEach(function (i, idx) {
         if (i.c === "lf") return;
@@ -211,11 +297,11 @@
   }
   function listText() {
     var lines = ["Groceries" + (S.weekOf ? " — week of " + S.weekOf : "")], keys = invKeys();
-    grocery().forEach(function (g) {
+    listGroups(keys).forEach(function (g) {
       var items = g.items.filter(function (i) { return !S.checked[i.key] && !onHand(i, keys); });
       if (!items.length) return;
       lines.push("", CAT_LABEL[g.cat].toUpperCase());
-      items.forEach(function (i) { lines.push("- " + shopLine(i)); });
+      items.forEach(function (i) { lines.push("- " + shopLine(i) + (i.restock ? " (restock)" : "")); });
     });
     return lines.join("\n");
   }
@@ -236,7 +322,7 @@
 
   // ---------- view state (not persisted) ----------
   var today = todayKey();
-  var V = { tab: S.active ? "week" : "plan", day: today, planDay: firstOpen(), open: "", hideDone: false, showText: false, showBackup: false, focus: null, back: null, chooser: "", sec: SECTIONS[0].id, xopen: "" };
+  var V = { cook: "", cookChoice: {}, undoSnap: null, tab: S.active ? "week" : "plan", day: today, planDay: firstOpen(), open: "", hideDone: false, showText: false, showBackup: false, focus: null, back: null, chooser: "", sec: SECTIONS[0].id, xopen: "" };
   function firstOpen() { for (var i = 0; i < DAYS.length; i++) if (!S.picks[DAYS[i]]) return DAYS[i]; return "mon"; }
 
   // ---------- render ----------
@@ -355,6 +441,27 @@
     for (var n = 0; n < names.length; n++) { var k = matchKey(names[n]); if (k && keys[k]) return keys[k]; }
     return null;
   }
+  function keyOfName(name) { return matchKey(words(String(name).replace(/\([^)]*\)/g, " "))); }
+  function pruneRestock(inv, rs) {
+    var keys = {}; inv.forEach(function (it) { keys[keyOfName(it.name)] = true; });
+    return rs.filter(function (r) { return !keys[keyOfName(r.name)]; });
+  }
+  function restockItems(keys) {
+    keys = keys || invKeys();
+    return S.restock.filter(function (r) { return !keys[keyOfName(r.name)]; }).map(function (r) {
+      return { key: "restock:" + r.id, id: r.id, sing: r.name, plur: r.name, cat: r.cat, fam: "u:", unit: "", amt: 0, days: [], uses: [], restock: true };
+    });
+  }
+  function listGroups(keys) {
+    var groups = grocery();
+    restockItems(keys).forEach(function (r) {
+      var g = groups.filter(function (x) { return x.cat === r.cat; })[0];
+      if (!g) { g = { cat: r.cat, items: [] }; groups.push(g); }
+      g.items.push(r);
+    });
+    groups.sort(function (a, b) { return CAT_ORDER.indexOf(a.cat) - CAT_ORDER.indexOf(b.cat); });
+    return groups;
+  }
   function onHand(item, keys) { return !S.needAnyway[item.key] && !!onHandFor(item, keys); }
   function findItem(key) {
     var out = null;
@@ -391,6 +498,10 @@
     return stepper(r, slot) + alternativePicker(r) + (srcNote(r) ? '<p class="cap" style="margin:-4px 0 8px">' + esc(srcNote(r)) + "</p>" : "") +
       "<h3>Ingredients</h3>" + ingList(r, servingsFor(slot) / r.serves, fx) + "<h3>Steps</h3>" + steps(r, fx) + credit(r);
   }
+  function cookBtn(slot) {
+    var done = !!S.cooked[slot];
+    return '<button class="btn cook' + (done ? " done" : "") + '" data-act="cook" data-slot="' + esc(slot) + '" aria-pressed="' + done + '">' + (done ? "✓ Cooked" : "Cooked") + "</button>";
+  }
   function renderWeek() {
     var d = V.day, id = S.picks[d], r = id && id !== "skip" ? selectedRecipe(BY_ID[id]) : null;
     var fx = V.focus && V.focus.d === d ? V.focus : null;
@@ -398,7 +509,7 @@
     h += "<h2>" + esc(DAY_FULL[d]) + "</h2>";
     if (r) {
       h += '<div class="card"><div class="opt"><div class="info"><div class="name" style="font-size:19px">' + nameHtml(r) + '</div>' +
-        '<div class="desc">' + esc(r.desc) + '</div><div class="meta">' + esc(r.time) + "</div></div></div>" +
+        '<div class="desc">' + esc(r.desc) + '</div><div class="meta">' + esc(r.time) + "</div></div>" + cookBtn(d) + "</div>" +
         recipeBody(r, d, fx) + "</div>";
     } else {
       h += '<p class="cap">' + (id === "skip" ? "Night off. No cooking planned." : "No recipe picked for this day.") + "</p>" +
@@ -407,8 +518,8 @@
     if (S.extras.length) {
       h += "<h3>Extras this week</h3>" + S.extras.map(function (xid) {
         var xr = BY_ID[xid];
-        return '<button class="xrow" data-act="openx" data-id="' + xid + '"><span>' + esc(xr.name) + '</span><span class="m">' +
-          esc(secName(secOf(xid))) + ' ›</span></button>';
+        return '<div class="xline"><button class="xrow" data-act="openx" data-id="' + xid + '"><span>' + esc(xr.name) + '</span><span class="m">' +
+          esc(secName(secOf(xid))) + ' ›</span></button>' + cookBtn("x:" + xid) + "</div>";
       }).join("");
     }
     h += '<div class="row" style="margin-top:22px"><button class="btn" data-act="newweek">Plan a new week</button></div>';
@@ -438,12 +549,13 @@
     return h;
   }
   function renderList() {
-    var groups = grocery(), keys = invKeys(), total = 0, done = 0, have = [];
+    var keys = invKeys(), groups = listGroups(keys), total = 0, done = 0, have = [];
     groups.forEach(function (g) { g.items.forEach(function (i) {
       if (onHand(i, keys)) { have.push(i); return; }
       total++; if (S.checked[i.key]) done++;
     }); });
     if (!total && !have.length) return '<p class="cap">Pick some recipes first, then your list shows up here.</p>';
+    // (restock items count toward total above)
     var h = '<p class="cap">' + done + " of " + total + " checked · Tap the box to check off, the name to see the recipe</p>" +
       '<div class="row"><button class="btn primary" data-act="copylist">Copy list</button>' +
       '<button class="btn" data-act="showtext">' + (V.showText ? "Hide text" : "Show as text") + "</button>" +
@@ -461,10 +573,15 @@
         return '<div class="check' + (on ? " on" : "") + '" data-row="' + esc(i.key) + '">' +
           '<button class="hit" role="checkbox" aria-checked="' + on + '" aria-label="Check off ' + esc(i.sing) + '" data-act="check" data-key="' + esc(i.key) + '">' +
           '<span class="box">' + (on ? "✓" : "") + "</span></button>" +
-          '<button class="go" data-act="usedin" data-key="' + esc(i.key) + '" aria-label="Show where ' + esc(i.sing) + ' is used">' +
-          '<span class="lbl">' + esc(shopLine(i)) + (forced ? ' <span class="badge">Need anyway</span>' : "") + '</span><span class="m">' +
-          daysOf(i) + '</span><span class="chev">›</span></button>' +
-          (forced ? '<button class="undo" data-act="needanyway" data-key="' + esc(i.key) + '" aria-label="Back to on hand">Undo</button>' : "") + "</div>";
+          (i.restock
+            ? '<div class="go static"><span class="lbl">' + esc(i.sing) + ' <span class="badge">Restock</span></span></div>' +
+              '<button class="btn ihave" data-act="ihave" data-restock="' + esc(i.id) + '" aria-label="I have ' + esc(i.sing) + '">I have it</button>' +
+              '<button class="x" data-act="restockremove" data-id="' + esc(i.id) + '" aria-label="Remove ' + esc(i.sing) + ' from list">✕</button>'
+            : '<button class="go" data-act="usedin" data-key="' + esc(i.key) + '" aria-label="Show where ' + esc(i.sing) + ' is used">' +
+              '<span class="lbl">' + esc(shopLine(i)) + (forced ? ' <span class="badge">Need anyway</span>' : "") + '</span><span class="m">' +
+              daysOf(i) + '</span><span class="chev">›</span></button>' +
+              (forced ? '<button class="undo" data-act="needanyway" data-key="' + esc(i.key) + '" aria-label="Back to on hand">Undo</button>' : "") +
+              '<button class="btn ihave" data-act="ihave" data-key="' + esc(i.key) + '" aria-label="I have ' + esc(i.sing) + '">I have it</button>') + "</div>";
       }).join("");
     });
     if (have.length) {
@@ -569,7 +686,7 @@
     var tabs = [];
     if (S.active) tabs.push(["week", "Week"]);
     tabs.push(["plan", "Plan"]);
-    if (pickedCount() || S.extras.length) tabs.push(["list", "List"]);
+    if (pickedCount() || S.extras.length || S.restock.length) tabs.push(["list", "List"]);
     tabs.push(["recipes", "Recipes"]);
     tabs.push(["inventory", "Inventory"]);
     tabs.push(["backup", "Backup"]);
@@ -592,8 +709,92 @@
     } else { $bar.className = ""; $bar.innerHTML = ""; }
     renderSheet();
   }
+  // What "Cooked" takes out of inventory: matching items, summed per inventory item, scaled to chosen servings.
+  function cookPlan(slot) {
+    var r = recipeFor(slot); if (!r) return [];
+    var f = servingsFor(slot) / r.serves, keys = invKeys(), by = {}, order = [];
+    r.ing.forEach(function (i) {
+      if (i.c === "lf") return;
+      var inv = onHandFor({ sing: i.sing, key: "" }, keys); if (!inv) return;
+      var e = by[inv.id];
+      if (!e) { e = by[inv.id] = { inv: inv, need: 0, ok: qtyOk(inv.qty), cat: i.c }; order.push(inv.id); }
+      var nd = needOf(i, f);
+      if (nd && e.ok && nd.fam === inv.qty.fam) e.need += nd.n; else e.ok = false;
+    });
+    return order.map(function (id) {
+      var e = by[id];
+      if (e.ok) { e.left = e.inv.qty.n - e.need; e.zero = e.left <= Math.max(1e-9, e.inv.qty.n * 1e-6); }
+      return e;
+    });
+  }
+  function renderCookSheet($s) {
+    var slot = V.cook, r = recipeFor(slot);
+    if (!r) { V.cook = ""; $s.className = ""; $s.innerHTML = ""; return; }
+    var plan = cookPlan(slot), rows = "";
+    plan.forEach(function (e) {
+      var it = e.inv, nm = '<b>' + esc(it.name) + '</b> <span class="m">' + esc(locName(it.loc)) + "</span>";
+      if (e.ok) {
+        rows += '<div class="cookrow" data-inv="' + esc(it.id) + '"><div>' + nm + '</div><div class="cq">' + esc(it.amt) + " → " +
+          (e.zero ? '<span class="zero">used up · back on grocery list</span>' : esc(formatQty({ n: e.left, fam: it.qty.fam, unit: it.qty.unit })) + " left") + "</div></div>";
+      } else {
+        var ch = V.cookChoice[it.id] || "some";
+        rows += '<div class="cookrow ask" data-inv="' + esc(it.id) + '"><div>' + nm + '</div><div class="cq">' + (it.amt ? esc(it.amt) : "No amount") +
+          ' · amounts can’t be compared</div><div class="seg">' +
+          [["some", "Still have some"], ["used", "Used up"]].map(function (o) {
+            return '<label class="segopt"><input type="radio" name="cook-' + esc(it.id) + '" data-cookid="' + esc(it.id) + '" value="' + o[0] + '"' + (ch === o[0] ? " checked" : "") + "><span>" + o[1] + "</span></label>";
+          }).join("") + "</div></div>";
+      }
+    });
+    $s.className = "show";
+    $s.innerHTML = '<div class="scrim" data-act="closesheet"></div><div class="panel" role="dialog" aria-label="Cooked">' +
+      '<div class="pt">Cooked: ' + esc(r.name) + "</div>" +
+      '<p class="cap">' + servingsFor(slot) + " " + (r.yieldUnit ? esc(r.yieldUnit) : "servings") + ". " +
+      (plan.length ? "This comes out of your inventory:" : "Nothing in this recipe is in your inventory.") + "</p>" + rows +
+      '<div class="row"><button class="btn primary" data-act="cookconfirm" style="flex:1">Confirm cooked</button>' +
+      '<button class="btn" data-act="closesheet">Cancel</button></div></div>';
+  }
+  function applyCook(slot) {
+    var plan = cookPlan(slot), snap = snapshot(), inv = S.inventory.slice(), ops = [], zeros = [];
+    plan.forEach(function (e) {
+      var k = -1; inv.forEach(function (x, n) { if (x.id === e.inv.id) k = n; }); if (k < 0) return;
+      var cur = inv[k];
+      if (e.ok && !e.zero) {
+        var nq = { n: e.left, fam: cur.qty.fam, unit: cur.qty.unit }, after = Object.assign({}, cur, { qty: nq, amt: formatQty(nq) });
+        ops.push({ t: "upd", before: cur, after: after }); inv[k] = after;
+      } else if ((e.ok && e.zero) || (!e.ok && V.cookChoice[cur.id] === "used")) {
+        ops.push({ t: "del", item: cur, idx: k }); inv.splice(k, 1); zeros.push({ item: cur, cat: cur.cat || e.cat });
+      }
+    });
+    // Ran out: if this week's recipes still need it, it simply leaves "On hand"; otherwise it goes on the list as Restock.
+    var cooked = Object.assign({}, S.cooked); cooked[slot] = { ts: Date.now(), ops: ops, restock: [] };
+    var prevCooked = S.cooked; S.cooked = cooked; var groups = grocery(); S.cooked = prevCooked;
+    var rs = S.restock.slice(), added = [];
+    zeros.forEach(function (z) {
+      var k1 = {}; k1[keyOfName(z.item.name)] = z.item;
+      var needed = groups.some(function (g) { return g.items.some(function (i) { return !!onHandFor(i, k1); }); });
+      var dup = rs.some(function (r) { return keyOfName(r.name) === keyOfName(z.item.name); });
+      if (!needed && !dup) { var rid = newId("r"); rs.push({ id: rid, name: z.item.name, cat: z.cat || "ot" }); added.push(rid); }
+    });
+    cooked[slot].restock = added;
+    V.cook = ""; V.cookChoice = {};
+    set({ inventory: inv, restock: rs, cooked: cooked });
+    toastUndo("Marked cooked" + (zeros.length ? " · " + zeros.length + " back on your list" : ""), snap);
+  }
+  function undoCooked(slot) {
+    var c = S.cooked[slot]; if (!c) return;
+    var inv = S.inventory.slice(), rs = S.restock.filter(function (r) { return c.restock.indexOf(r.id) < 0; });
+    c.ops.slice().reverse().forEach(function (op) {
+      if (op.t === "upd") {
+        var k = -1; inv.forEach(function (x, n) { if (x.id === op.before.id) k = n; });
+        if (k >= 0) inv[k] = op.before; else inv.push(op.before);
+      } else if (!inv.some(function (x) { return x.id === op.item.id; })) inv.splice(Math.min(op.idx, inv.length), 0, op.item);
+    });
+    var cooked = Object.assign({}, S.cooked); delete cooked[slot];
+    set({ inventory: inv, restock: rs, cooked: cooked }); toast("Cooked undone · inventory restored");
+  }
   function renderSheet() {
     var $s = document.getElementById("sheet");
+    if (V.cook && V.tab === "week") { renderCookSheet($s); return; }
     var it = V.chooser && V.tab === "list" ? findItem(V.chooser) : null;
     if (!it) { $s.className = ""; $s.innerHTML = ""; return; }
     var seen = {}, rows = "";
@@ -637,6 +838,49 @@
       }
       render(); return;
     }
+    if (act === "undo") {
+      if (!V.undoSnap) return;
+      var o = JSON.parse(V.undoSnap); V.undoSnap = null; $toast.classList.remove("show", "act");
+      set({ inventory: normInventory(o.inventory), needAnyway: o.needAnyway || {}, restock: normRestock(o.restock), cooked: o.cooked || {} }); toast("Undone"); return;
+    }
+    if (act === "ihave") {
+      var snap0 = snapshot(), inv0 = S.inventory.slice(), rs0 = S.restock.slice(), na0 = Object.assign({}, S.needAnyway), where;
+      var rsid = el.getAttribute("data-restock");
+      if (rsid) {
+        var rr = S.restock.filter(function (x) { return x.id === rsid; })[0]; if (!rr) return;
+        where = locForCat(rr.cat);
+        inv0.push({ id: newId("i"), name: rr.name, amt: "", qty: null, date: "", loc: where, cat: rr.cat });
+      } else {
+        var g0 = findItem(el.getAttribute("data-key")); if (!g0) return;
+        var n0 = g0.amt, cnt = g0.fam !== "vol" && g0.fam !== "wt" && g0.unit !== "handful";
+        if (cnt && n0 > 0) n0 = Math.abs(n0 - Math.round(n0)) <= 0.01 ? Math.round(n0) : Math.ceil(n0 - 0.01);
+        var q0 = n0 > 0 ? { n: n0, fam: g0.fam, unit: g0.unit } : null;
+        var m0 = onHandFor(g0, invKeys());
+        if (m0) {
+          where = m0.loc;
+          if (q0 && qtyOk(m0.qty) && m0.qty.fam === q0.fam) {
+            var nq0 = { n: m0.qty.n + q0.n, fam: q0.fam, unit: m0.qty.unit || q0.unit };
+            inv0 = inv0.map(function (x) { return x.id === m0.id ? Object.assign({}, x, { qty: nq0, amt: formatQty(nq0) }) : x; });
+          }
+        } else {
+          where = locForCat(g0.cat);
+          inv0.push({ id: newId("i"), name: g0.sing.replace(/\s*\([^)]*\)/g, "").trim() || g0.sing, amt: formatQty(q0), qty: q0, date: "", loc: where, cat: g0.cat });
+        }
+        delete na0[g0.key];
+      }
+      set({ inventory: inv0, restock: pruneRestock(inv0, rs0), needAnyway: na0 });
+      toastUndo("Added to " + locName(where), snap0); return;
+    }
+    if (act === "restockremove") {
+      var snap1 = snapshot(), rid1 = el.getAttribute("data-id");
+      set({ restock: S.restock.filter(function (x) { return x.id !== rid1; }) }); toastUndo("Removed from list", snap1); return;
+    }
+    if (act === "cook") {
+      var cs = el.getAttribute("data-slot");
+      if (S.cooked[cs]) { if (confirm("Undo Cooked? This puts back what it took from your inventory.")) undoCooked(cs); return; }
+      V.cook = cs; V.cookChoice = {}; renderSheet(); return;
+    }
+    if (act === "cookconfirm") { if (V.cook) applyCook(V.cook); return; }
     if (act === "needanyway") {
       var nk = el.getAttribute("data-key"), na = Object.assign({}, S.needAnyway);
       if (na[nk]) { delete na[nk]; toast("Marked on hand"); } else { na[nk] = true; toast("Added back to your list"); }
@@ -652,11 +896,11 @@
     }
     if (act === "clear") {
       if (!confirm("Clear all picks and checkmarks?")) return;
-      V.planDay = "mon"; set({ picks: {}, servings: {}, checked: {}, active: false, weekOf: "", extras: [], needAnyway: {} }); return;
+      V.planDay = "mon"; set({ picks: {}, servings: {}, checked: {}, active: false, weekOf: "", extras: [], needAnyway: {}, cooked: {}, restock: S.restock.filter(function (r) { return !S.checked["restock:" + r.id]; }) }); return;
     }
     if (act === "newweek") {
       if (!confirm("Start planning a new week? This clears this week's picks and checkmarks.")) return;
-      V.tab = "plan"; V.planDay = "mon"; set({ picks: {}, servings: {}, checked: {}, active: false, weekOf: "", extras: [], needAnyway: {} }); toTop(); return;
+      V.tab = "plan"; V.planDay = "mon"; set({ picks: {}, servings: {}, checked: {}, active: false, weekOf: "", extras: [], needAnyway: {}, cooked: {}, restock: S.restock.filter(function (r) { return !S.checked["restock:" + r.id]; }) }); toTop(); return;
     }
     if (act === "start") {
       V.tab = "week"; V.day = today; set({ active: true, weekOf: nextMonday(), checked: {} }); toTop(); toast("Week saved"); return;
@@ -688,7 +932,7 @@
       V.chooser = it.key; renderSheet(); return;
     }
     if (act === "gouse") { var it2 = findItem(V.chooser); if (it2) goToUse(it2, el.getAttribute("data-d")); return; }
-    if (act === "closesheet") { V.chooser = ""; renderSheet(); return; }
+    if (act === "closesheet") { V.cook = ""; V.chooser = ""; renderSheet(); return; }
     if (act === "tostep") {
       var st = $app.querySelector('ol.steps li[data-n="' + el.getAttribute("data-n") + '"]');
       if (st) { scrollToEl(st); st.classList.add("flash"); setTimeout(function () { st.classList.remove("flash"); }, 1600); }
@@ -725,6 +969,7 @@
         var body = txt.indexOf("MEALPLAN:") === 0 ? decodeURIComponent(escape(atob(txt.slice(9)))) : txt;
         var raw = JSON.parse(body), p = normalize(raw);
         if (!raw || !Array.isArray(raw.inventory)) p.inventory = S.inventory.slice();
+        if (!raw || !Array.isArray(raw.restock)) p.restock = S.restock.slice();
         S = p; save(); V.tab = S.active ? "week" : "plan"; V.day = today; V.showBackup = false; render(); toast("Plan restored");
       } catch (err) { toast("That backup didn't work"); }
       return;
@@ -741,25 +986,30 @@
       date: /^\d{4}-\d{2}-\d{2}$/.test(f.elements.date.value) ? f.elements.date.value : "", loc: locEl && locOk(locEl.value) ? locEl.value : "pantry" };
     var inv = S.inventory.slice();
     if (mode === "invadd") {
-      data.id = "i" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-      inv.push(data); V.invLoc = data.loc; V.invAdding = false; set({ inventory: inv }); toast("Added to " + locName(data.loc));
+      data.id = newId("i"); data.qty = parseQty(data.amt); data.cat = "";
+      inv.push(data); V.invLoc = data.loc; V.invAdding = false; set({ inventory: inv, restock: pruneRestock(inv, S.restock) }); toast("Added to " + locName(data.loc));
     } else {
       var eid0 = f.getAttribute("data-id");
-      inv = inv.map(function (x) { return x.id === eid0 ? Object.assign({ id: eid0 }, data) : x; });
-      V.invEdit = ""; set({ inventory: inv }); toast("Saved");
+      inv = inv.map(function (x) {
+        if (x.id !== eid0) return x;
+        return Object.assign({ id: eid0 }, data, { qty: data.amt === x.amt ? x.qty : parseQty(data.amt), cat: x.cat || "" });
+      });
+      V.invEdit = ""; set({ inventory: inv, restock: pruneRestock(inv, S.restock) }); toast("Saved");
     }
   });
   document.addEventListener("input", function (e) {
     if (e.target && e.target.hasAttribute && e.target.hasAttribute("data-inv-search")) { V.invQ = e.target.value; applyInvSearch(); }
   });
   document.addEventListener("change", function (e) {
+    var cid = e.target && e.target.getAttribute && e.target.getAttribute("data-cookid");
+    if (cid) { V.cookChoice[cid] = e.target.value; return; }
     // Date label follows the chosen place: freezer = "Frozen on", otherwise "Best by".
     if (e.target && e.target.name === "loc" && e.target.form) {
       var lab = e.target.form.querySelector("input[name=date]"); if (lab && lab.previousElementSibling) lab.previousElementSibling.textContent = (e.target.value === "freezer" ? "Frozen on" : "Best by") + " (optional)";
     }
   });
   document.addEventListener("toggle", function (e) { if (e.target && e.target.classList && e.target.classList.contains("onhand")) V.onHandOpen = e.target.open; }, true);
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && V.chooser) { V.chooser = ""; renderSheet(); } });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && (V.chooser || V.cook)) { V.chooser = ""; V.cook = ""; renderSheet(); } });
   // Re-open on today's weekday when the app comes back after a day change.
   document.addEventListener("visibilitychange", function () {
     if (document.visibilityState !== "visible") return;
