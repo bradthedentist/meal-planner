@@ -167,6 +167,27 @@ CHICKEN_DUMPLINGS.alternatives = {
     }
   }
 };
+// Cream soups: Pacific Foods Organic cans (default) or a quick homemade swap that replaces BOTH cans.
+// Homemade base: Berly's Kitchen 1:1 substitute (one batch = one 10.5 oz can), doubled for two cans.
+CHICKEN_DUMPLINGS.swap = {
+  key: "soup", label: "Cream soups", default: "pacific", ingAt: 1, ingCount: 2, stepAt: 1, stepCount: 1,
+  options: {
+    pacific: { label: "Pacific Foods cans" },
+    homemade: {
+      label: "Quick homemade", heading: "Quick homemade cream soup (replaces both cans)", creditLabel: "Homemade cream soup",
+      by: "Kimberly Vargo · Berly's Kitchen", src: "https://www.berlyskitchen.com/cream-celery-soup-substitute/",
+      note: "Quick homemade cream soup: Berly's Kitchen's 1:1 substitute for a 10.5 oz can of condensed cream of celery soup, doubled to replace both cans (the second batch stands in for the cream of chicken soup). About 15 minutes. Scales with your servings.",
+      ing: [
+        "1|cup|whole milk|da", "0.5|cup|all-purpose flour|st", "4|tbsp|unsalted butter|st", "1|cup|celery, finely chopped|pr",
+        "0.5|tsp|onion powder|sp", "0.25|tsp|garlic powder|sp", "1.5|cup|reduced-sodium chicken broth|pa", "0||salt|st",
+      ].map(parseIng),
+      steps: [
+        "Quick homemade cream soup: whisk the milk and flour together in a small bowl until smooth; set aside. Melt the butter in a small saucepan over low-medium heat. Add the celery, onion powder and garlic powder and cook 3 to 5 minutes, until the celery begins to soften. Whisk in the broth listed for the cream soup and bring to a simmer. Whisk in the milk-flour mixture and keep whisking over low heat 2 to 3 minutes, until thick. Season lightly with salt and pepper and let it cool slightly.",
+        "In a small bowl, combine the homemade cream soup, chopped parsley, poultry seasoning and pepper. Spread over the chicken. Top with the remaining chicken broth (the amount in the main ingredient list) and cook on high for 5 hours.",
+      ]
+    }
+  }
+};
 // Extra sections (not weekdays). Recipes here can be added to the week as extras so they join the grocery list.
 // keep: true = baked goods keep the source yield instead of the 4-serving default; yieldUnit labels the stepper.
 const SECTIONS = [
@@ -250,7 +271,50 @@ const SECTIONS = [
       "Cut into the shape and size you like.",
     ], { src: "https://recime.app/p/68293de0-54ee-41db-a01f-2dae06dd8db0", serves: 20, keep: true, yieldUnit: "bars" }),
   ] },
-  { id: "savory", name: "Baking Savory", recipes: [PIZZATEIG] },
+  { id: "savory", name: "Baking Savory", recipes: [PIZZATEIG,
+    R("bsv2", "Scarpaccia", "Tuscan zucchini flatbread: thinly sliced zucchini and red onion in a light flour batter, baked until golden and crispy.", "About 30 min prep + 30–35 min baking", [
+      "750|g|zucchini|pr", "130|g|Type 1 flour|st", "40|g|cornflour (as written in the source)|st", "1||red onion~red onions|pr",
+      "1|tsp|salt|st", "0|-|extra virgin olive oil|st", "0|-|breadcrumbs (optional, for extra crispiness)|pa",
+    ], [
+      "Thinly slice the zucchini and red onion (using a mandoline if you have one).",
+      "Place the vegetables in a colander over a bowl to collect the liquid. Add the salt and mix well.",
+      "Place a plate on top of the vegetables and add a weight. Leave to drain for 20–30 minutes. The heavier the weight, the faster the vegetables will release their water.",
+      "Measure the collected liquid (you should get about ¾ cup / 200 ml). If you have less, add a little water to reach ¾ cup (200 ml).",
+      "Whisk the two flours into the liquid until you get a smooth batter. Add a drizzle of olive oil.",
+      "Add the zucchini and onion to the batter and mix well.",
+      "Generously oil a nonstick baking tray of about 12 × 12 inches (30 × 30 cm). Spread the mixture evenly over the tray.",
+      "Drizzle with more olive oil and sprinkle with breadcrumbs if you like extra crispiness.",
+      "Bake in a preheated oven at 425°F (220°C) for 30–35 minutes, until golden and crispy.",
+    ], { by: "@thatoneitalianchef", src: "https://recime.app/p/9ef79f67-525e-4a51-8e41-7339d838423c", serves: 4, keep: true, yieldUnit: "servings" }),
+    R("bsv3", "Lahmacun – leckere türkische Pizza", "Thin Turkish flatbreads with a spiced ground-meat topping, finished with lemon, salad, onions, tomatoes, peppers and cheese. Makes 10. Added as given: the source is incomplete.", "1 hr 15 min prep + about 6 min per Lahmacun", [
+      "0|-|dry yeast (amount not given)|st", "0|-|flour (amount not given)|st", "0|-|yogurt (amount not given)|da", "0|-|olive oil (amount not given)|st",
+      "0|-|ground meat (Hackfleisch; amount not given)|me", "0|-|onion (for the meat mix; amount not given)|pr", "0|-|bell pepper (Paprika; amount not given)|pr",
+      "0|-|garlic (amount not given)|st", "0|-|spices for the meat mix (not specified)|sp", SP, PP,
+      "200|g|Turkish white cheese (Hirtenkäse) or feta|da", "1|head|butter lettuce (Kopfsalat), roughly chopped|pr",
+      "2||red onion, cut into thin strips~red onions, cut into thin strips|pr", "3||tomato, diced~tomatoes, diced|pr",
+      "2||lemon~lemons|pr", "0|-|fresh parsley (leftovers from the bunch)|pr", "1|jar|pickled peperoni peppers|co",
+    ], [
+      "Dough: dissolve the dry yeast in warm water. It should be no hotter than 104°F (40°C), or the yeast can't work and the dough won't rise. Let the yeast water stand about 5 minutes.",
+      "Weigh the flour into a stand-mixer bowl and add the yogurt, olive oil and salt. Pour in the yeast water and knead with the dough hook into a ball. Knead 8 minutes on medium-low speed (speed 3 in the source).",
+      "Lift the dough ball out, spread a little olive oil on the bottom of the bowl, return the dough and rub it with a little olive oil. Cover with a damp towel and let rise 45 minutes in a warm place. At room temperature it takes a little longer for the dough to more than double.",
+      "Meat mix: blend the onion, parsley, bell pepper and garlic very finely (the source uses a blender attachment). Add to the ground meat with the remaining ingredients, including the spices, and mix everything well.",
+      "To finish: preheat the oven to 480°F (250°C), conventional (top and bottom heat). If you have a pizza stone, put it in and heat it 45 minutes or longer, depending on its thickness.",
+      "Pull off 10 portions of about 3½ oz (100 g) of dough, shape them into even balls by pulling at the sides, and let them rest covered on a lightly floured baking sheet for 10–15 minutes.",
+      "Roll a dough ball out thinly, place it on a floured pizza peel or similar and spread about 1 tbsp of the meat mix over it, thin but even. Slide it onto the pizza stone. Without a stone, top the flatbread on a baking sheet and put that in the oven. Bake about 6 minutes, until the Lahmacun takes on a little color.",
+      "Take the Lahmacun out of the oven and drizzle it right away with some lemon juice. Then top as you like with parsley, lettuce, onions, tomatoes, peperoni and cheese.",
+      "To roll the Lahmacun, place them under an upturned baking sheet as they come out of the oven, always two stacked filling to filling, so they turn soft and can be rolled.",
+    ], { src: "https://recime.app/p/2ff191c0-f582-4427-8826-9c8e38a7645f", serves: 10, keep: true, yieldUnit: "Lahmacun", incomplete: true, note: "Added as given: the source's ingredient list only has salt, pepper and the toppings. The dough and meat-mix ingredients named in the steps have no amounts (not given)." }),
+    R("bsv4", "Käsebrötchen Over Night", "Overnight cheese rolls: a no-knead dough with grated Gouda or Emmentaler rises 12–24 hours in the fridge, then is spooned onto the sheet and baked. Makes 8–10 rolls.", "10 min + 12–24 hr in the fridge + 25–30 min baking", [
+      "300|g|wheat flour (Type 405)|st", "200|g|wheat flour (Type 1050)|st", "150|g|grated Gouda or Emmentaler|da", "370|ml|cold water|st",
+      "4|g|fresh yeast (or 1.5 g dry yeast)|da", "2|tsp|salt|st", "1|tsp|sugar|st", "0|-|extra grated cheese for the top (optional)|da",
+    ], [
+      "Stir the water together with the yeast and honey (the source's step says honey; its ingredient list has 1 tsp sugar instead).",
+      "Put all the remaining ingredients in a container with a lid, add the yeast mixture and mix briefly, just until no dry flour is visible. The dough can be soft and a little sticky.",
+      "Close the lid and let it rise in the fridge for 12–24 hours.",
+      "The next morning, preheat the oven to 410°F (210°C), conventional (top and bottom heat). Spoon portions of the dough straight onto the baking sheet and sprinkle with a little grated cheese if you like.",
+      "Bake 25–30 minutes until golden brown.",
+    ], { by: "@garden_and_g_made", src: "https://recime.app/p/6d74bf06-98fb-4f1c-9a7d-5aa28062509b", serves: 10, keep: true, yieldUnit: "rolls" }),
+  ] },
   { id: "salads", name: "Salads", recipes: [
     R("sal1", "Crispy Pasta Salad", "Air-fried crispy rotini tossed with tomatoes, green pepper, provolone, salami and olives in a red wine vinaigrette. Source makes 8; shown for 4.", "1 hr", [
       "12|oz|rotini pasta|pa", "2|tbsp|olive oil (extra virgin)|st", "1|cup|cherry tomatoes, halved|pr", "0.667|cup|green bell pepper, diced|pr",
@@ -277,6 +341,81 @@ const SECTIONS = [
       "0|-|olive oil for the dressing (amount not given)|st", "0|-|vinegar or balsamic (amount not given)|co", "0|-|banana pepper juice (amount not given)|co",
       "0|-|Dijon mustard (amount not given)|co", SP, PP,
     ], [], { src: "https://recime.app/p/b2b91064-4ca7-4c11-add3-5c96de0b7c81", serves: 4, incomplete: true, note: "Source has no steps." }),
+  ] },
+  { id: "dinners", name: "Dinners", recipes: [
+    R("din1", "Creamy Cabbage Pasta", "Roasted cabbage \u201cnoodles\u201d stirred with egg and egg whites, then made creamy with Greek yogurt (no actual pasta). Source makes 1; shown for 4.", "About 30 min", [
+      "1||small head of cabbage (about 280 g), sliced~small heads of cabbage (about 280 g each), sliced|pr", "100|g|egg whites|da",
+      "1||whole egg~whole eggs|da", "90|g|plain Greek yogurt, 0%|da", SP, PP, "0|-|Parmesan (optional, a light dusting for garnish)|da",
+    ], [
+      "Preheat your oven to 400°F (200°C).",
+      "Add the sliced cabbage to a baking sheet lined with parchment paper, season with salt and pepper, and roast for 15–20 minutes.",
+      "Meanwhile, whisk the whole egg and egg whites together in a bowl and season with salt and pepper.",
+      "Add the roasted cabbage to a skillet over medium heat, pour in the egg mixture, and stir the eggs around with the cabbage until the eggs are cooked.",
+      "Remove from the heat and stir in the Greek yogurt to make a rich, creamy sauce.",
+      "Serve hot, seasoned to taste, with optional Parmesan.",
+    ], { by: "@firsttakehadrian", src: "https://recime.app/p/78bc93a0-02f7-44ec-ac8a-1622a3e85c83", serves: 1 }),
+    R("din2", "Nudel Kraut Schmorbraten", "Beef (Tafelspitz) braised 3½ hours with onions, garlic, carrot and tomato paste in beef broth, then pointed cabbage and pasta cook right in the sauce.", "About 4 hr (3½ hr braising)", [
+      "800|g|Tafelspitz (beef rump cap), ideally with a little fat on it|me", "4||onion (4–5 in the source)~onions (4–5 in the source)|pr",
+      "4|clove|garlic (4–5 in the source)|st", "1||carrot~carrots|pr", "2|tbsp|tomato paste (2–3 tbsp in the source)|pa", "1.5|l|beef broth|pa",
+      "300|ml|water (as needed)|st", "1||Bratensaft (roast gravy; the source says just \u201c1\u201d)~Bratensaft (roast gravy; the source says just \u201c1\u201d)|pa",
+      "0.5||Spitzkohl (pointed cabbage)~Spitzkohl (pointed cabbage)|pr", "400|g|pasta of your choice|pa", "0|-|oil for searing|st", SP,
+    ], [
+      "Peel the onions and garlic and chop the onions. Peel the carrot as well and cut it into rough pieces.",
+      "Cut the Tafelspitz into four equal pieces and salt them on all sides.",
+      "Heat a little oil in a pot and sear the meat well on all sides. Then take it back out of the pot.",
+      "Add the prepared vegetables to the pot and sweat them briefly. Add the tomato paste and toast it briefly too.",
+      "Return the meat to the pot and pour in the beef broth. Add the Bratensaft as well.",
+      "Simmer everything over medium heat with the lid on for about 3½ hours, until the meat is nice and tender.",
+      "After about 3 hours, chop the Spitzkohl and add it to the sauce.",
+      "Depending on the consistency, add about 1¼ cups (300 ml) of water. Then add the pasta and simmer until it is al dente.",
+      "Taste and season once more, and enjoy!",
+    ], { by: "@joeskochwelt", src: "https://recime.app/p/4ac5ece6-483a-4c58-930b-1aecb1c0465e", serves: 4 }),
+    R("din3", "Schmorbraten mit Klößchen", "Tender braised beef shoulder in a rich red wine sauce with carrots and small potato dumplings. Source makes 2; shown for 4.", "About 3 hr 30 min (3 hr braising)", [
+      "500|g|beef shoulder roast (Rinderbraten)|me", "2||sweet onion (Gemüsezwiebel)~sweet onions (Gemüsezwiebeln)|pr", "1|tbsp|tomato paste (heaping)|pa",
+      "200|ml|red wine (1 glass)|ot", "500|ml|beef broth|pa", "400|ml|water|st", "1|tbsp|mustard|co", "1|tbsp|Worcestershire sauce|co",
+      "0|-|fresh thyme (a few sprigs)|pr", "4||carrot~carrots|pr", "12||small potato dumpling (Kartoffelklößchen)~small potato dumplings (Kartoffelklößchen)|pa",
+      "0|-|clarified butter (Butterschmalz; amount not given)|st", SP, PP,
+    ], [
+      "Cut the beef into large pieces, salt it and sear it on all sides in clarified butter. Then take it out.",
+      "Chop the onions and brown them in the same pot. Add the tomato paste and toast it briefly. Deglaze with the red wine and let it reduce a little.",
+      "Add the beef broth, water, mustard, Worcestershire sauce and thyme. Return the meat to the pot, salt it, and braise covered over low heat for about 3 hours, until it is nice and tender.",
+      "About 20 minutes before the end of the cooking time, add the peeled carrots to the sauce and cook them along.",
+      "Dumplings: let the small potato dumplings cook in hot water for about 10 minutes, following the package directions.",
+      "Take the meat out and pull it apart a little with two forks. Remove the thyme sprigs, season the sauce to taste and return the meat.",
+      "Serve the Schmorbraten with the red wine sauce, carrots and dumplings.",
+    ], { by: "@piaundhalloumi", src: "https://recime.app/p/80050f68-3736-4255-a64c-504af884f848", serves: 2 }),
+    R("din4", "Vegetarian Sheet Pan Gnocchi", "Potato gnocchi roasted on one pan with bell pepper, cherry tomatoes, red onion and chickpeas, finished with basil and balsamic glaze.", "35 min", [
+      "16|oz|potato gnocchi|pa", "1||yellow bell pepper, chopped~yellow bell peppers, chopped|pr", "1|pint|cherry or grape tomatoes|pr",
+      "1||red onion, chopped~red onions, chopped|pr", "1|can|chickpeas, drained and rinsed|pa", "2|tbsp|olive oil|st", "2|tbsp|nutritional yeast|pa",
+      "1|tsp|garlic powder|sp", "0.5|tsp|salt (or more to taste)|st", "0.5|tsp|dried oregano|sp",
+      "0|-|fresh basil (for garnish)|pr", "0|-|balsamic glaze (for garnish)|co", "0|-|vegan parmesan (optional, for garnish)|da",
+    ], [
+      "Preheat the oven to 400°F (200°C).",
+      "Add the gnocchi, bell pepper, cherry tomatoes, red onion and chickpeas to the sheet pan. Drizzle with olive oil and coat with nutritional yeast, garlic powder, salt and oregano. Toss until evenly mixed.",
+      "Bake for 25 minutes, until the tomatoes are burst and the gnocchi has a slight crisp. In the last few minutes, you can broil to brown the gnocchi and tomatoes a bit, if desired.",
+      "Serve immediately with fresh basil, balsamic glaze and vegan parmesan.",
+    ], { by: "PlantYou", src: "https://recime.app/p/abf42996-aaa0-42db-a749-27bd2c50f5f7", serves: 4 }),
+    R("din5", "Crockpot Cowboy Casserole", "Italian sausage, baby red potatoes, kidney beans, corn and fire-roasted tomatoes slow-cooked and topped with melted Colby Jack. Source makes 6; shown for 4.", "20 min + 2–6 hr in the slow cooker", [
+      "1|tbsp|olive oil|st", "1|lb|ground Italian sausage (mild or hot)|me", "1||yellow onion (about 1 cup finely diced)~yellow onions (about 1 cup finely diced each)|pr",
+      "1|tsp|salt|st", "0.5|tsp|black pepper|st", "1|lb|baby red potatoes (unpeeled)|pr", "1||green bell pepper~green bell peppers|pr",
+      "14.5|oz|kidney beans (drained and rinsed)|pa", "1.5|cup|frozen corn|fr", "1|can|fire-roasted diced tomatoes (14.5 oz)|pa",
+      "2|tsp|minced garlic|st", "0.5|tsp|chili powder|sp", "1|cup|shredded Colby Jack cheese|da",
+      "0|-|fresh cilantro (optional)|pr", "0|-|sour cream (optional)|da",
+    ], [
+      "Heat the oil in a large pan over high heat. Once hot, add the sausage and onion. Brown and crumble the sausage and caramelize it for maximum flavor. Season with salt and pepper. Transfer the browned sausage and onion to the Crock-Pot.",
+      "Thinly slice the potatoes, chop the pepper, then drain and rinse the beans. Add to the Crock-Pot along with the corn, undrained tomatoes, minced garlic and chili powder. Stir to combine and press into an even layer.",
+      "Cover and cook on high for 2–4 hours or on low for 4–6 hours, until the potatoes are tender. Gently stir and adjust the seasoning with salt and pepper if needed.",
+      "Sprinkle the cheese evenly on top, cover again, and let the cheese melt for 5–10 minutes.",
+      "Serve hot with optional toppings like fresh cilantro and sour cream.",
+    ], { by: "Chelsea Lords", src: "https://recime.app/p/91e4d09d-7a78-47e8-ae83-9ed20892d0fe", serves: 6 }),
+    R("din6", "Cheesy Cabbage Pancake", "One big pan-fried pancake of cabbage, grated potato and cheese in a light tempura batter, golden on both sides.", "20 min", [
+      "1|cup|tempura powder|pa", "1||large egg~large eggs|da", "0.5|cup|cold soda water|pa", "1||large potato, grated~large potatoes, grated|pr",
+      "0.25|head|large cabbage, chopped (about 4 cups)|pr", "1|cup|shredded cheese (your favorite)|da", SP, PP, "0|-|oil for the pan (amount not given)|st",
+    ], [
+      "Mix the cabbage, shredded cheese, grated potato, tempura powder, soda water, egg, and salt and pepper in a bowl.",
+      "Heat a nonstick pan over medium heat and add oil. Once the pan is hot, add the cabbage mixture.",
+      "Spread it out evenly and pan-fry for 5–6 minutes on each side, until golden brown.",
+    ], { by: "@tiffyycooks", src: "https://recime.app/p/966423e7-3794-4c83-bc3a-820d8cd04abb", serves: 4 }),
   ] },
 ];
 const BY_ID = {};
@@ -311,7 +450,8 @@ const PLURAL = {
   ear: "ears",
   sprig: "sprigs",
   cup: "cups",
-  ball: "balls"
+  ball: "balls",
+  pint: "pints"
 };
 const FR = [[0, ""], [0.125, "\u215B"], [0.25, "\xBC"], [1 / 3, "\u2153"], [0.5, "\xBD"], [2 / 3, "\u2154"], [0.75, "\xBE"], [1, ""]];
 function fmtNum(n) {

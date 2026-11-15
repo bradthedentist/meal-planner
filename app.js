@@ -42,7 +42,9 @@
       if (k.indexOf("x:") === 0 && BY_ID[k.slice(2)] && v > 0 && v <= MAXSERV) s.servings[k] = v;
     });
     Object.keys(p.alternatives || {}).forEach(function (id) {
-      var r = BY_ID[id], choice = p.alternatives[id];
+      var choice = p.alternatives[id], sw = swapFor(id);
+      if (sw) { if (sw.options[choice]) s.alternatives[id] = choice; return; }
+      var r = BY_ID[id];
       if (r && r.alternatives && r.alternatives.options[choice]) s.alternatives[id] = choice;
     });
     s.checked = p.checked && typeof p.checked === "object" ? p.checked : {};
@@ -208,7 +210,29 @@
   }
   // A "slot" is a weekday key ("mon") or an extra recipe added from a section ("x:<recipe id>").
   function isExtra(slot) { return String(slot).indexOf("x:") === 0; }
+  // Swaps: a second, independent choice on a recipe (e.g. cream soups: Pacific Foods cans or quick homemade).
+  // Saved in S.alternatives under "<recipe id>:<swap key>".
+  function swapFor(key) {
+    var i = String(key).indexOf(":"); if (i < 0) return null;
+    var r = BY_ID[key.slice(0, i)], sw = r && r.swap;
+    return sw && sw.key === key.slice(i + 1) ? sw : null;
+  }
+  function swapChoice(r) { return S.alternatives[r.id + ":" + r.swap.key] || r.swap.default; }
+  function applySwap(r) {
+    var sw = r.swap, o = sw && sw.options[swapChoice(r)];
+    if (!o || !o.ing) return r;
+    var di = o.ing.length - sw.ingCount, ds = o.steps.length - sw.stepCount, groups = {};
+    groups[sw.ingAt] = o.heading; groups[sw.ingAt + o.ing.length] = "Rest of the recipe";
+    var out = Object.assign({}, r, {
+      ing: r.ing.slice(0, sw.ingAt).concat(o.ing, r.ing.slice(sw.ingAt + sw.ingCount)),
+      steps: r.steps.slice(0, sw.stepAt).concat(o.steps, r.steps.slice(sw.stepAt + sw.stepCount)),
+      swapNote: o.note, swapCredit: o, ingredientGroups: groups
+    });
+    if (r.alternatives) out.alternatives = Object.assign({}, r.alternatives, { ingredientStart: r.alternatives.ingredientStart + di, stepStart: r.alternatives.stepStart + ds });
+    return out;
+  }
   function selectedRecipe(r) {
+    if (r && r.swap) r = applySwap(r);
     if (!r || !r.alternatives) return r;
     var a = r.alternatives, choice = S.alternatives[r.id] || a.default, opt = a.options[choice];
     if (!opt.ing) return r;
@@ -352,20 +376,29 @@
         (i.c === "lf" ? '<span class="tag">leftover</span>' : "") + "</div>" + used + "</li>";
     }).join("") + "</ul>";
   }
+  function swapPicker(r) {
+    var base = BY_ID[r.id]; if (!base || !base.swap) return "";
+    var sw = base.swap, chosen = swapChoice(base);
+    return '<fieldset class="alternatives"><legend>' + esc(sw.label) + ' — choose one</legend><div class="row">' + Object.keys(sw.options).map(function (key) {
+      return '<button class="btn' + (key === chosen ? ' primary' : '') + '" data-act="alternative" data-id="' + r.id + ':' + sw.key + '" data-choice="' + key + '" aria-pressed="' + (key === chosen) + '">' + esc(sw.options[key].label) + '</button>';
+    }).join('') + '</div></fieldset>';
+  }
   function alternativePicker(r) {
-    if (!r.alternatives) return "";
+    if (!r.alternatives) return swapPicker(r);
     var a = r.alternatives, chosen = S.alternatives[r.id] || a.default;
-    return '<fieldset class="alternatives"><legend>' + esc(a.label) + ' — choose one</legend><div class="row">' + Object.keys(a.options).map(function (key) {
+    return swapPicker(r) + '<fieldset class="alternatives"><legend>' + esc(a.label) + ' — choose one</legend><div class="row">' + Object.keys(a.options).map(function (key) {
       return '<button class="btn' + (key === chosen ? ' primary' : '') + '" data-act="alternative" data-id="' + r.id + '" data-choice="' + key + '" aria-pressed="' + (key === chosen) + '">' + esc(a.options[key].label) + '</button>';
     }).join('') + '</div><p class="cap">Only your selected option goes on the grocery list. Choice saves on this device.</p></fieldset>';
   }
   function credit(r) {
     if (!r.src && !r.by) return "";
-    return '<p class="src">' + (r.by ? "Recipe by " + esc(r.by) : "") + (r.src ? (r.by ? " · " : "") + '<a href="' + esc(r.src) + '" target="_blank" rel="noopener">Source</a>' : "") + "</p>" + (r.alternativeCredit ? '<p class="src">Homemade dumplings by ' + esc(r.alternativeCredit.by) + ' · <a href="' + esc(r.alternativeCredit.src) + '" target="_blank" rel="noopener">Dumpling source</a></p>' : '');
+    return '<p class="src">' + (r.by ? "Recipe by " + esc(r.by) : "") + (r.src ? (r.by ? " · " : "") + '<a href="' + esc(r.src) + '" target="_blank" rel="noopener">Source</a>' : "") + "</p>" + (r.alternativeCredit ? '<p class="src">Homemade dumplings by ' + esc(r.alternativeCredit.by) + ' · <a href="' + esc(r.alternativeCredit.src) + '" target="_blank" rel="noopener">Dumpling source</a></p>' : '') +
+      (r.swapCredit ? '<p class="src">' + esc(r.swapCredit.creditLabel) + ' adapted from ' + esc(r.swapCredit.by) + ' · <a href="' + esc(r.swapCredit.src) + '" target="_blank" rel="noopener">Source</a></p>' : '');
   }
   function nameHtml(r) { return esc(r.name) + (r.incomplete ? ' <span class="inc">Incomplete source</span>' : ""); }
   function steps(r, fx) {
     var note = r.note ? '<p class="cap note-src">' + esc(r.note) + "</p>" : "";
+    if (r.swapNote) note += '<p class="cap note-src">' + esc(r.swapNote) + "</p>";
     if (r.alternativeNote) note += '<p class="cap note-src">' + esc(r.alternativeNote) + "</p>";
     if (!r.steps.length) return note;
     return note + '<ol class="steps">' + r.steps.map(function (s, n) {
@@ -907,8 +940,8 @@
     }
     if (act === "pickfor") { V.planDay = el.getAttribute("data-d"); V.tab = "plan"; render(); toTop(); return; }
     if (act === "alternative") {
-      var rid = el.getAttribute("data-id"), choice = el.getAttribute("data-choice"), recipe = BY_ID[rid];
-      if (!recipe || !recipe.alternatives || !recipe.alternatives.options[choice]) return;
+      var rid = el.getAttribute("data-id"), choice = el.getAttribute("data-choice"), recipe = BY_ID[rid], swp = swapFor(rid);
+      if (swp ? !swp.options[choice] : (!recipe || !recipe.alternatives || !recipe.alternatives.options[choice])) return;
       var alternatives = Object.assign({}, S.alternatives); alternatives[rid] = choice;
       V.focus = null; V.chooser = ""; set({ alternatives: alternatives }); return;
     }
