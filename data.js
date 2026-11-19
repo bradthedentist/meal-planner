@@ -416,6 +416,79 @@ const SECTIONS = [
       "Heat a nonstick pan over medium heat and add oil. Once the pan is hot, add the cabbage mixture.",
       "Spread it out evenly and pan-fry for 5–6 minutes on each side, until golden brown.",
     ], { by: "@tiffyycooks", src: "https://recime.app/p/966423e7-3794-4c83-bc3a-820d8cd04abb", serves: 4 }),
+    R("din7", "Maggi Ofen-Hähnchen mit Gemüse und Kartoffeln", "Chicken breasts baked on one sheet with potatoes, tomatoes, yellow bell pepper and zucchini in a paprika-herb marinade. Maggi Fix pack or homemade mix.", "About 50 min (35 min baking)", [
+      "4||chicken breast fillet (about 5 oz / 150 g each)~chicken breast fillets (about 5 oz / 150 g each)|me", "400|g|potatoes|pr", "200|g|tomatoes|pr",
+      "1||yellow bell pepper~yellow bell peppers|pr", "1||zucchini (about 7 oz / 200 g)~zucchini (about 7 oz / 200 g each)|pr", "4|tbsp|oil|st",
+      "1|pack|Maggi Fix Ofen-Hähnchen mit Gemüse und Kartoffeln (27 g)|pa",
+    ], [
+      "Preheat the oven to 390°F (200°C), or 355°F (180°C) convection.",
+      "Peel the potatoes and cut them into ¾-inch (2 cm) cubes. Cut the bell pepper into strips. Halve the zucchini lengthwise and slice it ¾ inch (2 cm) thick. Cut the tomatoes into wedges.",
+      "In a large bowl, stir the Maggi Fix mix with 4 tbsp water and the oil.",
+      "Place the chicken on a baking sheet and brush each fillet with 1 tsp of the marinade. Toss the vegetables in the rest of the marinade and spread them around the chicken.",
+      "Bake about 35 minutes.",
+    ], { by: "Maggi Fix pack instructions (Romy's photos)", serves: 4, note: "Pack makes 4 servings. Pack nutrition per serving (337 g): 306 kcal, 39.2 g protein." }),
+    R("din8", "Maggi Paprika-Rahm Schnitzel", "Pork schnitzels baked under bell pepper strips in a creamy paprika sauce, served with rice. Maggi Fix pack or homemade mix. Pack makes 3; shown for 4.", "About 40 min (30 min baking)", [
+      "3||pork schnitzel (about 5 oz / 150 g each; turkey or veal also work)~pork schnitzels (about 5 oz / 150 g each; turkey or veal also work)|me",
+      "250|ml|cream, 15% fat (or heavy cream)|da", "1||bell pepper~bell peppers|pr",
+      "1|pack|Maggi Fix Paprika-Rahm Schnitzel (35 g)|pa",
+      "0|-|feta, diced (optional, pack tip)|da", "0|-|black olives (optional, pack tip)|pa", "0|-|rice (for serving)|pa",
+    ], [
+      "Preheat the oven to 390°F (200°C) top and bottom heat, or 340°F (170°C) convection.",
+      "Lay the schnitzels side by side in a baking dish. Cut the bell pepper into strips and spread them over the meat. If you like, add diced feta and black olives now (pack tip).",
+      "Stir the Maggi Fix mix into the cream and pour it over the schnitzels.",
+      "Bake about 30 minutes. Serve with rice.",
+    ], { by: "Maggi Fix pack instructions (Romy's photos)", serves: 3, note: "Pack makes 3 servings. Pack nutrition per serving (268 g): 358 kcal, 37.3 g protein." }),
+    R("din9", "Maggi Nudel-Schinken Gratin", "Uncooked pasta and diced ham baked in a creamy sauce under grated cheese; the pasta cooks in the oven. Maggi Fix pack or homemade mix. Pack makes 2; shown for 4.", "About 35 min (30 min baking)", [
+      "125|g|pasta (uncooked)|pa", "100|g|cooked ham|me", "400|ml|water|st", "100|ml|heavy cream|da", "50|g|grated cheese|da",
+      "1|pack|Maggi Fix Nudel-Schinken Gratin (33 g)|pa",
+    ], [
+      "Preheat the oven to 390°F (200°C), or 340°F (170°C) convection.",
+      "Put the uncooked pasta in a baking dish. Dice the ham and spread it on top.",
+      "Warm the water with the cream, stir in the Maggi Fix mix and boil 1 minute.",
+      "Pour the sauce over the pasta so it is fully covered, and top with the cheese.",
+      "Bake about 30 minutes, or air-fry about 25 minutes at 340°F (170°C).",
+    ], { by: "Maggi Fix pack instructions (Romy's photos)", serves: 2, note: "Pack makes 2 servings. Pack nutrition per serving (354 g): 595 kcal, 29 g protein." }),
+    R("din10", "Maggi Bauern-Topf mit Hackfleisch", "One-pot ground meat with potatoes and red bell pepper simmered in a paprika sauce. Maggi Fix pack or homemade mix. Pack makes 2; shown for 4.", "About 45 min (30 min simmering)", [
+      "300|g|potatoes|pr", "250|g|mixed ground meat (or ground beef)|me", "1||red bell pepper~red bell peppers|pr", "1|tsp|oil|st", "250|ml|water|st",
+      "1|pack|Maggi Fix Bauern-Topf mit Hackfleisch (39 g)|pa",
+    ], [
+      "Peel and dice the potatoes and the bell pepper.",
+      "Heat the oil in a pot and brown the ground meat. Add the bell pepper and potatoes and fry them too.",
+      "Add the water, stir in the Maggi Fix mix and bring to a boil.",
+      "Cover and simmer on low about 30 minutes, until the potatoes are done, stirring now and then.",
+    ], { by: "Maggi Fix pack instructions (Romy's photos)", serves: 2, note: "Pack makes 2 servings. Pack nutrition per serving (394 g): 516 kcal, 30.3 g protein." }),
+    R("din11", "Maggi Ofen-Spirelli alla Mamma", "Spirelli baked in a tomato ground-meat sauce under crème fraîche and cheese; the pasta cooks in the oven. Back label: Fix für Nudel-Gratin mit Hackfleisch. Maggi Fix pack or homemade mix. Pack makes 3; shown for 4.", "About 45 min (30 min baking)", [
+      "250|g|mixed ground meat (or ground beef)|me", "150|g|spirelli pasta (uncooked)|pa", "100|g|crème fraîche|da", "50|g|grated cheese|da", "1|tsp|oil|st", "500|ml|water|st",
+      "1|pack|Maggi Fix Ofen-Spirelli alla Mamma (Fix für Nudel-Gratin mit Hackfleisch, 43 g)|pa",
+    ], [
+      "Preheat the oven. Temperature [CONFIRM]: it isn't readable on the pack photo.",
+      "Heat the oil and brown the ground meat.",
+      "Add the water, stir in the Maggi Fix mix and bring to a boil while stirring.",
+      "Put the uncooked pasta in a baking dish and pour the sauce over so the pasta is covered.",
+      "Spread the crème fraîche on top, sprinkle with the cheese and bake about 30 minutes.",
+    ], { by: "Maggi Fix pack instructions (Romy's photos)", serves: 3, note: "Pack makes 3 servings. Pack nutrition per serving (305 g): 585 kcal, 28.8 g protein. Oven temperature [CONFIRM]: not readable on the pack photo." }),
+    R("din12", "Maggi Kräuter-Rahm Schnitzel", "Pan-fried pork schnitzels in a creamy herb sauce, served with Spätzle and a salad. Maggi Fix pack or homemade mix. Pack makes 3; shown for 4.", "About 15 min", [
+      "3||pork schnitzel (about 5 oz / 150 g each; turkey or veal also work)~pork schnitzels (about 5 oz / 150 g each; turkey or veal also work)|me",
+      "50|ml|heavy cream|da", "1|tsp|oil|st", "250|ml|water|st",
+      "1|pack|Maggi Fix Kräuter-Rahm Schnitzel (36 g)|pa",
+      "0|-|Spätzle (for serving)|pa", "0|-|salad (for serving)|pr",
+    ], [
+      "Heat the oil and brown the schnitzels. Take them out of the pan and keep them warm.",
+      "Pour the water and the cream into the pan, stir in the Maggi Fix mix and bring to a boil.",
+      "Put the schnitzels back in and let them heat through. Serve with Spätzle and a salad.",
+    ], { by: "Maggi Fix pack instructions (Romy's photos)", serves: 3, note: "Pack makes 3 servings. Pack nutrition per serving (240 g): 282 kcal (protein not given)." }),
+    R("din13", "Maggi Ofen-Kartoffeln mit Hackfleisch", "Thinly sliced potatoes and browned ground beef baked in a creamy sauce under cheese. Back label: Fix für Kartoffelauflauf mit Hackfleisch. Maggi Fix pack or homemade mix. Pack makes 3; shown for 4.", "About 1 hr (45 min baking)", [
+      "500|g|floury (starchy) potatoes|pr", "250|g|ground beef (or mixed ground meat)|me", "0|-|oil (amount not given; [CONFIRM])|st", "250|ml|water|st",
+      "100|ml|cream, 15% fat (or heavy cream)|da", "50|g|grated cheese|da",
+      "1|pack|Maggi Fix Ofen-Kartoffeln mit Hackfleisch (Fix für Kartoffelauflauf mit Hackfleisch, 34 g)|pa",
+    ], [
+      "Preheat the oven to 390°F (200°C), or 340°F (170°C) convection.",
+      "Peel the potatoes and slice them thinly.",
+      "Heat the oil in a pot and brown the meat.",
+      "Add the water and the cream, stir in the Maggi Fix mix and bring to a boil.",
+      "Mix in the potato slices, put everything in a baking dish and top with the cheese.",
+      "Bake about 45 minutes, until the potatoes are done.",
+    ], { by: "Maggi Fix pack instructions (Romy's photos)", serves: 3, note: "Pack makes 3 servings. Pack nutrition per serving (283 g): 437 kcal, 25.8 g protein. Oil amount not given on the pack [CONFIRM]." }),
   ] },
 ];
 const BY_ID = {};
@@ -525,3 +598,68 @@ function gName(g) {
 function gLine(g) {
   return [gQty(g), gName(g)].filter((x) => x).join(" ");
 }
+// Maggi Fix recipes: the pack (default) or a homemade mix built from the pack's own ingredient list.
+// The homemade amounts are estimates; uncertain ones carry [CONFIRM] until Romy confirms them.
+const MAGGI_NOTE = "Homemade mix: estimated from the pack's ingredient list. Amounts marked [CONFIRM] are best guesses; adjust to taste.";
+function maggiSwap(id, ingAt, stepAt, stepCount, ing, steps, restHeading) {
+  BY_ID[id].swap = {
+    key: "mix", label: "Seasoning", default: "pack", ingAt: ingAt, ingCount: 1, stepAt: stepAt, stepCount: stepCount,
+    options: {
+      pack: { label: "Maggi Fix pack" },
+      homemade: { label: "Homemade mix", heading: "Homemade mix (replaces the pack)", restHeading: restHeading, note: MAGGI_NOTE, ing: ing.map(parseIng), steps: steps }
+    }
+  };
+}
+maggiSwap("din7", 6, 2, 1, [
+  "0.5|tsp|salt ([CONFIRM])|st", "2|tsp|sweet paprika|sp", "1|tsp|onion powder|sp", "0.5|tsp|garlic powder|sp", "0.25|tsp|ground turmeric|sp",
+  "0.25|tsp|black pepper|st", "2|tsp|Italian seasoning (basil, oregano, thyme, rosemary)|sp", "0.5|tsp|dried parsley|sp",
+  "1|tbsp|tomato paste ([CONFIRM])|pa", "0.5|tsp|sugar|st", "1|tsp|vegetable bouillon powder (for the pack's celery, leek and carrot; [CONFIRM])|pa",
+], [
+  "Homemade mix: in a large bowl, stir the salt, paprika, onion powder, garlic powder, turmeric, pepper, Italian seasoning, parsley, tomato paste, sugar and bouillon powder with 4 tbsp water and the oil until smooth.",
+]);
+maggiSwap("din8", 3, 2, 1, [
+  "1|tbsp|cornstarch (thickener; [CONFIRM])|st", "2|tsp|sweet paprika|sp", "1|tsp|onion powder|sp", "0.5|tsp|garlic powder|sp",
+  "0.125|tsp|cayenne pepper (for the pack's chili; [CONFIRM])|sp", "1|tbsp|tomato paste|pa", "0.5|tsp|salt ([CONFIRM])|st",
+  "1|tsp|vegetable bouillon powder (for the pack's seasoning; [CONFIRM])|pa", "0.5|tsp|dried parsley|sp", "0.5|tsp|dried oregano|sp",
+  "0.25|tsp|dried thyme|sp", "0.25|tsp|sugar|st", "1|tsp|lemon juice|pr", "0.5|tsp|smoked paprika (optional, for the pack's smoked bacon; [CONFIRM])|sp",
+], [
+  "Homemade mix: whisk the cornstarch, paprika, onion powder, garlic powder, cayenne, tomato paste, salt, bouillon powder, herbs, sugar and smoked paprika (if using) into the cold cream until smooth, then stir in the lemon juice. Pour it over the schnitzels.",
+], "Optional and to serve");
+maggiSwap("din9", 5, 2, 1, [
+  "2|tbsp|cornstarch (thickener; [CONFIRM])|st", "1|tsp|onion powder|sp", "0.25|tsp|ground nutmeg|sp", "0.25|tsp|garlic powder|sp", "0.25|tsp|black pepper|st",
+  "0.5|tsp|salt ([CONFIRM])|st", "1|tsp|vegetable bouillon powder (for the pack's seasoning and leek; [CONFIRM])|pa", "1|tsp|dried chives|sp",
+  "0.25|tsp|smoked paprika (optional, for the pack's smoked bacon; [CONFIRM])|sp",
+], [
+  "Homemade mix: stir the cornstarch into 3 tbsp of the cold water to make a slurry. Warm the rest of the water with the cream, onion powder, nutmeg, garlic powder, pepper, salt, bouillon powder, chives and smoked paprika (if using). Whisk in the slurry and boil 1 minute, stirring, until slightly thickened.",
+]);
+maggiSwap("din10", 5, 2, 2, [
+  "2|tsp|sweet paprika|sp", "1|tsp|onion powder|sp", "0.5|tsp|garlic powder|sp", "0.25|tsp|black pepper|st", "0.125|tsp|cayenne pepper (for the pack's chili; [CONFIRM])|sp",
+  "0.5|tsp|dried parsley|sp", "0.25|tsp|dried thyme|sp", "0.5|tsp|dried marjoram|sp", "1||bay leaf~bay leaves|sp",
+  "1|tsp|beef or vegetable bouillon powder (for the pack's seasoning; [CONFIRM])|pa", "0.25|tsp|salt ([CONFIRM])|st", "0.25|tsp|sugar|st",
+  "0.5|tsp|smoked paprika (optional, for the pack's smoked bacon; [CONFIRM])|sp", "2|tsp|cornstarch (thickener; [CONFIRM])|st",
+], [
+  "Homemade mix: add the water with the paprika, onion powder, garlic powder, pepper, cayenne, parsley, thyme, marjoram, bay leaf, bouillon powder, salt, sugar and smoked paprika (if using). Stir and bring to a boil.",
+  "Cover and simmer on low about 30 minutes, until the potatoes are done, stirring now and then. Stir the cornstarch with 2 tbsp cold water, stir it in and simmer 1–2 minutes until thickened. Remove the bay leaf.",
+]);
+maggiSwap("din11", 6, 2, 1, [
+  "2|tbsp|tomato paste (for the pack's tomato; [CONFIRM])|pa", "1|tbsp|cornstarch (thickener; [CONFIRM])|st", "1|tsp|onion powder|sp", "0.5|tsp|garlic powder|sp",
+  "1|tsp|sweet paprika|sp", "0.25|tsp|black pepper|st", "0.5|tsp|sugar|st", "1|tsp|vegetable bouillon powder (for the pack's seasoning; [CONFIRM])|pa",
+  "0.5|tsp|salt ([CONFIRM])|st", "1|tsp|dried oregano|sp",
+], [
+  "Homemade mix: stir the cornstarch into 3 tbsp of the cold water to make a slurry. Add the rest of the water to the meat with the tomato paste, onion powder, garlic powder, paprika, pepper, sugar, bouillon powder, salt and oregano. Stir in the slurry and bring to a boil while stirring.",
+]);
+maggiSwap("din12", 4, 1, 1, [
+  "1|tbsp|butter (for the pack's fat; [CONFIRM])|st", "1|tbsp|cornstarch (thickener; [CONFIRM])|st", "0.5|tsp|onion powder|sp", "0.25|tsp|garlic powder|sp",
+  "0.25|tsp|black pepper|st", "0.125|tsp|ground turmeric|sp", "1|tsp|vegetable bouillon powder (for the pack's seasoning; [CONFIRM])|pa", "0.25|tsp|salt ([CONFIRM])|st",
+  "0.25|tsp|sugar|st", "1|tsp|dried parsley|sp", "1|tsp|dried chives|sp", "1|tsp|lemon juice (for the pack's white wine extract and lemon; [CONFIRM])|pr",
+], [
+  "Homemade mix: stir the cornstarch into 3 tbsp of the cold water to make a slurry. Pour the rest of the water and the cream into the pan and add the butter, onion powder, garlic powder, pepper, turmeric, bouillon powder, salt, sugar, parsley and chives. Stir in the slurry and bring to a boil, stirring. Stir in the lemon juice.",
+], "To serve");
+maggiSwap("din13", 6, 3, 1, [
+  "1|tbsp|cornstarch (thickener; [CONFIRM])|st", "1|tsp|onion powder|sp", "0.25|tsp|garlic powder|sp", "0.25|tsp|black pepper|st", "0.25|tsp|ground nutmeg|sp",
+  "0.5|tsp|salt ([CONFIRM])|st", "1|tsp|vegetable bouillon powder (for the pack's seasoning; [CONFIRM])|pa", "1|tsp|dried chives|sp", "0.5|tsp|dried parsley|sp",
+  "0.25|tsp|dried marjoram|sp", "0.25|tsp|dried thyme|sp", "0.25|tsp|smoked paprika (optional, for the pack's smoked bacon; [CONFIRM])|sp",
+  "1|tsp|lemon juice|pr", "0.25|tsp|sugar|st",
+], [
+  "Homemade mix: stir the cornstarch into 3 tbsp of the cold water to make a slurry. Add the rest of the water and the cream to the pot with the onion powder, garlic powder, pepper, nutmeg, salt, bouillon powder, herbs, smoked paprika (if using), lemon juice and sugar. Stir in the slurry and bring to a boil.",
+]);

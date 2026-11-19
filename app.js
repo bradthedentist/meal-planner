@@ -222,7 +222,7 @@
     var sw = r.swap, o = sw && sw.options[swapChoice(r)];
     if (!o || !o.ing) return r;
     var di = o.ing.length - sw.ingCount, ds = o.steps.length - sw.stepCount, groups = {};
-    groups[sw.ingAt] = o.heading; groups[sw.ingAt + o.ing.length] = "Rest of the recipe";
+    groups[sw.ingAt] = o.heading; groups[sw.ingAt + o.ing.length] = o.restHeading || "Rest of the recipe";
     var out = Object.assign({}, r, {
       ing: r.ing.slice(0, sw.ingAt).concat(o.ing, r.ing.slice(sw.ingAt + sw.ingCount)),
       steps: r.steps.slice(0, sw.stepAt).concat(o.steps, r.steps.slice(sw.stepAt + sw.stepCount)),
@@ -393,7 +393,7 @@
   function credit(r) {
     if (!r.src && !r.by) return "";
     return '<p class="src">' + (r.by ? "Recipe by " + esc(r.by) : "") + (r.src ? (r.by ? " · " : "") + '<a href="' + esc(r.src) + '" target="_blank" rel="noopener">Source</a>' : "") + "</p>" + (r.alternativeCredit ? '<p class="src">Homemade dumplings by ' + esc(r.alternativeCredit.by) + ' · <a href="' + esc(r.alternativeCredit.src) + '" target="_blank" rel="noopener">Dumpling source</a></p>' : '') +
-      (r.swapCredit ? '<p class="src">' + esc(r.swapCredit.creditLabel) + ' adapted from ' + esc(r.swapCredit.by) + ' · <a href="' + esc(r.swapCredit.src) + '" target="_blank" rel="noopener">Source</a></p>' : '');
+      (r.swapCredit && r.swapCredit.src ? '<p class="src">' + esc(r.swapCredit.creditLabel) + ' adapted from ' + esc(r.swapCredit.by) + ' · <a href="' + esc(r.swapCredit.src) + '" target="_blank" rel="noopener">Source</a></p>' : '');
   }
   function nameHtml(r) { return esc(r.name) + (r.incomplete ? ' <span class="inc">Incomplete source</span>' : ""); }
   function steps(r, fx) {
@@ -701,7 +701,7 @@
         '<div class="name">' + nameHtml(r) + '</div><div class="desc">' + esc(r.desc) + "</div>" +
         '<div class="meta">' + esc(r.time) + ' · <button class="link" data-act="xtoggle" data-id="' + r.id + '">' + (open ? "Hide" : "See recipe") + "</button></div></div>" +
         '<button class="btn pick' + (on ? " primary" : "") + '" data-act="extra" data-id="' + r.id + '">' + (on ? "Added ✓" : "Add to week") + "</button></div>" +
-        (open ? recipeBody(r, slot, fx) : "") + "</div>";
+        (open ? recipeBody(selectedRecipe(r), slot, fx) : "") + "</div>";
     }).join("");
     return h;
   }
