@@ -421,7 +421,7 @@ const SECTIONS = [
       "1||yellow bell pepper~yellow bell peppers|pr", "1||zucchini (about 7 oz / 200 g)~zucchini (about 7 oz / 200 g each)|pr", "4|tbsp|oil|st",
       "1|pack|Maggi Fix Ofen-Hähnchen mit Gemüse und Kartoffeln (27 g)|pa",
     ], [
-      "Preheat the oven to 390°F (200°C), or 355°F (180°C) convection.",
+      "Preheat the oven to 400°F, or 350°F convection.",
       "Peel the potatoes and cut them into ¾-inch (2 cm) cubes. Cut the bell pepper into strips. Halve the zucchini lengthwise and slice it ¾ inch (2 cm) thick. Cut the tomatoes into wedges.",
       "In a large bowl, stir the Maggi Fix mix with 4 tbsp water and the oil.",
       "Place the chicken on a baking sheet and brush each fillet with 1 tsp of the marinade. Toss the vegetables in the rest of the marinade and spread them around the chicken.",
@@ -433,7 +433,7 @@ const SECTIONS = [
       "1|pack|Maggi Fix Paprika-Rahm Schnitzel (35 g)|pa",
       "0|-|feta, diced (optional, pack tip)|da", "0|-|black olives (optional, pack tip)|pa", "0|-|rice (for serving)|pa",
     ], [
-      "Preheat the oven to 390°F (200°C) top and bottom heat, or 340°F (170°C) convection.",
+      "Preheat the oven to 400°F (top and bottom heat), or about 340°F convection.",
       "Lay the schnitzels side by side in a baking dish. Cut the bell pepper into strips and spread them over the meat. If you like, add diced feta and black olives now (pack tip).",
       "Stir the Maggi Fix mix into the cream and pour it over the schnitzels.",
       "Bake about 30 minutes. Serve with rice.",
@@ -442,11 +442,11 @@ const SECTIONS = [
       "125|g|pasta (uncooked)|pa", "100|g|cooked ham|me", "400|ml|water|st", "100|ml|heavy cream|da", "50|g|grated cheese|da",
       "1|pack|Maggi Fix Nudel-Schinken Gratin (33 g)|pa",
     ], [
-      "Preheat the oven to 390°F (200°C), or 340°F (170°C) convection.",
+      "Preheat the oven to 400°F, or about 340°F convection.",
       "Put the uncooked pasta in a baking dish. Dice the ham and spread it on top.",
       "Warm the water with the cream, stir in the Maggi Fix mix and boil 1 minute.",
       "Pour the sauce over the pasta so it is fully covered, and top with the cheese.",
-      "Bake about 30 minutes, or air-fry about 25 minutes at 340°F (170°C).",
+      "Bake about 30 minutes, or air-fry about 25 minutes at about 340°F.",
     ], { by: "Maggi Fix pack instructions (Romy's photos)", serves: 2, note: "Pack makes 2 servings. Pack nutrition per serving (354 g): 595 kcal, 29 g protein." }),
     R("din10", "Maggi Bauern-Topf mit Hackfleisch", "One-pot ground meat with potatoes and red bell pepper simmered in a paprika sauce. Maggi Fix pack or homemade mix. Pack makes 2; shown for 4.", "About 45 min (30 min simmering)", [
       "300|g|potatoes|pr", "250|g|mixed ground meat (or ground beef)|me", "1||red bell pepper~red bell peppers|pr", "1|tsp|oil|st", "250|ml|water|st",
@@ -461,12 +461,12 @@ const SECTIONS = [
       "250|g|mixed ground meat (or ground beef)|me", "150|g|spirelli pasta (uncooked)|pa", "100|g|crème fraîche|da", "50|g|grated cheese|da", "1|tsp|oil|st", "500|ml|water|st",
       "1|pack|Maggi Fix Ofen-Spirelli alla Mamma (Fix für Nudel-Gratin mit Hackfleisch, 43 g)|pa",
     ], [
-      "Preheat the oven. Temperature [CONFIRM]: it isn't readable on the pack photo.",
+      "Preheat the oven to 400°F, or 350°F convection.",
       "Heat the oil and brown the ground meat.",
       "Add the water, stir in the Maggi Fix mix and bring to a boil while stirring.",
       "Put the uncooked pasta in a baking dish and pour the sauce over so the pasta is covered.",
       "Spread the crème fraîche on top, sprinkle with the cheese and bake about 30 minutes.",
-    ], { by: "Maggi Fix pack instructions (Romy's photos)", serves: 3, note: "Pack makes 3 servings. Pack nutrition per serving (305 g): 585 kcal, 28.8 g protein. Oven temperature [CONFIRM]: not readable on the pack photo." }),
+    ], { by: "Maggi Fix pack instructions (Romy's photos)", serves: 3, note: "Pack makes 3 servings. Pack nutrition per serving (305 g): 585 kcal, 28.8 g protein." }),
     R("din12", "Maggi Kräuter-Rahm Schnitzel", "Pan-fried pork schnitzels in a creamy herb sauce, served with Spätzle and a salad. Maggi Fix pack or homemade mix. Pack makes 3; shown for 4.", "About 15 min", [
       "3||pork schnitzel (about 5 oz / 150 g each; turkey or veal also work)~pork schnitzels (about 5 oz / 150 g each; turkey or veal also work)|me",
       "50|ml|heavy cream|da", "1|tsp|oil|st", "250|ml|water|st",
@@ -478,19 +478,24 @@ const SECTIONS = [
       "Put the schnitzels back in and let them heat through. Serve with Spätzle and a salad.",
     ], { by: "Maggi Fix pack instructions (Romy's photos)", serves: 3, note: "Pack makes 3 servings. Pack nutrition per serving (240 g): 282 kcal (protein not given)." }),
     R("din13", "Maggi Ofen-Kartoffeln mit Hackfleisch", "Thinly sliced potatoes and browned ground beef baked in a creamy sauce under cheese. Back label: Fix für Kartoffelauflauf mit Hackfleisch. Maggi Fix pack or homemade mix. Pack makes 3; shown for 4.", "About 1 hr (45 min baking)", [
-      "500|g|floury (starchy) potatoes|pr", "250|g|ground beef (or mixed ground meat)|me", "0|-|oil (amount not given; [CONFIRM])|st", "250|ml|water|st",
+      "500|g|floury (starchy) potatoes|pr", "250|g|ground beef (or mixed ground meat)|me", "1|tsp|oil|st", "250|ml|water|st",
       "100|ml|cream, 15% fat (or heavy cream)|da", "50|g|grated cheese|da",
       "1|pack|Maggi Fix Ofen-Kartoffeln mit Hackfleisch (Fix für Kartoffelauflauf mit Hackfleisch, 34 g)|pa",
     ], [
-      "Preheat the oven to 390°F (200°C), or 340°F (170°C) convection.",
+      "Preheat the oven to 400°F, or about 340°F convection.",
       "Peel the potatoes and slice them thinly.",
       "Heat the oil in a pot and brown the meat.",
       "Add the water and the cream, stir in the Maggi Fix mix and bring to a boil.",
       "Mix in the potato slices, put everything in a baking dish and top with the cheese.",
       "Bake about 45 minutes, until the potatoes are done.",
-    ], { by: "Maggi Fix pack instructions (Romy's photos)", serves: 3, note: "Pack makes 3 servings. Pack nutrition per serving (283 g): 437 kcal, 25.8 g protein. Oil amount not given on the pack [CONFIRM]." }),
+    ], { by: "Maggi Fix pack instructions (Romy's photos)", serves: 3, note: "Pack makes 3 servings. Pack nutrition per serving (283 g): 437 kcal, 25.8 g protein." }),
   ] },
 ];
+// Romy (Nov 18, 2026): the Maggi recipes go into the weekday choices, not Dinners. One per day, quick ones on weekdays.
+const DINNERS = SECTIONS.find(sec => sec.id === "dinners");
+const MAGGI_DAYS = { mon: "din12", tue: "din10", wed: "din8", thu: "din9", fri: "din7", sat: "din13", sun: "din11" };
+for (const d in MAGGI_DAYS) RECIPES[d].push(DINNERS.recipes.find(r => r.id === MAGGI_DAYS[d]));
+DINNERS.recipes = DINNERS.recipes.filter(r => !Object.values(MAGGI_DAYS).includes(r.id));
 const BY_ID = {};
 for (const d of DAYS) for (const r of RECIPES[d]) BY_ID[r.id] = r;
 for (const sec of SECTIONS) for (const r of sec.recipes) BY_ID[r.id] = r;

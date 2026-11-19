@@ -552,7 +552,7 @@
       h += "<h3>Extras this week</h3>" + S.extras.map(function (xid) {
         var xr = BY_ID[xid];
         return '<div class="xline"><button class="xrow" data-act="openx" data-id="' + xid + '"><span>' + esc(xr.name) + '</span><span class="m">' +
-          esc(secName(secOf(xid))) + ' ›</span></button>' + cookBtn("x:" + xid) + "</div>";
+          esc(dayOf(xid) ? DAY_FULL[dayOf(xid)] : secName(secOf(xid))) + ' ›</span></button>' + cookBtn("x:" + xid) + "</div>";
       }).join("");
     }
     h += '<div class="row" style="margin-top:22px"><button class="btn" data-act="newweek">Plan a new week</button></div>';
@@ -957,6 +957,7 @@
       if (at >= 0) ex.splice(at, 1); else ex.push(eid);
       set({ extras: ex }); toast(at >= 0 ? "Removed from this week" : "Added to this week · on your list"); return;
     }
+    if (act === "openx" && dayOf(el.getAttribute("data-id"))) { V.tab = "plan"; V.planDay = dayOf(el.getAttribute("data-id")); V.open = el.getAttribute("data-id"); V.focus = null; render(); toTop(); return; }
     if (act === "openx") { var oid = el.getAttribute("data-id"); V.tab = "recipes"; V.sec = secOf(oid); V.xopen = oid; V.focus = null; render(); toTop(); return; }
     if (act === "usedin") {
       var it = findItem(el.getAttribute("data-key")); if (!it) return;
