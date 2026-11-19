@@ -492,9 +492,9 @@ const SECTIONS = [
   ] },
 ];
 // Romy (Nov 19, 2026): Maggi recipes in the weekday choices. One pot / gratin on Wed, sheet pan on Tue,
-// the rest on Fri. None on Mon ("We don't cook Mondays, that's left overs"), Thu, Sat or Sun.
+// the rest on Fri. Ofen-Kartoffeln moved to Wed (Romy, Nov 19: "Move Ofen-Kartoffeln to Wednesday"). None on Mon ("We don't cook Mondays, that's left overs"), Thu, Sat or Sun.
 const DINNERS = SECTIONS.find(sec => sec.id === "dinners");
-const MAGGI_DAYS = { tue: ["din7", "din13"], wed: ["din10", "din9", "din11"], fri: ["din12", "din8"] };
+const MAGGI_DAYS = { tue: ["din7"], wed: ["din10", "din9", "din11", "din13"], fri: ["din12", "din8"] };
 const MAGGI_IDS = Object.values(MAGGI_DAYS).flat();
 for (const d in MAGGI_DAYS) for (const id of MAGGI_DAYS[d]) RECIPES[d].push(DINNERS.recipes.find(r => r.id === id));
 DINNERS.recipes = DINNERS.recipes.filter(r => !MAGGI_IDS.includes(r.id));
