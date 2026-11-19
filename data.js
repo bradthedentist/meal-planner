@@ -491,11 +491,13 @@ const SECTIONS = [
     ], { by: "Maggi Fix pack instructions (Romy's photos)", serves: 3, note: "Pack makes 3 servings. Pack nutrition per serving (283 g): 437 kcal, 25.8 g protein." }),
   ] },
 ];
-// Romy (Nov 18, 2026): the Maggi recipes go into the weekday choices, not Dinners. One per day, quick ones on weekdays.
+// Romy (Nov 19, 2026): Maggi recipes in the weekday choices. One pot / gratin on Wed, sheet pan on Tue,
+// the rest on Fri. None on Mon ("We don't cook Mondays, that's left overs"), Thu, Sat or Sun.
 const DINNERS = SECTIONS.find(sec => sec.id === "dinners");
-const MAGGI_DAYS = { mon: "din12", tue: "din10", wed: "din8", thu: "din9", fri: "din7", sat: "din13", sun: "din11" };
-for (const d in MAGGI_DAYS) RECIPES[d].push(DINNERS.recipes.find(r => r.id === MAGGI_DAYS[d]));
-DINNERS.recipes = DINNERS.recipes.filter(r => !Object.values(MAGGI_DAYS).includes(r.id));
+const MAGGI_DAYS = { tue: ["din7", "din13"], wed: ["din10", "din9", "din11"], fri: ["din12", "din8"] };
+const MAGGI_IDS = Object.values(MAGGI_DAYS).flat();
+for (const d in MAGGI_DAYS) for (const id of MAGGI_DAYS[d]) RECIPES[d].push(DINNERS.recipes.find(r => r.id === id));
+DINNERS.recipes = DINNERS.recipes.filter(r => !MAGGI_IDS.includes(r.id));
 const BY_ID = {};
 for (const d of DAYS) for (const r of RECIPES[d]) BY_ID[r.id] = r;
 for (const sec of SECTIONS) for (const r of sec.recipes) BY_ID[r.id] = r;
