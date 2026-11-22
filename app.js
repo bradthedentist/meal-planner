@@ -12,6 +12,8 @@
   function fresh() {
     return { v: 1, ts: 0, picks: {}, servings: {}, alternatives: {}, checked: {}, active: false, weekOf: "", extras: [], inventory: [], needAnyway: {}, restock: [], cooked: {} };
   }
+  function inSection(id) { return SECTIONS.some(function (sec) { return sec.recipes.some(function (r) { return r.id === id; }); }); }
+  function dayLabel(d) { return typeof DAY_LABEL !== "undefined" && DAY_LABEL[d] ? '<p class="day-label">' + esc(DAY_LABEL[d]) + "</p>" : ""; }
   function dayOf(id) {
     for (var i = 0; i < DAYS.length; i++) if (RECIPES[DAYS[i]].some(function (r) { return r.id === id; })) return DAYS[i];
     return null;
@@ -539,7 +541,7 @@
     var d = V.day, id = S.picks[d], r = id && id !== "skip" ? selectedRecipe(BY_ID[id]) : null;
     var fx = V.focus && V.focus.d === d ? V.focus : null;
     var h = dayStrip(d, false);
-    h += "<h2>" + esc(DAY_FULL[d]) + "</h2>";
+    h += "<h2>" + esc(DAY_FULL[d]) + "</h2>" + dayLabel(d);
     if (r) {
       h += '<div class="card"><div class="opt"><div class="info"><div class="name" style="font-size:19px">' + nameHtml(r) + '</div>' +
         '<div class="desc">' + esc(r.desc) + '</div><div class="meta">' + esc(r.time) + "</div></div>" + cookBtn(d) + "</div>" +
@@ -552,7 +554,7 @@
       h += "<h3>Extras this week</h3>" + S.extras.map(function (xid) {
         var xr = BY_ID[xid];
         return '<div class="xline"><button class="xrow" data-act="openx" data-id="' + xid + '"><span>' + esc(xr.name) + '</span><span class="m">' +
-          esc(dayOf(xid) ? DAY_FULL[dayOf(xid)] : secName(secOf(xid))) + ' ›</span></button>' + cookBtn("x:" + xid) + "</div>";
+          esc(dayOf(xid) && !inSection(xid) ? DAY_FULL[dayOf(xid)] : secName(secOf(xid))) + ' ›</span></button>' + cookBtn("x:" + xid) + "</div>";
       }).join("");
     }
     h += '<div class="row" style="margin-top:22px"><button class="btn" data-act="newweek">Plan a new week</button></div>';
@@ -562,8 +564,10 @@
     var d = V.planDay, cur = S.picks[d];
     var decided = DAYS.filter(function (x) { return !!S.picks[x]; }).length;
     var h = dayStrip(d, true);
-    h += "<h2>" + esc(DAY_FULL[d]) + "</h2><p class=\"cap\">" + decided + " of 7 days decided</p>";
-    if (!RECIPES[d].length) {
+    h += "<h2>" + esc(DAY_FULL[d]) + "</h2>" + (RECIPES[d].length ? dayLabel(d) : "") + "<p class=\"cap\">" + decided + " of 7 days decided</p>";
+    if (!RECIPES[d].length && typeof DAY_LABEL !== "undefined" && DAY_LABEL[d]) {
+      h += '<div class="empty"><div class="empty-t day-label">' + esc(DAY_LABEL[d]) + '</div><div class="cap" style="margin:4px 0 0">No cooking planned.</div></div>';
+    } else if (!RECIPES[d].length) {
       h += '<div class="empty"><div class="empty-t">No recipes yet</div><div class="cap" style="margin:4px 0 0">Send recipes to Meal Planner to add them.</div></div>';
     }
     h += RECIPES[d].map(function (r) {
@@ -957,7 +961,7 @@
       if (at >= 0) ex.splice(at, 1); else ex.push(eid);
       set({ extras: ex }); toast(at >= 0 ? "Removed from this week" : "Added to this week · on your list"); return;
     }
-    if (act === "openx" && dayOf(el.getAttribute("data-id"))) { V.tab = "plan"; V.planDay = dayOf(el.getAttribute("data-id")); V.open = el.getAttribute("data-id"); V.focus = null; render(); toTop(); return; }
+    if (act === "openx" && dayOf(el.getAttribute("data-id")) && !inSection(el.getAttribute("data-id"))) { V.tab = "plan"; V.planDay = dayOf(el.getAttribute("data-id")); V.open = el.getAttribute("data-id"); V.focus = null; render(); toTop(); return; }
     if (act === "openx") { var oid = el.getAttribute("data-id"); V.tab = "recipes"; V.sec = secOf(oid); V.xopen = oid; V.focus = null; render(); toTop(); return; }
     if (act === "usedin") {
       var it = findItem(el.getAttribute("data-key")); if (!it) return;
