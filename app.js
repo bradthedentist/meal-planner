@@ -10,10 +10,23 @@
   var $toast = document.getElementById("toast");
 
   function fresh() {
-    return { v: 1, ts: 0, picks: {}, servings: {}, alternatives: {}, checked: {}, active: false, weekOf: "", extras: [], inventory: [], needAnyway: {}, restock: [], cooked: {} };
+    return { v: 1, ts: 0, picks: {}, servings: {}, alternatives: {}, checked: {}, active: false, weekOf: "", extras: [], inventory: [], needAnyway: {}, restock: [], cooked: {}, moves: {} };
   }
   function inSection(id) { return SECTIONS.some(function (sec) { return sec.recipes.some(function (r) { return r.id === id; }); }); }
   function dayLabel(d) { return typeof DAY_LABEL !== "undefined" && DAY_LABEL[d] ? '<p class="day-label">' + esc(DAY_LABEL[d]) + "</p>" : ""; }
+  // "Move to day" (Romy, Nov 22, 2026): a recipe can be added to a weekday's options (Tue-Sun) and stays in its category too.
+  var MOVE_DAYS = ["tue", "wed", "thu", "fri", "sat", "sun"];
+  function builtIn(id, d) { return RECIPES[d].some(function (r) { return r.id === id; }); }
+  function normMoves(m) {
+    var out = {};
+    if (m && typeof m === "object") MOVE_DAYS.forEach(function (d) {
+      var a = Array.isArray(m[d]) ? m[d].filter(function (id, n, arr) { return typeof id === "string" && BY_ID[id] && !builtIn(id, d) && arr.indexOf(id) === n; }) : [];
+      if (a.length) out[d] = a;
+    });
+    return out;
+  }
+  function movedTo(id, d, moves) { var a = (moves || S.moves || {})[d]; return !!a && a.indexOf(id) >= 0; }
+  function dayOptions(d) { return RECIPES[d].concat(((S.moves || {})[d] || []).map(function (id) { return BY_ID[id]; }).filter(Boolean)); }
   function dayOf(id) {
     for (var i = 0; i < DAYS.length; i++) if (RECIPES[DAYS[i]].some(function (r) { return r.id === id; })) return DAYS[i];
     return null;
@@ -23,6 +36,7 @@
     if (!p || typeof p !== "object") return s;
     s.ts = p.ts || 0;
     s.picks = {};
+    s.moves = normMoves(p.moves);
     var moved = {};
     DAYS.forEach(function (d) {
       var id = p.picks && p.picks[d];
@@ -31,7 +45,7 @@
       if (id === "skip") s.picks[d] = id;
       else if (id && BY_ID[id]) {
         var home = dayOf(id);
-        if (home === d) { s.picks[d] = id; if (sv) s.servings[d] = sv; }
+        if (home === d || movedTo(id, d, s.moves)) { s.picks[d] = id; if (sv) s.servings[d] = sv; }
         else if (home) moved[home] = { id: id, sv: sv }; // e.g. pizza moved from Friday to Sunday
       } // picks for recipes that no longer exist are dropped
     });
@@ -355,11 +369,13 @@
   function dayStrip(sel, withDots) {
     return '<div class="days">' + DAYS.map(function (d) {
       var id = S.picks[d];
-      var sub = id === "skip" ? "Night off" : id && BY_ID[id] ? BY_ID[id].name : "";
+      var lbl = typeof DAY_LABEL !== "undefined" && DAY_LABEL[d] ? DAY_LABEL[d] : "";
+      var rec = id === "skip" ? "Night off" : id && BY_ID[id] ? BY_ID[id].name : "";
+      // Plan boxes show only the day name; Week boxes show the day name with the picked recipe under it.
       return '<button class="day' + (d === sel ? " on" : "") + '" data-act="day" data-d="' + d + '">' +
         '<div class="d">' + DAY_SHORT[d] + (d === today ? '<span class="t">today</span>' : "") +
         (withDots && id ? '<span class="dot"></span>' : "") + "</div>" +
-        '<div class="s">' + esc(sub) + "</div></button>";
+        (withDots ? '<div class="s lbl">' + esc(lbl) + "</div>" : (lbl ? '<div class="lbl">' + esc(lbl) + "</div>" : "") + '<div class="s">' + esc(rec) + "</div>") + "</button>";
     }).join("") + "</div>";
   }
   function ingList(r, f, fx) {
@@ -564,23 +580,24 @@
     var d = V.planDay, cur = S.picks[d];
     var decided = DAYS.filter(function (x) { return !!S.picks[x]; }).length;
     var h = dayStrip(d, true);
-    h += "<h2>" + esc(DAY_FULL[d]) + "</h2>" + (RECIPES[d].length ? dayLabel(d) : "") + "<p class=\"cap\">" + decided + " of 7 days decided</p>";
-    if (!RECIPES[d].length && typeof DAY_LABEL !== "undefined" && DAY_LABEL[d]) {
+    var opts = dayOptions(d);
+    h += "<h2>" + esc(DAY_FULL[d]) + "</h2>" + (opts.length ? dayLabel(d) : "") + "<p class=\"cap\">" + decided + " of 7 days decided</p>";
+    if (!opts.length && typeof DAY_LABEL !== "undefined" && DAY_LABEL[d]) {
       h += '<div class="empty"><div class="empty-t day-label">' + esc(DAY_LABEL[d]) + '</div><div class="cap" style="margin:4px 0 0">No cooking planned.</div></div>';
-    } else if (!RECIPES[d].length) {
+    } else if (!opts.length) {
       h += '<div class="empty"><div class="empty-t">No recipes yet</div><div class="cap" style="margin:4px 0 0">Send recipes to Meal Planner to add them.</div></div>';
     }
-    h += RECIPES[d].map(function (r) {
+    h += opts.map(function (r) {
       r = selectedRecipe(r);
       var on = cur === r.id, open = V.open === r.id;
       return '<div class="card' + (on ? " on" : "") + '"><div class="opt"><div class="info" data-act="toggle" data-id="' + r.id + '">' +
         '<div class="name">' + nameHtml(r) + '</div><div class="desc">' + esc(r.desc) + "</div>" +
-        '<div class="meta">' + esc(r.time) + ' · ' + (r.keep ? "makes " + r.serves + (r.yieldUnit ? " " + esc(r.yieldUnit) : "") : "serves " + HOUSEHOLD + (r.serves !== HOUSEHOLD ? " (source makes " + r.serves + ")" : "")) + ' · <button class="link" data-act="toggle" data-id="' + r.id + '">' + (open ? "Hide" : "See recipe") + "</button></div></div>" +
+        '<div class="meta">' + esc(r.time) + ' · ' + (r.keep ? "makes " + r.serves + (r.yieldUnit ? " " + esc(r.yieldUnit) : "") : "serves " + HOUSEHOLD + (r.serves !== HOUSEHOLD ? " (source makes " + r.serves + ")" : "")) + ' · <button class="link" data-act="toggle" data-id="' + r.id + '">' + (open ? "Hide" : "See recipe") + "</button>" + moveLinks(r.id, d) + "</div></div>" +
         '<button class="btn pick' + (on ? " primary" : "") + '" data-act="pick" data-id="' + r.id + '">' + (on ? "Picked" : "Pick") + "</button></div>" +
         (open ? alternativePicker(r) + "<h3>Ingredients</h3>" + ingList(r, defServ(r) / r.serves) + "<h3>Steps</h3>" + steps(r) + credit(r) : "") + "</div>";
     }).join("");
     var btns = "";
-    if (RECIPES[d].length || cur === "skip") btns += '<button class="btn" data-act="pick" data-id="skip">' + (cur === "skip" ? "Skipped (undo)" : "Skip this day") + "</button>";
+    if (opts.length || cur === "skip") btns += '<button class="btn" data-act="pick" data-id="skip">' + (cur === "skip" ? "Skipped (undo)" : "Skip this day") + "</button>";
     if (decided) btns += '<button class="btn" data-act="clear">Clear all picks</button>';
     if (btns) h += '<div class="row">' + btns + "</div>";
     return h;
@@ -703,7 +720,7 @@
       var fx = open && V.focus && V.focus.d === slot ? V.focus : null;
       return '<div class="card' + (on ? " on" : "") + '"><div class="opt"><div class="info" data-act="xtoggle" data-id="' + r.id + '">' +
         '<div class="name">' + nameHtml(r) + '</div><div class="desc">' + esc(r.desc) + "</div>" +
-        '<div class="meta">' + esc(r.time) + ' · <button class="link" data-act="xtoggle" data-id="' + r.id + '">' + (open ? "Hide" : "See recipe") + "</button></div></div>" +
+        '<div class="meta">' + esc(r.time) + ' · <button class="link" data-act="xtoggle" data-id="' + r.id + '">' + (open ? "Hide" : "See recipe") + "</button>" + moveLinks(r.id, null) + "</div></div>" +
         '<button class="btn pick' + (on ? " primary" : "") + '" data-act="extra" data-id="' + r.id + '">' + (on ? "Added ✓" : "Add to week") + "</button></div>" +
         (open ? recipeBody(selectedRecipe(r), slot, fx) : "") + "</div>";
     }).join("");
@@ -829,8 +846,40 @@
     var cooked = Object.assign({}, S.cooked); delete cooked[slot];
     set({ inventory: inv, restock: rs, cooked: cooked }); toast("Cooked undone · inventory restored");
   }
+  function moveLinks(id, d) {
+    var h = ' · <button class="link" data-act="moveday" data-id="' + id + '">Move to day</button>';
+    if (d && movedTo(id, d)) h = ' · <span class="tag moved">Moved here</span> · <button class="link" data-act="unmove" data-id="' + id + '" data-d="' + d + '">Take off ' + DAY_SHORT[d] + "</button>" + h;
+    return h;
+  }
+  function renderMoveSheet($s) {
+    var r = BY_ID[V.mover];
+    var rows = MOVE_DAYS.map(function (d) {
+      var lbl = typeof DAY_LABEL !== "undefined" && DAY_LABEL[d] ? DAY_LABEL[d] : "";
+      var b = builtIn(V.mover, d), m = movedTo(V.mover, d);
+      var state = b ? "Already there" : m ? "✓ Added · tap to take off" : "Add";
+      return '<button class="pickuse mv' + (m ? " on" : "") + '" data-act="movetoggle" data-id="' + V.mover + '" data-d="' + d + '"' + (b ? " disabled" : "") + ' aria-pressed="' + (b || m) + '">' +
+        '<span class="pu-d">' + DAY_SHORT[d] + '</span><span class="pu-r"><b>' + esc(lbl || DAY_FULL[d]) + "</b><span>" + state + "</span></span></button>";
+    }).join("");
+    $s.className = "show";
+    $s.innerHTML = '<div class="scrim" data-act="closesheet"></div><div class="panel" role="dialog" aria-label="Move to day">' +
+      '<div class="pt">Move ' + esc(r.name) + ' to a day</div><p class="cap">It stays where it is now and also shows up under the day you choose.</p>' + rows +
+      '<button class="btn" data-act="closesheet" style="width:100%;margin-top:10px">Done</button></div>';
+  }
+  function setMove(id, d, on) {
+    var moves = JSON.parse(JSON.stringify(S.moves || {})), a = moves[d] || [];
+    if (on) { if (a.indexOf(id) < 0) a.push(id); moves[d] = a; set({ moves: moves }); toast("Added to " + DAY_FULL[d]); return; }
+    if (S.picks[d] === id && !confirm(BY_ID[id].name + " is picked for " + DAY_FULL[d] + ". Take it off " + DAY_FULL[d] + " and clear that pick?")) return;
+    moves[d] = a.filter(function (x) { return x !== id; }); if (!moves[d].length) delete moves[d];
+    var patch = { moves: moves };
+    if (S.picks[d] === id) {
+      var picks = Object.assign({}, S.picks), servings = Object.assign({}, S.servings), cooked = Object.assign({}, S.cooked);
+      delete picks[d]; delete servings[d]; delete cooked[d]; patch.picks = picks; patch.servings = servings; patch.cooked = cooked;
+    }
+    set(patch); toast("Taken off " + DAY_FULL[d]);
+  }
   function renderSheet() {
     var $s = document.getElementById("sheet");
+    if (V.mover && BY_ID[V.mover]) { renderMoveSheet($s); return; }
     if (V.cook && V.tab === "week") { renderCookSheet($s); return; }
     var it = V.chooser && V.tab === "list" ? findItem(V.chooser) : null;
     if (!it) { $s.className = ""; $s.innerHTML = ""; return; }
@@ -855,7 +904,7 @@
     var el = e.target.closest("[data-act]");
     if (!el) return;
     var act = el.getAttribute("data-act");
-    if (act === "tab") { V.invEdit = ""; V.invAdding = false; V.back = null; V.focus = null; V.chooser = ""; V.tab = el.getAttribute("data-tab"); if (V.tab === "week") V.day = today; render(); toTop(); return; }
+    if (act === "tab") { V.mover = ""; V.invEdit = ""; V.invAdding = false; V.back = null; V.focus = null; V.chooser = ""; V.tab = el.getAttribute("data-tab"); if (V.tab === "week") V.day = today; render(); toTop(); return; }
     if (act === "day") {
       var d = el.getAttribute("data-d");
       if (V.tab === "week") V.day = d; else { V.planDay = d; V.open = ""; }
@@ -970,7 +1019,10 @@
       V.chooser = it.key; renderSheet(); return;
     }
     if (act === "gouse") { var it2 = findItem(V.chooser); if (it2) goToUse(it2, el.getAttribute("data-d")); return; }
-    if (act === "closesheet") { V.cook = ""; V.chooser = ""; renderSheet(); return; }
+    if (act === "closesheet") { V.cook = ""; V.chooser = ""; V.mover = ""; renderSheet(); return; }
+    if (act === "moveday") { V.mover = el.getAttribute("data-id"); renderSheet(); return; }
+    if (act === "movetoggle") { var mid = el.getAttribute("data-id"), md = el.getAttribute("data-d"); if (builtIn(mid, md)) return; setMove(mid, md, !movedTo(mid, md)); renderSheet(); return; }
+    if (act === "unmove") { setMove(el.getAttribute("data-id"), el.getAttribute("data-d"), false); return; }
     if (act === "tostep") {
       var st = $app.querySelector('ol.steps li[data-n="' + el.getAttribute("data-n") + '"]');
       if (st) { scrollToEl(st); st.classList.add("flash"); setTimeout(function () { st.classList.remove("flash"); }, 1600); }
@@ -1008,6 +1060,7 @@
         var raw = JSON.parse(body), p = normalize(raw);
         if (!raw || !Array.isArray(raw.inventory)) p.inventory = S.inventory.slice();
         if (!raw || !Array.isArray(raw.restock)) p.restock = S.restock.slice();
+        if (!raw || !raw.moves || typeof raw.moves !== "object") p.moves = JSON.parse(JSON.stringify(S.moves || {})); // older backups have no moves
         S = p; save(); V.tab = S.active ? "week" : "plan"; V.day = today; V.showBackup = false; render(); toast("Plan restored");
       } catch (err) { toast("That backup didn't work"); }
       return;

@@ -184,3 +184,8 @@ textarea { min-height: 120px; font: 13px/1.4 ui-monospace, Menlo, monospace; wor
 
 .day-label{font-weight:700;color:var(--accent,#c4692b);margin:-4px 0 8px}
 .empty .day-label{margin:0;color:inherit}
+.day .lbl { font-size: 12px; font-weight: 700; color: var(--accent); line-height: 1.25; }
+.day .s.lbl { -webkit-line-clamp: 2; }
+.tag.moved { font-size: 11px; padding: 1px 6px; border-radius: 8px; background: var(--soft); color: var(--accent); font-weight: 600; }
+.pickuse.mv[disabled] { opacity: .55; }
+.pickuse.mv.on { border-color: var(--accent); background: var(--soft); }

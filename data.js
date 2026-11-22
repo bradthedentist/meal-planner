@@ -496,7 +496,8 @@ const SECTIONS = [
 const DINNERS = SECTIONS.find(sec => sec.id === "dinners");
 // Romy (Nov 21, 2026, "Yes. Lahmacin too"): Mon = Leftovers day, Sun = Pizza day (dough + Lahmacun),
 // Crock Pot Chicken and Dumplings Sat -> Thu, Sushi Bowls off the plan into Other recipes > Dinners.
-const DAY_LABEL = { mon: "Leftovers day", sun: "Pizza day" };
+// Day names (Romy, Nov 22, 2026). Saturday stays blank "until I add recipes".
+const DAY_LABEL = { mon: "Leftovers day", tue: "Sheet Pan day", wed: "One Pot day", thu: "Crock Pot day", fri: "Mix-it-up day", sun: "Pizza day" };
 DINNERS.recipes.push(...RECIPES.thu.filter(r => r.id === "thu1"));
 RECIPES.thu = RECIPES.sat.concat(RECIPES.thu.filter(r => r.id !== "thu1"));
 RECIPES.sat = [];
