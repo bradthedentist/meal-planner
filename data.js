@@ -341,6 +341,28 @@ const SECTIONS = [
       "0|-|olive oil for the dressing (amount not given)|st", "0|-|vinegar or balsamic (amount not given)|co", "0|-|banana pepper juice (amount not given)|co",
       "0|-|Dijon mustard (amount not given)|co", SP, PP,
     ], [], { src: "https://recime.app/p/b2b91064-4ca7-4c11-add3-5c96de0b7c81", serves: 4, incomplete: true, note: "Source has no steps." }),
+    R("sal3", "Mediterraner Brotsalat – schnell und einfach gemacht", "Crispy pan-toasted ciabatta with arugula, cherry and sun-dried tomatoes, pine nuts, red onion, Parmesan and basil in a balsamic vinaigrette. Toss just before serving. Source makes 6; shown for 4.", "25 min (20 min prep + 5 min cooking)", [
+      "300|g|ciabatta bread, cut into pieces|ba", "250|g|arugula, trimmed|pr", "250|g|cherry tomatoes, halved|pr",
+      "150|g|sun-dried tomatoes in oil and herbs, cut into strips|pa", "100|g|pine nuts, toasted|pa",
+      "1||large red onion, halved and cut into rings~large red onions, halved and cut into rings|pr", "2|clove|garlic, cut into thin slivers|st",
+      "100|g|Parmesan, shaved (for vegetarians: made without animal rennet)|da", "20|leaf|fresh basil|pr",
+      "3|tbsp|olive oil for toasting the bread (3–4 in the source)|st",
+      "6|tbsp|olive oil (vinaigrette)|st", "4|tbsp|dark balsamic vinegar|co", "0.5|tsp|honey|pa",
+      "0.5||lemon, freshly squeezed~lemons, freshly squeezed|pr", SP, PP,
+    ], [
+      "Please note: you need a large pan, because the bread needs plenty of room to toast nicely (the author's pan is 13 inches / 32 cm across). You also need a large bowl, about 3¾–4¼ quarts (3.5–4 liters), for mixing and serving.",
+      "First toast the pine nuts in the large pan without any fat over medium heat until nicely browned. Keep an eye on them, because they burn quickly. Take them out of the pan and set aside.",
+      "Cut the ciabatta into slices about ⅝ inch (1.5 cm) thick, then into pieces.",
+      "Slice the garlic cloves very thinly.",
+      "Heat the olive oil for toasting in the pan over medium heat. Add the bread and, a little later, the garlic, and toast until the bread has a nice crisp surface. Set aside.",
+      "Trim and wash the arugula and shake it well dry. Set aside.",
+      "Peel the red onion, halve it and cut it into rings. Wash and halve the cherry tomatoes. Set both aside.",
+      "Cut the sun-dried tomatoes into strips and set aside.",
+      "For the vinaigrette, mix the olive oil, balsamic vinegar, honey and lemon juice together and season to taste with salt and freshly ground black pepper.",
+      "Shave the Parmesan and set it out as a topping.",
+      "Wash the fresh basil leaves and set them out as a topping.",
+      "Just before serving, toss all the ingredients with the vinaigrette.",
+    ], { by: "Emmi kocht einfach", src: "https://emmikochteinfach.de/mediterraner-brotsalat/", serves: 6, note: "Source nutrition per serving: 587 kcal, 39 g carbohydrates, 19 g protein, 38 g fat." }),
   ] },
   { id: "dinners", name: "Dinners", recipes: [
     R("din1", "Creamy Cabbage Pasta", "Roasted cabbage \u201cnoodles\u201d stirred with egg and egg whites, then made creamy with Greek yogurt (no actual pasta). Source makes 1; shown for 4.", "About 30 min", [
