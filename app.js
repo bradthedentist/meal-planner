@@ -113,6 +113,7 @@
       var e = x[id], o = {};
       if (!BY_ID[id] || !e || typeof e !== "object") return;
       if (typeof e.name === "string" && e.name.trim()) o.name = e.name.trim().slice(0, 120);
+      if (typeof e.serves === "number" && isFinite(e.serves) && e.serves >= 1 && e.serves <= MAXSERV && Math.round(e.serves) !== BY_ID[id].serves) o.serves = Math.round(e.serves);
       if (e.ing && typeof e.ing === "object") {
         var ing = {};
         Object.keys(e.ing).forEach(function (k) { if (!EID.test(k)) return; var m = normLine(e.ing[k], false); if (m) ing[k] = m; });
@@ -316,6 +317,7 @@
     if (!e) return r;
     var out = Object.assign({}, r, { edited: true }), mods = e.ing || {}, ing = [], pos = [];
     if (e.name) out.name = e.name;
+    if (e.serves) out.serves = e.serves; // what the recipe's own amounts feed (Romy, Nov 25 4:53 PM)
     if (e.steps) out.steps = r.steps.map(function (s, n) { var t = e.steps[r.stepIds[n]]; return typeof t === "string" ? t : s; });
     r.ing.forEach(function (i, k) { var m = mods[i._id]; pos[k] = ing.length; if (m && m.del) return; ing.push(m ? Object.assign({}, i, m) : i); });
     pos[r.ing.length] = ing.length;
@@ -335,7 +337,8 @@
     var id = S.picks[d]; return id && id !== "skip" ? selectedRecipe(BY_ID[id]) : null;
   }
   var HOUSEHOLD = 4; // meals default to 4 servings, scaled from the source yield
-  function defServ(r) { return r && r.keep ? r.serves : HOUSEHOLD; } // baked goods keep the source yield
+  function yieldOf(r) { return (S.edits && S.edits[r.id] && S.edits[r.id].serves) || r.serves; }
+  function defServ(r) { return r && r.keep ? yieldOf(r) : HOUSEHOLD; } // baked goods keep the source yield
   function servingsFor(d) {
     if (S.servings[d]) return S.servings[d];
     return defServ(isExtra(d) ? BY_ID[d.slice(2)] : recipeFor(d));
@@ -996,8 +999,8 @@
     var base = BY_ID[id], v = variantOf(base), e = S.edits[id] || {}, mods = e.ing || {}, labels = [];
     if (base.swap) labels.push(base.swap.options[swapChoice(base)].label);
     if (base.alternatives) labels.push(base.alternatives.options[S.alternatives[id] || base.alternatives.default].label);
-    var serv = slot && (isExtra(slot) || DAYS.indexOf(slot) >= 0) ? servingsFor(slot) : defServ(base), f = serv / base.serves;
-    return { id: id, name: e.name || base.name, labels: labels, serv: serv, f: f,
+    var serv = slot && (isExtra(slot) || DAYS.indexOf(slot) >= 0) ? servingsFor(slot) : defServ(base), y = yieldOf(base), f = serv / y;
+    return { id: id, name: e.name || base.name, labels: labels, serv: serv, f: f, yld: y,
       rows: v.ing.map(function (i) { var m = mods[i._id] || {}; return editRow(m.del ? i : Object.assign({}, i, m), i._id, { del: !!m.del, orig: i }, f); }),
       adds: (e.add || []).map(function (a) { return editRow(a, "n:" + a.id, { id: a.id }, f); }),
       steps: v.steps.map(function (s, n) { var t = e.steps && e.steps[v.stepIds[n]]; return { k: v.stepIds[n], text: typeof t === "string" ? t : s, orig: s }; }) };
@@ -1021,6 +1024,9 @@
       '<div class="pt">Edit recipe</div>' +
       '<label class="field"><span>Title</span><span class="ed-top"><input data-ed="name" maxlength="120" value="' + esc(D.name) + '">' +
       '<button class="ed-u" data-act="edundo" data-k="name" aria-label="Undo title" title="Back to original"' + (D.name.trim() !== base.name ? "" : " hidden") + ">↺</button></span></label>" +
+      '<label class="field"><span>Recipe makes</span><span class="ed-top ed-yield"><input type="number" inputmode="numeric" min="1" max="' + MAXSERV + '" step="1" data-ed="yld" aria-label="Recipe makes (servings)" value="' + D.yld + '"><b class="ed-yu">' + esc(base.yieldUnit || "servings") + "</b>" +
+      '<button class="ed-u" data-act="edundo" data-k="yld" aria-label="Undo recipe size" title="Back to original"' + (D.yld !== base.serves ? "" : " hidden") + ">↺</button></span></label>" +
+      '<p class="cap" style="margin-top:-4px">How many the recipe’s own amounts feed. Changing it doesn’t change those amounts; the app scales from it.</p>' +
       "<h3>Ingredients</h3><p class=\"cap ed-size\">Amounts for " + esc(size) + " (your current setting). The app scales them when you change servings. Leave the amount empty for “to taste”. ↺ puts one line back to the original." +
       (D.labels.length ? " Changes apply to every option; lines that belong only to " + esc(D.labels.join(" + ")) + " show when it's chosen." : "") + "</p>" +
       D.rows.map(edRowHtml).join("") + D.adds.map(edRowHtml).join("") +
@@ -1031,6 +1037,18 @@
       '<div class="edbar"><button class="btn primary" data-act="edsave">Save</button><button class="btn" data-act="edcancel">Cancel</button>' +
       (S.edits[D.id] ? '<button class="btn" data-act="edreset">Reset to original</button>' : "") + "</div></div>";
     var np = $s.querySelector(".panel"); if (np && y) np.scrollTop = y;
+  }
+  // New recipe size: untouched amounts keep their recipe values (so the panel re-shows them at the new size);
+  // amounts she typed stay as typed for the servings shown and are stored against the new size.
+  function setYield(n) {
+    var D = V.edit; n = Math.round(+n);
+    if (!(n >= 1 && n <= MAXSERV)) return false;
+    D.yld = n; D.f = D.serv / n;
+    D.rows.concat(D.adds).forEach(function (r) {
+      if ((r.amt || "").trim() !== (r.amt0 || "").trim() || r.u !== r.u0 || r.amt0 === "\u0000") return;
+      r.amt = r.amt0 = amtText(r, D.f);
+    });
+    return true;
   }
   function edFind(k) { var D = V.edit; return D.rows.filter(function (r) { return r.k === k; })[0] || D.adds.filter(function (r) { return r.k === k; })[0]; }
   function edLine(r, o) {
@@ -1052,9 +1070,12 @@
     return line;
   }
   function saveEdit() {
+    var yi = document.querySelector('#sheet input[data-ed="yld"]');
+    if (yi && +yi.value !== V.edit.yld) setYield(yi.value); // typed a size and tapped Save without leaving the box
     var D = V.edit, base = BY_ID[D.id], cur = S.edits[D.id] || {}, e = {};
     var nm = (D.name || "").replace(/\s+/g, " ").trim();
     if (nm && nm !== base.name) e.name = nm.slice(0, 120);
+    if (D.yld !== base.serves) e.serves = D.yld;
     var ing = Object.assign({}, cur.ing || {});
     D.rows.forEach(function (r) {
       var o = r.orig; delete ing[r.k];
@@ -1093,6 +1114,7 @@
       if (!V.edit) return;
       var uk = el.getAttribute("data-k"), D0 = V.edit;
       if (uk === "name") D0.name = BY_ID[D0.id].name;
+      else if (uk === "yld") setYield(BY_ID[D0.id].serves);
       else { var urw = edFind(uk); if (urw && urw.orig) rowUndo(urw); }
       renderSheet(); return;
     }
@@ -1296,6 +1318,7 @@
   function edInput(e) {
     var t = e.target, f = t && t.getAttribute && t.getAttribute("data-ed"); if (!f || !V.edit) return;
     function showUndo(sel, on) { var b = document.querySelector("#sheet " + sel); if (b) b.hidden = !on; }
+    if (f === "yld") { if (e.type === "change") { if (!setYield(t.value)) t.value = V.edit.yld; renderSheet(); } return; }
     if (f === "name") { V.edit.name = t.value; showUndo('.ed-u[data-k="name"]', t.value.trim() !== BY_ID[V.edit.id].name); return; }
     var k = t.getAttribute("data-k");
     if (f === "step") { V.edit.steps.forEach(function (st) { if (st.k === k) { st.text = t.value; showUndo('.edstepf .ed-u[data-k="' + k + '"]', t.value.trim() !== st.orig); } }); return; }
