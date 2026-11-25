@@ -189,3 +189,12 @@ textarea { min-height: 120px; font: 13px/1.4 ui-monospace, Menlo, monospace; wor
 .tag.moved { font-size: 11px; padding: 1px 6px; border-radius: 8px; background: var(--soft); color: var(--accent); font-weight: 600; }
 .pickuse.mv[disabled] { opacity: .55; }
 .pickuse.mv.on { border-color: var(--accent); background: var(--soft); }
+/* v37: ingredient name | amount, amounts aligned in one column across the whole list */
+.ing { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 14px; }
+.ing > li { grid-column: 1 / -1; display: grid; grid-template-columns: subgrid; align-items: baseline; }
+.ing > li > * { grid-column: 1 / -1; }
+.ing > li > .ln { display: contents; }
+.ing .in { grid-column: 1; min-width: 0; overflow-wrap: anywhere; }
+.ing .nt { font-size: 13px; color: var(--muted); }
+.ing .am { grid-column: 2; white-space: nowrap; text-align: left; font-variant-numeric: tabular-nums; }
+.ing .ln > .tag { grid-column: 1; }

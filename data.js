@@ -610,15 +610,41 @@ function practicalVolume(t) {
   const remainder = exact ? fmtNum(t) : "≈ " + Math.round(t * 100) / 100;
   return [cups ? cups + (cups === 1 ? " cup" : " cups") : "", tbsp ? tbsp + " tbsp" : "", t > 1e-8 ? remainder + " tsp" : ""].filter(Boolean).join(" + ");
 }
-function ingText(i, f) {
-  if (i.u === "-") return i.sing;
-  if (i.q <= 0) return `${i.sing}, to taste`;
+// Amount and name of an ingredient, scaled by f. ingText joins them amount-first (used by the grocery "used in" sheet);
+// ingLine is the recipe-card format Romy asked for (Nov 25, 2026): name first, amount after, notes last, all on one line.
+function ingParts(i, f) {
+  if (i.u === "-") return { amt: "", name: i.sing };
+  if (i.q <= 0) return { amt: "to taste", name: i.sing, taste: true };
   const q = i.q * f;
-  if (i.practical && VOL[i.u]) return `${practicalVolume(q * VOL[i.u])} ${i.sing}`;
-  if ((i.u === "cup" && q < 0.25) || (i.u === "tbsp" && q < 1)) return `${gQty({ amt: q * VOL[i.u], fam: "vol" })} ${i.sing}`;
-  if (METRIC[i.u]) return `${gQty({ amt: q * (WT[i.u] || VOL[i.u]), fam: WT[i.u] ? "wt" : "vol" })} (${metricText(q, i.u)}) ${i.sing}`;
+  if (i.practical && VOL[i.u]) return { amt: practicalVolume(q * VOL[i.u]), name: i.sing };
+  if ((i.u === "cup" && q < 0.25) || (i.u === "tbsp" && q < 1)) return { amt: gQty({ amt: q * VOL[i.u], fam: "vol" }), name: i.sing };
+  if (METRIC[i.u]) return { amt: `${gQty({ amt: q * (WT[i.u] || VOL[i.u]), fam: WT[i.u] ? "wt" : "vol" })} (${metricText(q, i.u)})`, name: i.sing };
   const n = fmtNum(q), many = !oneOrLess(n);
-  return [n, unitLabel(i.u, many ? 2 : 1), !i.u && many ? i.plur : i.sing].filter((x) => x).join(" ");
+  return { amt: [n, unitLabel(i.u, many ? 2 : 1)].filter((x) => x).join(" "), name: !i.u && many ? i.plur : i.sing };
+}
+function ingText(i, f) {
+  const p = ingParts(i, f);
+  if (!p.amt) return p.name;
+  if (p.taste) return `${p.name}, to taste`;
+  return `${p.amt} ${p.name}`;
+}
+// Recipe-card cells (Romy, Nov 25, 2026): name on the left, amount in its own aligned column, short note after the name.
+function ingCells(i, f) {
+  const p = ingParts(i, f), name = p.name;
+  const cap = (x) => x.charAt(0).toUpperCase() + x.slice(1);
+  // Split off a trailing note at the first comma outside parentheses ("large onion, diced ¼ inch").
+  let depth = 0, cut = -1;
+  for (let k = 0; k < name.length; k++) {
+    const ch = name[k];
+    if (ch === "(" || ch === "[") depth++;
+    else if (ch === ")" || ch === "]") depth = Math.max(0, depth - 1);
+    else if (ch === "," && depth === 0 && name[k + 1] === " ") { cut = k; break; }
+  }
+  return { name: cap(cut < 0 ? name : name.slice(0, cut)), note: cut < 0 ? "" : name.slice(cut + 2), amt: p.amt };
+}
+function ingLine(i, f) {
+  const c = ingCells(i, f);
+  return c.name + (c.amt ? ", " + c.amt : "") + (c.note ? " · " + c.note : "");
 }
 function famOf(u) {
   if (VOL[u]) return "vol";

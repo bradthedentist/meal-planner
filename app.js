@@ -390,7 +390,7 @@
             }).join(", ") + " ↓"
           : "Not named in the steps") + "</div>";
       }
-      return (r.ingredientGroups && r.ingredientGroups[idx] ? '<li class="alternative-heading">' + esc(r.ingredientGroups[idx]) + '</li>' : '') + (a && idx === a.ingredientStart ? '<li class="alternative-heading">' + esc(a.options[S.alternatives[r.id] || a.default].label) + ' ingredients</li>' : '') + '<li data-i="' + idx + '"' + (hl ? ' class="hl"' : "") + '><div class="ln"><span>' + esc(ingText(i, f)) + "</span>" +
+      return (r.ingredientGroups && r.ingredientGroups[idx] ? '<li class="alternative-heading">' + esc(r.ingredientGroups[idx]) + '</li>' : '') + (a && idx === a.ingredientStart ? '<li class="alternative-heading">' + esc(a.options[S.alternatives[r.id] || a.default].label) + ' ingredients</li>' : '') + '<li data-i="' + idx + '"' + (hl ? ' class="hl"' : "") + '><div class="ln"><span class="in">' + (function (c) { return esc(c.name) + (c.note ? ' <span class="nt">' + esc(c.note) + "</span>" : ""); })(ingCells(i, f)) + '</span><span class="am">' + esc(ingCells(i, f).amt) + "</span>" +
         (i.c === "lf" ? '<span class="tag">leftover</span>' : "") + "</div>" + used + "</li>";
     }).join("") + "</ul>";
   }
