@@ -99,6 +99,22 @@ const RECIPES = {
       "Add the linguine and broth and bring to a boil over high heat, stirring occasionally. Cook about 10 minutes, until the pasta is fully cooked. Keep stirring so the pasta doesn't stick.",
       "Serve garnished with freshly grated Parmesan, chopped fresh basil and a drizzle of extra-virgin olive oil.",
     ], { by: "Jo Cooks", src: "https://www.jocooks.com/recipes/one-pot-pasta/", serves: 4 }),
+    // Romy (Nov 25, 2026): "Add this to meal plan one pot recipe"
+    R("wbc1", "Ground Beef and Cabbage", "An \u2018unstuffed\u2019 German cabbage roll: ground beef, onion, garlic, fire-roasted tomatoes and cabbage simmered in one Dutch oven with smoked paprika and marjoram. Serve with steamed rice, parsley and sauerkraut.", "40 min (20 min prep + 20 min cooking)", [
+      "1|tbsp|olive oil (listed in the source, but the steps don't say when to use it; [CONFIRM])|st", "1|lb|ground beef (85/15 lean)|me",
+      "1||large onion, diced ¼ inch (about 4 cups)~large onions, diced ¼ inch (about 4 cups each)|pr", "2|clove|garlic, minced|st",
+      "1|tsp|smoked paprika|sp", "1|tsp|sea salt (or to taste)|st", "0.5|tsp|black pepper (or to taste)|st",
+      "1|tbsp|fresh marjoram, chopped (or rosemary)|pr", "14|oz|diced fire-roasted tomatoes|pa", "6|oz|tomato paste|pa",
+      "1|cup|low-sodium beef broth|pa", "1|tbsp|brown sugar (or coconut sugar, honey or maple syrup)|st", "1|tbsp|coconut aminos|co",
+      "1||small head of cabbage, cut into 1-inch pieces (about 8 cups)~small heads of cabbage, cut into 1-inch pieces (about 8 cups each)|pr",
+      "0|-|steamed rice (for serving)|st", "0|-|fresh parsley, chopped (for serving)|pr", "0|-|sauerkraut (for serving)|co",
+    ], [
+      "Start by dicing the onion.",
+      "Next, chop the cabbage, cutting around the core to remove it.",
+      "When your ingredients are prepped, brown the ground beef in a large Dutch oven over medium-high heat, breaking it up into small pieces.",
+      "Add the onion and garlic and cook 2–3 minutes. Then add the herbs and spices, diced tomatoes, tomato paste and beef broth. Stir to combine, then add the chopped cabbage and stir again.",
+      "Cook covered, stirring 2–3 times, for about 15 minutes, or until the cabbage is completely tender and most of the liquid is reduced. Season to taste with sea salt and pepper and serve.",
+    ], { by: "Kari Peters, Get Inspired Everyday", src: "https://getinspiredeveryday.com/food/ground-beef-and-cabbage/", serves: 4, note: "Time-saving tip from the source: brown the beef, then add the onion and garlic to cook slowly while you prep the cabbage. Source nutrition per serving: 455 kcal, 40 g carbohydrates, 28 g protein, 21 g fat." }),
   ],
   thu: [
     R("thu1", "Sushi Bowls", "Rice bowls with sweet-spicy marinated cucumbers, spicy canned tuna or salmon, edamame, avocado and nori.", "15 min", [
