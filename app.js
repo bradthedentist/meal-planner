@@ -632,7 +632,7 @@
     h += "<h2>" + esc(DAY_FULL[d]) + "</h2>" + dayLabel(d);
     if (r) {
       h += '<div class="card"><div class="opt"><div class="info"><div class="name" style="font-size:19px">' + nameHtml(r) + '</div>' +
-        '<div class="desc">' + esc(r.desc) + '</div><div class="meta">' + esc(r.time) + " · " + editLink(r.id) + "</div></div>" + cookBtn(d) + "</div>" +
+        '<div class="desc">' + esc(r.desc) + '</div><div class="meta">' + esc(r.time) + " · " + editLink(r.id, d) + "</div></div>" + cookBtn(d) + "</div>" +
         recipeBody(r, d, fx) + "</div>";
     } else {
       h += '<p class="cap">' + (id === "skip" ? "Night off. No cooking planned." : "No recipe picked for this day.") + "</p>" +
@@ -792,7 +792,7 @@
       var fx = open && V.focus && V.focus.d === slot ? V.focus : null;
       return '<div class="card' + (on ? " on" : "") + '"><div class="opt"><div class="info" data-act="xtoggle" data-id="' + r.id + '">' +
         '<div class="name">' + nameHtml(r) + '</div><div class="desc">' + esc(r.desc) + "</div>" +
-        '<div class="meta">' + esc(r.time) + ' · <button class="link" data-act="xtoggle" data-id="' + r.id + '">' + (open ? "Hide" : "See recipe") + "</button>" + moveLinks(r.id, null) + "</div></div>" +
+        '<div class="meta">' + esc(r.time) + ' · <button class="link" data-act="xtoggle" data-id="' + r.id + '">' + (open ? "Hide" : "See recipe") + "</button>" + moveLinks(r.id, null, slot) + "</div></div>" +
         '<button class="btn pick' + (on ? " primary" : "") + '" data-act="extra" data-id="' + r.id + '">' + (on ? "Added ✓" : "Add to week") + "</button></div>" +
         (open ? recipeBody(selectedRecipe(r), slot, fx) : "") + "</div>";
     }).join("");
@@ -918,9 +918,9 @@
     var cooked = Object.assign({}, S.cooked); delete cooked[slot];
     set({ inventory: inv, restock: rs, cooked: cooked }); toast("Cooked undone · inventory restored");
   }
-  function editLink(id) { return '<button class="link" data-act="edit" data-id="' + id + '">Edit</button>'; }
-  function moveLinks(id, d) {
-    var h = ' · <button class="link" data-act="moveday" data-id="' + id + '">Move to day</button> · ' + editLink(id);
+  function editLink(id, slot) { return '<button class="link" data-act="edit" data-id="' + id + '"' + (slot ? ' data-slot="' + esc(slot) + '"' : "") + ">Edit</button>"; }
+  function moveLinks(id, d, slot) {
+    var h = ' · <button class="link" data-act="moveday" data-id="' + id + '">Move to day</button> · ' + editLink(id, slot);
     if (d && movedTo(id, d)) h = ' · <span class="tag moved">Moved here</span> · <button class="link" data-act="unmove" data-id="' + id + '" data-d="' + d + '">Take off ' + DAY_SHORT[d] + "</button>" + h;
     return h;
   }
@@ -973,30 +973,41 @@
   }
   // ---------- edit a recipe (name, amounts, aisles, add/remove ingredients, title, steps) ----------
   var ED_UNITS = ["", "tsp", "tbsp", "cup", "oz", "lb", "g", "kg", "ml", "l", "clove", "can", "pack", "packet", "slice", "head", "bunch", "leaf", "jar", "ball", "pint", "-"];
-  function amtText(i) {
-    if (i.raw) return i.raw;
+  function amtText(i, f) {
+    if (i.raw) return i.raw; // typed text the app couldn't read: never scaled
     if (i.u === "-" || !(i.q > 0)) return "";
-    var t = fmtNum(i.q), pn = parseNum(t);
-    return pn && !pn[1] && Math.abs(pn[0] - i.q) < 1e-6 ? t : String(Math.round(i.q * 1000) / 1000);
+    var q = i.q * (f || 1), t = fmtNum(q), pn = parseNum(t);
+    return pn && !pn[1] && Math.abs(pn[0] - q) < 1e-6 ? t : String(Math.round(q * 100) / 100);
   }
-  function editRow(i, k, extra) {
-    var a = amtText(i);
+  function editRow(i, k, extra, f) {
+    var a = amtText(i, f);
     return Object.assign({ k: k, sing: i.sing, plur: i.plur || i.sing, q: i.q, u: i.u, c: i.c, raw: i.raw || "", amt: a, amt0: a, u0: i.u }, extra || {});
   }
-  function editDraft(id) {
+  // Per-line undo (Romy, Nov 25 4:19 PM: "I want to undo one line at a time").
+  function rowChanged(r) {
+    var o = r.orig; if (!o) return false;
+    return !!r.del || (r.sing || "").trim() !== o.sing || r.u !== o.u || r.c !== o.c || (r.amt || "").trim() !== amtText(o, V.edit.f);
+  }
+  function rowUndo(r) {
+    var o = r.orig, a = amtText(o, V.edit.f);
+    Object.assign(r, { sing: o.sing, plur: o.plur || o.sing, q: o.q, u: o.u, c: o.c, raw: "", amt: a, amt0: a, u0: o.u, del: false });
+  }
+  function editDraft(id, slot) {
     var base = BY_ID[id], v = variantOf(base), e = S.edits[id] || {}, mods = e.ing || {}, labels = [];
     if (base.swap) labels.push(base.swap.options[swapChoice(base)].label);
     if (base.alternatives) labels.push(base.alternatives.options[S.alternatives[id] || base.alternatives.default].label);
-    return { id: id, name: e.name || base.name, labels: labels,
-      rows: v.ing.map(function (i) { var m = mods[i._id] || {}; return editRow(m.del ? i : Object.assign({}, i, m), i._id, { del: !!m.del, orig: i }); }),
-      adds: (e.add || []).map(function (a) { return editRow(a, "n:" + a.id, { id: a.id }); }),
+    var serv = slot && (isExtra(slot) || DAYS.indexOf(slot) >= 0) ? servingsFor(slot) : defServ(base), f = serv / base.serves;
+    return { id: id, name: e.name || base.name, labels: labels, serv: serv, f: f,
+      rows: v.ing.map(function (i) { var m = mods[i._id] || {}; return editRow(m.del ? i : Object.assign({}, i, m), i._id, { del: !!m.del, orig: i }, f); }),
+      adds: (e.add || []).map(function (a) { return editRow(a, "n:" + a.id, { id: a.id }, f); }),
       steps: v.steps.map(function (s, n) { var t = e.steps && e.steps[v.stepIds[n]]; return { k: v.stepIds[n], text: typeof t === "string" ? t : s, orig: s }; }) };
   }
   function edRowHtml(r) {
     var units = ED_UNITS.indexOf(r.u) >= 0 ? ED_UNITS : ED_UNITS.concat([r.u]);
     var cats = CAT_ORDER.concat(r.c === "lf" ? ["lf"] : []);
-    if (r.del) return '<div class="edrow del" data-k="' + esc(r.k) + '"><span class="ed-gone">' + esc(r.sing) + '</span> <button class="link" data-act="eddel" data-k="' + esc(r.k) + '">Undo remove</button></div>';
-    return '<div class="edrow" data-k="' + esc(r.k) + '"><input class="ed-n" data-ed="sing" data-k="' + esc(r.k) + '" maxlength="120" aria-label="Ingredient" placeholder="Ingredient" value="' + esc(r.sing) + '">' +
+    if (r.del) return '<div class="edrow del" data-k="' + esc(r.k) + '"><span class="ed-gone">' + esc(r.sing) + '</span> <button class="link" data-act="edundo" data-k="' + esc(r.k) + '">↺ Undo remove</button></div>';
+    return '<div class="edrow" data-k="' + esc(r.k) + '"><div class="ed-top"><input class="ed-n" data-ed="sing" data-k="' + esc(r.k) + '" maxlength="120" aria-label="Ingredient" placeholder="Ingredient" value="' + esc(r.sing) + '">' +
+      (r.orig ? '<button class="ed-u" data-act="edundo" data-k="' + esc(r.k) + '" aria-label="Undo changes to ' + esc(r.orig.sing) + '" title="Back to original"' + (rowChanged(r) ? "" : " hidden") + ">↺</button>" : "") + "</div>" +
       '<div class="ed-q"><input class="ed-a" data-ed="amt" data-k="' + esc(r.k) + '" maxlength="40" aria-label="Amount" placeholder="to taste" value="' + esc(r.amt) + '">' +
       '<select data-ed="u" data-k="' + esc(r.k) + '" aria-label="Unit">' + units.map(function (u) { return '<option value="' + esc(u) + '"' + (u === r.u ? " selected" : "") + ">" + (u === "" ? "each" : u === "-" ? "none" : esc(u)) + "</option>"; }).join("") + "</select>" +
       '<select data-ed="c" data-k="' + esc(r.k) + '" aria-label="Grocery aisle">' + cats.map(function (c) { return '<option value="' + c + '"' + (c === r.c ? " selected" : "") + ">" + esc(CAT_LABEL[c]) + "</option>"; }).join("") + "</select>" +
@@ -1004,17 +1015,18 @@
   }
   function renderEditSheet($s) {
     var D = V.edit, base = BY_ID[D.id], old = $s.querySelector(".panel"), y = old && old.getAttribute("data-edid") === D.id ? old.scrollTop : 0;
-    var size = base.keep ? "makes " + base.serves + (base.yieldUnit ? " " + base.yieldUnit : "") : base.serves + " servings";
+    var size = D.serv + " " + (base.yieldUnit || (D.serv === 1 ? "serving" : "servings"));
     $s.className = "show";
     $s.innerHTML = '<div class="scrim" data-act="edcancel"></div><div class="panel edpanel" role="dialog" aria-label="Edit recipe" data-edid="' + esc(D.id) + '">' +
       '<div class="pt">Edit recipe</div>' +
-      '<label class="field"><span>Title</span><input data-ed="name" maxlength="120" value="' + esc(D.name) + '"></label>' +
-      "<h3>Ingredients</h3><p class=\"cap\">Amounts are for the recipe's own size (" + esc(size) + "); the app still scales them to your servings. Leave the amount empty for “to taste”." +
-      (D.labels.length ? " Editing with " + esc(D.labels.join(" + ")) + " chosen: lines from that choice change only for that choice." : "") + "</p>" +
+      '<label class="field"><span>Title</span><span class="ed-top"><input data-ed="name" maxlength="120" value="' + esc(D.name) + '">' +
+      '<button class="ed-u" data-act="edundo" data-k="name" aria-label="Undo title" title="Back to original"' + (D.name.trim() !== base.name ? "" : " hidden") + ">↺</button></span></label>" +
+      "<h3>Ingredients</h3><p class=\"cap ed-size\">Amounts for " + esc(size) + " (your current setting). The app scales them when you change servings. Leave the amount empty for “to taste”. ↺ puts one line back to the original." +
+      (D.labels.length ? " Changes apply to every option; lines that belong only to " + esc(D.labels.join(" + ")) + " show when it's chosen." : "") + "</p>" +
       D.rows.map(edRowHtml).join("") + D.adds.map(edRowHtml).join("") +
       '<button class="btn" data-act="edadd" style="width:100%;margin:6px 0 4px">+ Add ingredient</button>' +
       (D.steps.length ? "<h3>Steps</h3>" + D.steps.map(function (st, n) {
-        return '<label class="field"><span>Step ' + (n + 1) + '</span><textarea class="edstep" data-ed="step" data-k="' + esc(st.k) + '" rows="3">' + esc(st.text) + "</textarea></label>";
+        return '<div class="field edstepf"><span class="ed-sh">Step ' + (n + 1) + ' <button class="ed-u" data-act="edundostep" data-k="' + esc(st.k) + '" aria-label="Undo step ' + (n + 1) + '" title="Back to original"' + (st.text.trim() !== st.orig ? "" : " hidden") + '>↺</button></span><textarea class="edstep" data-ed="step" data-k="' + esc(st.k) + '" rows="3" aria-label="Step ' + (n + 1) + '">' + esc(st.text) + "</textarea></div>";
       }).join("") : "") +
       '<div class="edbar"><button class="btn primary" data-act="edsave">Save</button><button class="btn" data-act="edcancel">Cancel</button>' +
       (S.edits[D.id] ? '<button class="btn" data-act="edreset">Reset to original</button>' : "") + "</div></div>";
@@ -1036,7 +1048,7 @@
       var p1 = parseNum(t), al = p1 && UNIT_ALIAS[p1[1].toLowerCase().replace(/\./g, "")];
       if (p1 && al) { pn = p1[0]; line.u = al; }
     }
-    if (pn !== null && isFinite(pn) && pn > 0) line.q = pn; else { line.q = 0; line.raw = t.slice(0, 40); } // can't read it: shown as typed, not scaled
+    if (pn !== null && isFinite(pn) && pn > 0) line.q = pn / ((V.edit && V.edit.f) || 1); else { line.q = 0; line.raw = t.slice(0, 40); } // can't read it: shown as typed, not scaled
     return line;
   }
   function saveEdit() {
@@ -1070,13 +1082,21 @@
     var el = e.target.closest("[data-act]");
     if (!el) return;
     var act = el.getAttribute("data-act");
-    if (act === "edit") { e.stopPropagation(); var edid = el.getAttribute("data-id"); if (!BY_ID[edid]) return; V.mover = ""; V.chooser = ""; V.edit = editDraft(edid); renderSheet(); return; }
+    if (act === "edit") { e.stopPropagation(); var edid = el.getAttribute("data-id"); if (!BY_ID[edid]) return; V.mover = ""; V.chooser = ""; V.edit = editDraft(edid, el.getAttribute("data-slot")); renderSheet(); return; }
     if (act === "edcancel") { V.edit = null; renderSheet(); return; }
     if (act === "edsave") { if (V.edit) saveEdit(); return; }
     if (act === "edreset") {
       if (!V.edit || !confirm("Reset " + BY_ID[V.edit.id].name + " to the original recipe? This removes all your edits to it.")) return;
       var edits0 = Object.assign({}, S.edits); delete edits0[V.edit.id]; V.edit = null; set({ edits: edits0 }); toast("Back to the original"); return;
     }
+    if (act === "edundo") {
+      if (!V.edit) return;
+      var uk = el.getAttribute("data-k"), D0 = V.edit;
+      if (uk === "name") D0.name = BY_ID[D0.id].name;
+      else { var urw = edFind(uk); if (urw && urw.orig) rowUndo(urw); }
+      renderSheet(); return;
+    }
+    if (act === "edundostep") { if (!V.edit) return; var sk = el.getAttribute("data-k"); V.edit.steps.forEach(function (x) { if (x.k === sk) x.text = x.orig; }); renderSheet(); return; }
     if (act === "eddel") { var er = V.edit && edFind(el.getAttribute("data-k")); if (!er) return; if (er.orig) er.del = !er.del; else V.edit.adds = V.edit.adds.filter(function (x) { return x !== er; }); renderSheet(); return; }
     if (act === "edadd") {
       if (!V.edit) return;
@@ -1275,11 +1295,13 @@
   });
   function edInput(e) {
     var t = e.target, f = t && t.getAttribute && t.getAttribute("data-ed"); if (!f || !V.edit) return;
-    if (f === "name") { V.edit.name = t.value; return; }
+    function showUndo(sel, on) { var b = document.querySelector("#sheet " + sel); if (b) b.hidden = !on; }
+    if (f === "name") { V.edit.name = t.value; showUndo('.ed-u[data-k="name"]', t.value.trim() !== BY_ID[V.edit.id].name); return; }
     var k = t.getAttribute("data-k");
-    if (f === "step") { V.edit.steps.forEach(function (st) { if (st.k === k) st.text = t.value; }); return; }
+    if (f === "step") { V.edit.steps.forEach(function (st) { if (st.k === k) { st.text = t.value; showUndo('.edstepf .ed-u[data-k="' + k + '"]', t.value.trim() !== st.orig); } }); return; }
     var r = edFind(k); if (!r) return;
     if (f === "sing") r.sing = t.value; else if (f === "amt") r.amt = t.value; else if (f === "u") r.u = t.value; else if (f === "c") r.c = t.value;
+    if (r.orig) showUndo('.edrow .ed-u[data-k="' + k + '"]', rowChanged(r));
   }
   document.addEventListener("change", function (e) {
     edInput(e);

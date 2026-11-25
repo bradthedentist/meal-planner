@@ -215,3 +215,12 @@ textarea.edstep { font: inherit; font-size: 16px; word-break: normal; min-height
 .edbar { position: sticky; bottom: -16px; background: var(--bg); display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 0 14px; margin-top: 8px; }
 .edbar .btn { flex: 1 1 auto; }
 #sheet .panel.edpanel { max-height: 92vh; max-height: 92dvh; }
+/* v39: per-line undo */
+.ed-top { display: flex; gap: 6px; align-items: center; }
+.ed-top input { flex: 1 1 auto; min-width: 0; }
+.ed-u { flex: 0 0 auto; border: 1px solid var(--line2); background: var(--card); color: var(--accent); border-radius: 10px; min-width: 40px; min-height: 42px; font-size: 18px; line-height: 1; }
+.ed-u[hidden] { display: none; }
+.ed-sh { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+.ed-sh .ed-u { min-height: 32px; min-width: 36px; font-size: 16px; }
+.field .ed-top, .field .ed-sh { display: flex; }
+.field .ed-sh { justify-content: space-between; align-items: center; }
