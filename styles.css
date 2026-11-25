@@ -198,3 +198,20 @@ textarea { min-height: 120px; font: 13px/1.4 ui-monospace, Menlo, monospace; wor
 .ing .nt { font-size: 13px; color: var(--muted); }
 .ing .am { grid-column: 2; white-space: nowrap; text-align: left; font-variant-numeric: tabular-nums; }
 .ing .ln > .tag { grid-column: 1; }
+/* v38: edit a recipe */
+.inc.edited { color: var(--accent); border-color: var(--accent); }
+.edpanel h3 { margin: 14px 0 6px; }
+.edpanel .field input { min-height: 44px; }
+.edrow { border-bottom: 1px solid var(--line); padding: 8px 0; }
+.edrow input, .edrow select { font-size: 16px; border: 1px solid var(--line2); background: var(--card); border-radius: 10px; min-height: 42px; padding: 8px 10px; min-width: 0; }
+.edrow .ed-n { width: 100%; }
+.edrow .ed-a { padding: 8px 6px; }
+.ed-q { display: grid; grid-template-columns: 76px minmax(0, 1fr) minmax(0, 1.3fr) 40px; gap: 6px; margin-top: 6px; }
+.ed-q select { padding: 8px 4px; width: 100%; }
+.ed-x { border: 1px solid var(--line2); background: var(--card); border-radius: 10px; min-height: 42px; color: var(--muted); }
+.edrow.del { color: var(--faint); }
+.ed-gone { text-decoration: line-through; }
+textarea.edstep { font: inherit; font-size: 16px; word-break: normal; min-height: 84px; }
+.edbar { position: sticky; bottom: -16px; background: var(--bg); display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 0 14px; margin-top: 8px; }
+.edbar .btn { flex: 1 1 auto; }
+#sheet .panel.edpanel { max-height: 92vh; max-height: 92dvh; }

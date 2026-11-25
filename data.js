@@ -613,6 +613,8 @@ function practicalVolume(t) {
 // Amount and name of an ingredient, scaled by f. ingText joins them amount-first (used by the grocery "used in" sheet);
 // ingLine is the recipe-card format Romy asked for (Nov 25, 2026): name first, amount after, notes last, all on one line.
 function ingParts(i, f) {
+  // An edited amount the app couldn't read (e.g. "3-4") is shown as typed and not scaled.
+  if (i.raw) return { amt: [i.raw, i.u && i.u !== "-" ? i.u : ""].filter((x) => x).join(" "), name: i.sing };
   if (i.u === "-") return { amt: "", name: i.sing };
   if (i.q <= 0) return { amt: "to taste", name: i.sing, taste: true };
   const q = i.q * f;
