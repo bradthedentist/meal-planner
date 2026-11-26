@@ -984,7 +984,7 @@
   }
   function editRow(i, k, extra, f) {
     var a = amtText(i, f);
-    return Object.assign({ k: k, sing: i.sing, plur: i.plur || i.sing, q: i.q, u: i.u, c: i.c, raw: i.raw || "", amt: a, amt0: a, u0: i.u }, extra || {});
+    return Object.assign({ k: k, sing: i.sing, plur: i.plur || i.sing, q: i.q, q0: i.q, u: i.u, c: i.c, raw: i.raw || "", amt: a, amt0: a, u0: i.u }, extra || {});
   }
   // Per-line undo (Romy, Nov 25 4:19 PM: "I want to undo one line at a time").
   function rowChanged(r) {
@@ -993,14 +993,14 @@
   }
   function rowUndo(r) {
     var o = r.orig, a = amtText(o, V.edit.f);
-    Object.assign(r, { sing: o.sing, plur: o.plur || o.sing, q: o.q, u: o.u, c: o.c, raw: "", amt: a, amt0: a, u0: o.u, del: false });
+    Object.assign(r, { sing: o.sing, plur: o.plur || o.sing, q: o.q, u: o.u, c: o.c, raw: "", amt: a, amt0: a, u0: o.u, del: false, fresh: true });
   }
   function editDraft(id, slot) {
     var base = BY_ID[id], v = variantOf(base), e = S.edits[id] || {}, mods = e.ing || {}, labels = [];
     if (base.swap) labels.push(base.swap.options[swapChoice(base)].label);
     if (base.alternatives) labels.push(base.alternatives.options[S.alternatives[id] || base.alternatives.default].label);
     var serv = slot && (isExtra(slot) || DAYS.indexOf(slot) >= 0) ? servingsFor(slot) : defServ(base), y = yieldOf(base), f = serv / y;
-    return { id: id, name: e.name || base.name, labels: labels, serv: serv, f: f, yld: y,
+    return { id: id, name: e.name || base.name, labels: labels, serv: serv, f: f, yld: y, serv0: serv, f0: f, yld0: y,
       rows: v.ing.map(function (i) { var m = mods[i._id] || {}; return editRow(m.del ? i : Object.assign({}, i, m), i._id, { del: !!m.del, orig: i }, f); }),
       adds: (e.add || []).map(function (a) { return editRow(a, "n:" + a.id, { id: a.id }, f); }),
       steps: v.steps.map(function (s, n) { var t = e.steps && e.steps[v.stepIds[n]]; return { k: v.stepIds[n], text: typeof t === "string" ? t : s, orig: s }; }) };
@@ -1027,7 +1027,7 @@
       '<label class="field"><span>Recipe makes</span><span class="ed-top ed-yield"><input type="number" inputmode="numeric" min="1" max="' + MAXSERV + '" step="1" data-ed="yld" aria-label="Recipe makes (servings)" value="' + D.yld + '"><b class="ed-yu">' + esc(base.yieldUnit || "servings") + "</b>" +
       '<button class="ed-u" data-act="edundo" data-k="yld" aria-label="Undo recipe size" title="Back to original"' + (D.yld !== base.serves ? "" : " hidden") + ">↺</button></span></label>" +
       '<p class="cap" style="margin-top:-4px">How many the recipe’s own amounts feed. Changing it doesn’t change those amounts; the app scales from it.</p>' +
-      "<h3>Ingredients</h3><p class=\"cap ed-size\">Amounts for " + esc(size) + " (your current setting). The app scales them when you change servings. Leave the amount empty for “to taste”. ↺ puts one line back to the original." +
+      "<h3>Ingredients</h3><p class=\"cap ed-size\">Amounts for " + esc(size) + (D.yld === D.yld0 ? " (your current setting)" : " (the recipe’s new size)") + ". The app scales them when you change servings. Leave the amount empty for “to taste”. ↺ puts one line back to the original." +
       (D.labels.length ? " Changes apply to every option; lines that belong only to " + esc(D.labels.join(" + ")) + " show when it's chosen." : "") + "</p>" +
       D.rows.map(edRowHtml).join("") + D.adds.map(edRowHtml).join("") +
       '<button class="btn" data-act="edadd" style="width:100%;margin:6px 0 4px">+ Add ingredient</button>' +
@@ -1040,14 +1040,27 @@
   }
   // New recipe size: untouched amounts keep their recipe values (so the panel re-shows them at the new size);
   // amounts she typed stay as typed for the servings shown and are stored against the new size.
+  // Recipe size (Romy, Nov 25 5:17 PM): changing it never changes an amount on screen. The amounts shown
+  // become the recipe's own amounts for the new size (untouched lines keep their exact value, no rounding).
+  function untouched(r) { return (r.amt || "").trim() === (r.amt0 || "").trim() && r.u === r.u0 && r.amt0 !== "\u0000"; }
   function setYield(n) {
     var D = V.edit; n = Math.round(+n);
     if (!(n >= 1 && n <= MAXSERV)) return false;
-    D.yld = n; D.f = D.serv / n;
+    if (n === D.yld) return true;
+    D.rows.concat(D.adds).forEach(function (r) { if (untouched(r)) r.q = r.q * D.f; });
+    D.mult = (D.mult || 1) * D.f; D.yld = n; D.serv = n; D.f = 1;
+    return true;
+  }
+  // ↺ on the size: back to the original size and the panel's original amounts basis.
+  function undoYield() {
+    var D = V.edit, orig = BY_ID[D.id].serves;
+    if (D.yld0 !== orig) return setYield(orig); // a size saved earlier: undo it the same way (amounts on screen stay)
     D.rows.concat(D.adds).forEach(function (r) {
-      if ((r.amt || "").trim() !== (r.amt0 || "").trim() || r.u !== r.u0 || r.amt0 === "\u0000") return;
-      r.amt = r.amt0 = amtText(r, D.f);
+      if (!untouched(r)) return;
+      if (r.fresh && r.orig) r.q = r.orig.q; else { r.q = r.q / (D.mult || 1); if (Math.abs(r.q - r.q0) < 1e-9 * Math.max(1, r.q0)) r.q = r.q0; }
+      r.amt = r.amt0 = amtText(r, D.f0);
     });
+    D.mult = 1; D.yld = orig; D.serv = D.serv0; D.f = D.f0;
     return true;
   }
   function edFind(k) { var D = V.edit; return D.rows.filter(function (r) { return r.k === k; })[0] || D.adds.filter(function (r) { return r.k === k; })[0]; }
@@ -1114,7 +1127,7 @@
       if (!V.edit) return;
       var uk = el.getAttribute("data-k"), D0 = V.edit;
       if (uk === "name") D0.name = BY_ID[D0.id].name;
-      else if (uk === "yld") setYield(BY_ID[D0.id].serves);
+      else if (uk === "yld") undoYield();
       else { var urw = edFind(uk); if (urw && urw.orig) rowUndo(urw); }
       renderSheet(); return;
     }

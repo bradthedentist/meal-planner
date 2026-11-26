@@ -1,4 +1,4 @@
-const CACHE = "meal-plan-v40";
+const CACHE = "meal-plan-v41";
 const ASSETS = ["./", "index.html", "styles.css", "data.js", "app.js", "manifest.json", "apple-touch-icon.png", "icon-192.png", "icon-512.png"];
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)).then(() => self.skipWaiting()));
